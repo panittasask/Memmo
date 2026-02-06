@@ -1,6 +1,23 @@
 /* You can add global styles to this file, and also import other style files */
+@import "../src/assets/font/fontawesome/css/all.css";
+@font-face {
+  font-family: "Noto Sans Thai";
+  src: url("/assets/font/Noto_Sans/NotoSans-Italic-VariableFont_wdth,wght.ttf")
+    format("truetype");
+  font-style: italic;
+  font-weight: 100 900;
+}
+@font-face {
+  font-family: "Noto Sans Thai";
+  src: url("/assets/font/Noto_Sans/NotoSans-VariableFont_wdth\,wght.ttf")
+    format("truetype");
+  font-style: italic;
+  font-weight: 100 900;
+}
+
 html,
 body {
   margin: 0;
   background-color: #c7c7c7;
+  font-family: "Noto Sans Thai", sans-serif;
 }

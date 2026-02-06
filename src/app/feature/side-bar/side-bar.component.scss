@@ -23,7 +23,7 @@
     &:hover,
     &:active,
     &:focus {
-      background-color: #0d6efd;
+      background-color: hsl(from #0d6efd h s 90%);
       cursor: pointer;
     }
     &:first-child {
@@ -84,4 +84,7 @@
     }
   }
   //   height: 100vh;
+}
+i {
+  color: #0d6efd;
 }
