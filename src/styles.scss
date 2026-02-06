@@ -2,22 +2,42 @@
 @import "../src/assets/font/fontawesome/css/all.css";
 @font-face {
   font-family: "Noto Sans Thai";
-  src: url("/assets/font/Noto_Sans/NotoSans-Italic-VariableFont_wdth,wght.ttf")
+  src: url("/assets/font/Noto_Sans_Thai/NotoSansThai-VariableFont_wdth,wght.ttf")
     format("truetype");
-  font-style: italic;
+  font-style: normal;
   font-weight: 100 900;
 }
 @font-face {
-  font-family: "Noto Sans Thai";
-  src: url("/assets/font/Noto_Sans/NotoSans-VariableFont_wdth\,wght.ttf")
+  font-family: "Noto Sans";
+  src: url("/assets/font/Noto_Sans/static/NotoSans-Regular.ttf")
+    format("truetype");
+  font-style: normal;
+  font-weight: 400;
+}
+@font-face {
+  font-family: "Noto Sans";
+  src: url("/assets/font/Noto_Sans/static/NotoSans-Italic.ttf")
     format("truetype");
   font-style: italic;
-  font-weight: 100 900;
+  font-weight: 400;
+}
+@font-face {
+  font-family: "Noto Sans";
+  src: url("/assets/font/Noto_Sans/static/NotoSans-Bold.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 700;
+}
+@font-face {
+  font-family: "Noto Sans";
+  src: url("/assets/font/Noto_Sans/static/NotoSans-BoldItalic.ttf")
+    format("truetype");
+  font-style: italic;
+  font-weight: 700;
 }
 
 html,
 body {
   margin: 0;
   background-color: #c7c7c7;
-  font-family: "Noto Sans Thai", sans-serif;
+  font-family: "Noto Sans Thai", "Noto Sans", sans-serif;
 }

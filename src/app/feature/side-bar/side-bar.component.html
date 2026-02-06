@@ -3,10 +3,34 @@
     <i style="font-size: 25px" class="fa-solid fa-book"></i>
     <span style="margin-left: 10px">Memo Me</span>
   </div>
-  <div class="side-bar-item">Dashboard</div>
-  <div class="side-bar-item">Today's Entry</div>
-  <div class="side-bar-item">History</div>
-  <div class="side-bar-item">Analytics</div>
+  <div
+    [class.active]="currentRoute === 'summary'"
+    class="side-bar-item"
+    (click)="navigate('summary')"
+  >
+    Dashboard
+  </div>
+  <div
+    [class.active]="currentRoute === 'today-entry'"
+    class="side-bar-item"
+    (click)="navigate('today-entry')"
+  >
+    Today's Entry
+  </div>
+  <div
+    [class.active]="currentRoute === 'history'"
+    class="side-bar-item"
+    (click)="navigate('history')"
+  >
+    History
+  </div>
+  <div
+    [class.active]="currentRoute === 'analytics'"
+    class="side-bar-item"
+    (click)="navigate('analytics')"
+  >
+    Analytics
+  </div>
   <div class="search-box-container">
     <input class="search-box" placeholder="Search..." />
   </div>
