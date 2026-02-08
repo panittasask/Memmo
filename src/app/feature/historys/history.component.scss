@@ -1,0 +1,28 @@
+.history-container {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  gap: 10px;
+  .main-history-container {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex: 1;
+    border-radius: 8px;
+    background-color: white;
+    .header {
+      display: flex;
+      padding: 10px;
+    }
+    .body {
+      //   display: flex;
+      padding: 10px;
+    }
+  }
+  .detail-history-container {
+    display: flex;
+    flex: 1;
+    border-radius: 8px;
+    background-color: white;
+  }
+}

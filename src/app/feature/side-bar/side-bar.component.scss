@@ -9,6 +9,7 @@
   box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
   background-color: white;
   display: flex;
+  height: 70px;
   //   align-items: center;
   flex-direction: row;
   //   gap: 10px;
@@ -26,9 +27,11 @@
     &:focus,
     &.active {
       background-color: hsl(from #0d6efd h s 90%);
+      color: hsl(from #0d6efd h s 50%);
       cursor: pointer;
     }
     &:first-child {
+      font-size: 20px;
       border-top-left-radius: inherit;
       border-bottom-left-radius: inherit;
     }

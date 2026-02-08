@@ -1,0 +1,45 @@
+<div class="grid-container">
+  <table class="grid-table">
+    <thead>
+      <tr>
+        <th [width]="20"></th>
+        @for (header of columns; track $index) {
+          <th [width]="header.width ?? 'auto'">
+            {{ header.text }}
+          </th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for (item of data; track $index) {
+        <tr
+          (dragover)="dragOver($event, $index)"
+          (dragleave)="dragLeave($event)"
+          (drop)="drop($event, $index)"
+          [class.is-drag-over]="dragOverIndex === $index"
+        >
+          <td
+            class="drag-icon"
+            draggable="true"
+            (dragstart)="dragStart($event, $index)"
+            (dragend)="dragEnd($event)"
+          >
+            <i class="fa-solid fa-grip-vertical"></i>
+          </td>
+          @for (col of columns; track $index) {
+            <td>
+              {{ item?.[col?.text] }}
+            </td>
+          }
+        </tr>
+      }
+    </tbody>
+  </table>
+  <!-- <div class="grid-column">
+      <div class="grid-header-column">
+        {{ header.text }}
+      </div>
+    }
+  </div>
+  <div class="grid-body"></div> -->
+</div>

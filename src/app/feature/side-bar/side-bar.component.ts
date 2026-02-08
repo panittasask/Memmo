@@ -9,7 +9,7 @@ import { Router } from '@angular/router';
   styleUrl: './side-bar.component.scss',
 })
 export class SideBarComponent {
-  public currentRoute = 'summary';
+  public currentRoute = 'history';
   private readonly routes = inject(Router);
   ngOnInit() {
     this.routes.navigate([this.currentRoute]);
