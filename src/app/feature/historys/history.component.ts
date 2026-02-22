@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { GridItemComponent } from '../../shared/components/grid-item/grid-item.component';
-import { withDebugTracing } from '@angular/router';
 
 @Component({
   selector: 'app-history',
