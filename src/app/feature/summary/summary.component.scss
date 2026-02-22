@@ -39,6 +39,10 @@
           transition: 0.3s ease-in-out;
           &:hover {
             border: 1px solid hsl(from #0d6efd h s 80%);
+            color: hsl(from #0d6efd h s 75%);
+          }
+          &:active {
+            color: hsl(from #0d6efd h s 75%);
           }
           &::after {
             content: "\f107";
