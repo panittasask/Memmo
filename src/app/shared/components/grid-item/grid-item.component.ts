@@ -1,5 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, Input, SimpleChange } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  inject,
+  Input,
+  Output,
+  SimpleChange,
+  SimpleChanges,
+} from '@angular/core';
 import { DateFormatPipe } from '../../pipes/date-format.pipe';
 
 @Component({
@@ -14,7 +22,12 @@ export class GridItemComponent {
   @Input() data: any[] = [];
   public draggedIndex: number | null = null;
   public dragOverIndex: number | null = null;
-  private readonly dateFormat = inject(DateFormatPipe);
+  public selectedItem: number = 0;
+  @Output() selectedClick = new EventEmitter();
+
+  ngOnInit() {
+    console.log('Column', this.columns);
+  }
   dragStart(e: any, index: number) {
     this.draggedIndex = index;
     e.currentTarget.closest('tr').classList.add('is-dragging');
@@ -36,6 +49,7 @@ export class GridItemComponent {
     if (this.draggedIndex !== null && this.draggedIndex !== index) {
       this.reorderData(this.draggedIndex, index);
     }
+    if (this.selectedItem === this.draggedIndex) this.selectedItem = index;
     this.draggedIndex = null;
     this.dragOverIndex = null;
   }
@@ -52,19 +66,10 @@ export class GridItemComponent {
     items.splice(toIndex, 0, draggedItem);
     this.data = items;
   }
-  ngOnChanges(change: SimpleChange) {
-    const value = change as any;
-    if (value['data']?.currentValue.length > 0) {
-      debugger;
-
-      const data = value['data'];
-      let i = 0;
-      for (const dt of Object.assign(data)) {
-        if (dt.toUpperCase() === 'DATE') {
-          this.dateFormat.transform(dt[i]);
-        }
-        i++;
-      }
-    }
+  ngOnChanges(change: SimpleChanges) {}
+  selected(item: any, index: number) {
+    console.log('item', item);
+    this.selectedItem = index;
+    this.selectedClick.emit(item);
   }
 }

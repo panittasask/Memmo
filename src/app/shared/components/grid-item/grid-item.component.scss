@@ -5,7 +5,10 @@
   //   width: 100%;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
-  overflow: hidden;
+  // overflow: hidden;
+  max-height: 80vh;
+  overflow-y: auto;
+  overflow-x: hidden; /* ถ้าไม่อยากให้เลื่อนซ้ายขวา */
   border: 1px solid #e0e0e0;
   .grid-table {
     width: 100%;
@@ -22,9 +25,15 @@
     th {
       background-color: hsl(from #e0e0e0 h s 95%);
     }
+    thead th {
+      position: sticky;
+      top: 0;
+    }
     tbody tr {
       transition: background-color 0.2s ease;
-
+      &.isSelect {
+        background-color: #f5f5f5;
+      }
       &:hover {
         background-color: #f5f5f5;
       }
@@ -37,6 +46,46 @@
       &.is-drag-over {
         background-color: #bbdefb;
         border-top: 2px solid #2196f3;
+      }
+    }
+    tbody td:not(.drag-icon) {
+      cursor: pointer;
+    }
+    tbody {
+      td {
+        .action-bar {
+          display: flex;
+          flex-direction: row;
+          gap: 5px;
+          > span {
+            padding: 5px;
+            border-radius: 8px;
+            border-color: transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: 0.3s ease-in-out;
+            &:first-child {
+              color: rgb(33, 150, 243);
+              padding: 5px 5px 5px 7px;
+              background-color: rgb(33, 150, 243, 10%);
+              &:hover {
+                // color: hsl(from currentColor h calc(s + 6%) calc(l - 16%));
+                color: rgb(25, 118, 210);
+                background-color: rgba(25, 118, 210, 20%);
+              }
+            }
+            &:last-child {
+              padding: 5px 6px;
+              color: #dc3545;
+              background-color: #f8d7da;
+              &:hover {
+                color: #bd2130;
+                background-color: #f1bfc4;
+              }
+            }
+          }
+        }
       }
     }
 

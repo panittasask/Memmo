@@ -41,3 +41,10 @@ body {
   background-color: #c7c7c7;
   font-family: "Noto Sans Thai", "Noto Sans", sans-serif;
 }
+
+.text-ellipsis {
+  overflow: hidden;
+  text-wrap: nowrap;
+  // white-space: normal;
+  text-overflow: ellipsis;
+}

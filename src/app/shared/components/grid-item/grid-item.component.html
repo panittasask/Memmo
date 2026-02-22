@@ -3,6 +3,7 @@
     <thead>
       <tr>
         <th [width]="20"></th>
+        <th [width]="30">No.</th>
         @for (header of columns; track $index) {
           <th [width]="header.width ?? 'auto'">
             {{ header.text }}
@@ -11,12 +12,15 @@
       </tr>
     </thead>
     <tbody>
-      @for (item of data; track $index) {
+      @for (item of data; track $index; let i = $index) {
         <tr
+          class="header"
           (dragover)="dragOver($event, $index)"
           (dragleave)="dragLeave($event)"
           (drop)="drop($event, $index)"
           [class.is-drag-over]="dragOverIndex === $index"
+          [class.isSelect]="i === selectedItem"
+          (click)="selected(item, i)"
         >
           <td
             class="drag-icon"
@@ -26,9 +30,29 @@
           >
             <i class="fa-solid fa-grip-vertical"></i>
           </td>
+          <td>
+            {{ i + 1 }}
+          </td>
           @for (col of columns; track $index) {
-            <td>
-              {{ item?.[col?.text] }}
+            <td *ngIf="item?.[col?.text] !== 'id'">
+              @if (col?.text !== "Action") {
+                <div class="text-ellipsis" [title]="item?.[col?.text]">
+                  {{
+                    item?.[col?.text] === "Date"
+                      ? (item?.[col?.text] | dateFormat)
+                      : item?.[col?.text]
+                  }}
+                </div>
+              } @else {
+                <div class="action-bar">
+                  <span [title]="'Edit'">
+                    <i class="fa-regular fa-pen-to-square"></i>
+                  </span>
+                  <span [title]="'Remove'">
+                    <i class="fa-regular fa-trash-can"></i>
+                  </span>
+                </div>
+              }
             </td>
           }
         </tr>

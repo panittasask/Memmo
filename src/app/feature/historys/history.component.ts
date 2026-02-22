@@ -10,6 +10,7 @@ import { GridItemComponent } from '../../shared/components/grid-item/grid-item.c
   styleUrl: './history.component.scss',
 })
 export class HistoryComponent {
+  public selectedData: object = {};
   public columns = [
     {
       text: 'Date',
@@ -32,7 +33,7 @@ export class HistoryComponent {
       // width: 150,
     },
     {
-      text: 'action',
+      text: 'Action',
     },
   ];
   public data = [
@@ -55,4 +56,8 @@ export class HistoryComponent {
       Duration: '8 ชั่วโมง',
     },
   ];
+
+  selectedItem(item: any) {
+    this.selectedData = item;
+  }
 }

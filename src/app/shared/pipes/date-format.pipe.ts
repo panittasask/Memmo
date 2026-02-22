@@ -5,7 +5,7 @@ import { Pipe, PipeTransform } from '@angular/core';
   standalone: true,
 })
 export class DateFormatPipe implements PipeTransform {
-  transform(value: string) {
+  transform(value: any) {
     return new Date(value).toLocaleDateString('th-TH');
   }
 }
