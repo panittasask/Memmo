@@ -1,8 +1,10 @@
 .history-container {
+  position: relative;
   display: flex;
   flex-direction: row;
   height: 100%;
   gap: 10px;
+  overflow: hidden;
   .main-history-container {
     display: flex;
     flex-direction: column;
@@ -23,8 +25,28 @@
   }
   .detail-history-container {
     display: flex;
-    flex: 3;
+    // flex: 3;
+    width: 70%;
+    height: 100%;
     border-radius: 8px;
     background-color: white;
+    position: absolute;
+    top: 0;
+    right: 0;
+    transition: 0.3s ease-in-out;
+    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+    transform: translateX(101%);
+    // visibility: hidden;
+    z-index: 2;
+    &.is-show {
+      transform: translateX(0px);
+    }
   }
+}
+.back-drop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(3px);
+  // z-index: 10;
 }

@@ -9,7 +9,6 @@
       ></app-grid-item>
     </div>
   </div>
-  <div class="detail-history-container">
-    
-  </div>
+  <div [class.is-show]="isShowDetail" class="detail-history-container"></div>
 </div>
+<div [class.back-drop]="isShowDetail"></div>

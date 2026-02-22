@@ -11,6 +11,7 @@ import { GridItemComponent } from '../../shared/components/grid-item/grid-item.c
 })
 export class HistoryComponent {
   public selectedData: object = {};
+  public isShowDetail = false;
   public columns = [
     {
       text: 'Date',
@@ -59,5 +60,6 @@ export class HistoryComponent {
 
   selectedItem(item: any) {
     this.selectedData = item;
+    this.isShowDetail = true;
   }
 }
