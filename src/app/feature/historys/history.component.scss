@@ -41,6 +41,26 @@
     &.is-show {
       transform: translateX(0px);
     }
+    .header-history-container{
+      display:flex;
+      flex-direction:column;
+      padding:10px;
+      position:relative;
+      width:100%;
+      min-height:50px;
+      .close-icon{
+        font-size: 20px;
+        transition:0.3s ease-in-out;
+        cursor:pointer;
+        // color:rgb(229, 231, 235);
+        position:absolute;
+        top:5px;
+        right:10px;
+        &:hover{
+          color:hsl(from currentColor h 90% l)
+        }
+      }
+    }
   }
 }
 .back-drop {

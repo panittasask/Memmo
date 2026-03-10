@@ -9,6 +9,13 @@
       ></app-grid-item>
     </div>
   </div>
-  <div [class.is-show]="isShowDetail" class="detail-history-container"></div>
+  <div [class.is-show]="isShowDetail" class="detail-history-container">
+    <div class="header-history-container">
+      <div class="header-content"></div>
+            <div class="close-icon">
+        <i class="fa-solid fa-xmark" (click)="isShowDetail = false"></i>
+      </div>
+    </div>
+  </div>
 </div>
 <div [class.back-drop]="isShowDetail"></div>
