@@ -3,7 +3,7 @@
     <thead>
       <tr>
         <th [width]="20"></th>
-        <th [width]="30">No.</th>
+        <th [width]="65">No.</th>
         @for (header of columns; track $index) {
           <th [width]="header.width ?? 'auto'">
             {{ header.text }}

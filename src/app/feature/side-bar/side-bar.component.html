@@ -34,8 +34,59 @@
   <div class="search-box-container">
     <input class="search-box" placeholder="Search..." />
   </div>
-  <div class="quick-add"><button class="quick-add-new-button">+</button></div>
+  <div class="quick-add"><button (click)="onAddNew()" class="quick-add-new-button">+</button></div>
   <div class="profile">
     <img class="profile-image" src="/assets/images/SnowyOwl.jpg" alt="" />
+  </div>
+</div>
+<div [class.isShow]="isAddNew" class="add-new-container">
+  <div [formGroup]="formAddNew" class="add-new-content">
+    <div class="header-content">
+      เพิ่ม Task งานใหม่
+    </div>
+    <div class="close-icon">
+        <i class="fa-solid fa-xmark" (click)="isAddNew = false"></i>
+      </div>
+    <div class="content-container ">
+        <div class="input-container-content">
+          <label >วันที่</label>
+          <input formControlName="date" type="date" class="form-input">
+        </div>
+        <div class="input-container-content">
+          <label >ระยะเวลา</label>
+          <input formControlName="time" type="number" class="form-input">
+        </div>
+    </div>
+    <div class="content-container">
+      <div class="input-container-content">
+        <label >Project</label>
+        <input formControlName="projectName" type="text" class="form-input">
+      </div>
+      <div class="input-container-content">
+        <label >Status</label>
+        <input formControlName="status" type="text" class="form-input">
+      </div>
+    </div>
+    <div class="content-container">
+      <div class="input-container-content">
+        <label >Task</label>
+        <input formControlName="taskName" type="text" class="form-input">
+      </div>
+    </div>
+    <div class="content-container">
+      <div class="input-container-content">
+        <label >รายละเอียด</label>
+        <textarea formControlName="description" type="text" class="form-input"></textarea>
+      </div>
+    </div>
+    <div class="button-wrapper">
+    <button 
+      type="submit" 
+      class="btn-save" 
+      [disabled]="formAddNew.invalid"
+      (click)="onSave()">
+      บันทึกข้อมูล
+  </button>
+</div>
   </div>
 </div>
