@@ -2,13 +2,12 @@ import { CommonModule } from '@angular/common';
 import {
   Component,
   EventEmitter,
-  inject,
   Input,
   Output,
-  SimpleChange,
   SimpleChanges,
 } from '@angular/core';
 import { DateFormatPipe } from '../../pipes/date-format.pipe';
+import { ColumnSettings } from '../../models/column-settings.model';
 
 @Component({
   selector: 'app-grid-item',
@@ -18,7 +17,7 @@ import { DateFormatPipe } from '../../pipes/date-format.pipe';
   styleUrl: './grid-item.component.scss',
 })
 export class GridItemComponent {
-  @Input() columns: any[] = [];
+  @Input() columns: ColumnSettings[] = [];
   @Input() data: any[] = [];
   public draggedIndex: number | null = null;
   public dragOverIndex: number | null = null;
@@ -71,5 +70,17 @@ export class GridItemComponent {
     console.log('item', item);
     this.selectedItem = index;
     this.selectedClick.emit(item);
+  }
+
+  isActionColumn(col: ColumnSettings): boolean {
+    return col.type === 'action';
+  }
+
+  getCellValue(item: any, col: ColumnSettings): unknown {
+    if (!col.field) {
+      return '';
+    }
+
+    return item?.[col.field];
   }
 }

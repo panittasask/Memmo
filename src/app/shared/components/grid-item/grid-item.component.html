@@ -3,7 +3,7 @@
     <thead>
       <tr>
         <th [width]="20"></th>
-        <th [width]="65">No.</th>
+        <th [width]="45">ลำดับ</th>
         @for (header of columns; track $index) {
           <th [width]="header.width ?? 'auto'">
             {{ header.text }}
@@ -34,14 +34,10 @@
             {{ i + 1 }}
           </td>
           @for (col of columns; track $index) {
-            <td *ngIf="item?.[col?.text] !== 'id'">
-              @if (col?.text !== "Action") {
-                <div class="text-ellipsis" [title]="item?.[col?.text]">
-                  {{
-                    item?.[col?.text] === "Date"
-                      ? (item?.[col?.text] | dateFormat)
-                      : item?.[col?.text]
-                  }}
+            <td>
+              @if (!isActionColumn(col)) {
+                <div class="text-ellipsis" [title]="(getCellValue(item, col) ?? '').toString()">
+                  {{ col?.type === 'date' ? (getCellValue(item, col) | dateFormat) : getCellValue(item, col) }}
                 </div>
               } @else {
                 <div class="action-bar">

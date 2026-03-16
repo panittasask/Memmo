@@ -14,7 +14,104 @@
     background-color: white;
     .header {
       display: flex;
-      padding: 10px;
+      padding: 14px 16px;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid #e5e7eb;
+      background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+
+      .header-title-group {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        .title {
+          font-size: 20px;
+          font-weight: 700;
+          color: #0f172a;
+          line-height: 1.2;
+        }
+
+        .subtitle {
+          font-size: 13px;
+          color: #64748b;
+        }
+      }
+
+      .header-filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+
+        label {
+          font-size: 12px;
+          font-weight: 600;
+          color: #334155;
+        }
+
+        .filter-control {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .date-filter-input {
+          min-width: 170px;
+          height: 38px;
+          padding: 0 12px;
+          border-radius: 10px;
+          border: 1px solid #cbd5e1;
+          background-color: #ffffff;
+          color: #0f172a;
+          font-size: 14px;
+          transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+          &:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+          }
+        }
+
+        .btn-filter {
+          height: 38px;
+          padding: 0 14px;
+          border: 1px solid transparent;
+          border-radius: 10px;
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: background-color 0.2s ease, transform 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+
+          &.btn-today {
+            background-color: #3b82f6;
+            color: #ffffff;
+
+            &:hover {
+              background-color: #2563eb;
+            }
+          }
+
+          &.btn-all {
+            background-color: #e2e8f0;
+            color: #0f172a;
+            border-color: #cbd5e1;
+
+            &:hover {
+              background-color: #cbd5e1;
+            }
+          }
+
+          &.active {
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+          }
+
+          &:active {
+            transform: translateY(1px);
+          }
+        }
+      }
     }
     .body {
       //   display: flex;
@@ -69,9 +166,6 @@
       flex-direction: column;
       gap:5px;
       justify-content: flex-start;
-      .body-content-container{
-        
-      }
     }
   }
 }
@@ -182,4 +276,26 @@
 
 .btn-save i {
   font-size: 18px;
+}
+
+@media (max-width: 768px) {
+  .history-container {
+    .main-history-container {
+      .header {
+        flex-direction: column;
+        align-items: stretch;
+
+        .header-filter-group {
+          .filter-control {
+            width: 100%;
+          }
+
+          .date-filter-input {
+            min-width: 0;
+            flex: 1;
+          }
+        }
+      }
+    }
+  }
 }

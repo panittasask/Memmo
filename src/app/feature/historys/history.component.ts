@@ -5,6 +5,7 @@ import { HistoryService } from '../../shared/services/history.service';
 import { firstValueFrom } from 'rxjs';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePickerDirective } from '../../shared/directive/input-date.directive';
+import { ColumnSettings } from '../../shared/models/column-settings.model';
 
 @Component({
   selector: 'app-history',
@@ -35,32 +36,47 @@ export class HistoryComponent {
   }
   public selectedData: object = {};
   public isShowDetail = false;
-  public columns = [
+  public filterDate = this.getToday();
+  public isAllFilter = false;
+  public columns: ColumnSettings[] = [
     {
-      text: 'startDate',
-      // width: 150,
+      field: 'startDate',
+      text: 'วันที่',
+      type: 'date',
+      width: 80,
     },
     {
-      text: 'taskName',
-      // width: 450,
+      field: 'taskName',
+      type: 'text',
+      text: 'งาน',
+      width: 280,
     },
     {
-      text: 'projectName',
-      // width: 100,
+      field: 'projectName',
+      type: 'text',
+      text: 'โปรเจกต์',
+      width: 100,
     },
     {
-      text: 'status',
-      // width: 100,
+      field: 'status',
+      type: 'text',
+      text: 'สถานะ',
+      width: 80,
     },
     {
-      text: 'duration',
-      // width: 150,
+      field: 'duration',
+      type: 'number',
+      text: 'ระยะเวลา',
+      width: 80,
     },
     {
-      text: 'Action',
+      type: 'action',
+      text: 'จัดการ',
+      width: 80,
     },
   ];
-  public data = [];
+  public data: any[] = [];
+  private allData: any[] = [];
 
   selectedItem(item: any) {
     this.formUpdate.patchValue({
@@ -77,10 +93,41 @@ export class HistoryComponent {
   }
   async fetchData(){
     try{
-      this.data = await firstValueFrom(this.HistoryService.getTask()) as any;
+      this.allData = await firstValueFrom(this.HistoryService.getTask()) as any[];
+      this.applyDateFilter();
     }catch(ex:any){
       console.log("Error >>",ex)
     }
+  }
+
+  onFilterDateChange(value: string) {
+    this.isAllFilter = false;
+    this.filterDate = value || this.getToday();
+    this.applyDateFilter();
+  }
+
+  setTodayFilter() {
+    this.isAllFilter = false;
+    this.filterDate = this.getToday();
+    this.applyDateFilter();
+  }
+
+  setAllFilter() {
+    this.isAllFilter = true;
+    this.data = [...this.allData];
+  }
+
+  private applyDateFilter() {
+    if (this.isAllFilter) {
+      this.data = [...this.allData];
+      return;
+    }
+
+    const selectedDateKey = this.filterDate;
+    this.data = this.allData.filter((item) => {
+      const itemDateKey = this.getDate(item?.startDate);
+      return itemDateKey === selectedDateKey;
+    });
   }
   async ngOnInit(){
     await this.fetchData();
@@ -110,9 +157,16 @@ export class HistoryComponent {
   }
    private getDate(date:any): string {
     const today = new Date(date);
+    if (Number.isNaN(today.getTime())) {
+      return '';
+    }
     const year = today.getFullYear();
     const month = String(today.getMonth() + 1).padStart(2, '0');
     const day = String(today.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  }
+
+  private getToday(): string {
+    return this.getDate(new Date());
   }
 }

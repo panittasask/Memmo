@@ -62,6 +62,7 @@ export class SideBarComponent {
       if(result){
         console.log("result");
         this.isAddNew = false;
+        this.formAddNew.reset();
         this.historyService.notifyDataChanged();
       }
     }catch(ex:any){

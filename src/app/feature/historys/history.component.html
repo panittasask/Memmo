@@ -1,6 +1,25 @@
 <div class="history-container">
   <div class="main-history-container">
-    <div class="header">header</div>
+    <div class="header">
+      <div class="header-title-group">
+        <div class="title">ประวัติรายการ</div>
+        <div class="subtitle">ค้นหาและดูข้อมูลตามวันที่</div>
+      </div>
+      <div class="header-filter-group">
+        <label for="history-date-filter">วันที่</label>
+        <div class="filter-control">
+          <input
+            id="history-date-filter"
+            type="date"
+            class="date-filter-input"
+            [ngModel]="filterDate"
+            (ngModelChange)="onFilterDateChange($event)"
+          >
+          <button type="button" class="btn-filter btn-today" [class.active]="!isAllFilter" (click)="setTodayFilter()">วันนี้</button>
+          <button type="button" class="btn-filter btn-all" [class.active]="isAllFilter" (click)="setAllFilter()">ทั้งหมด</button>
+        </div>
+      </div>
+    </div>
     <div class="body">
       <app-grid-item
         [data]="data"
