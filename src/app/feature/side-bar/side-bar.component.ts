@@ -60,9 +60,17 @@ export class SideBarComponent {
     try{
       const result = await firstValueFrom(this.historyService.addNewTask(model));
       if(result){
-        console.log("result");
+        // console.log("result");
         this.isAddNew = false;
-        this.formAddNew.reset();
+        // this.formAddNew.reset();
+        this.formAddNew.patchValue({
+          date: this.getToday(),
+          time:0,
+          description:'',
+          projectName:'',
+          taskName: '',
+          status:''
+        });
         this.historyService.notifyDataChanged();
       }
     }catch(ex:any){
