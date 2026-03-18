@@ -1,5 +1,5 @@
 {
-  "apiBaseUrl": "https://memmoapi.runasp.net/",
+  "apiBaseUrl": "http://localhost:5065",
   "appName": "Memmo",
   "env": "dev"
 }
