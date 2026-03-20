@@ -24,7 +24,14 @@
       <app-grid-item
         [data]="data"
         [columns]="columns"
+        [currentPage]="currentPage"
+        [totalPages]="totalPages"
+        [totalCount]="totalCount"
+        [hasNextPage]="hasNextPage"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="pageSizeOptions"
         (selectedClick)="selectedItem($event)"
+        (pageChange)="onPageChange($event)"
       ></app-grid-item>
     </div>
   </div>

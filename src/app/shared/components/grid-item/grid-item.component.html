@@ -1,65 +1,86 @@
 <div class="grid-container">
-  <table class="grid-table">
-    <thead>
-      <tr>
-        <th [width]="20"></th>
-        <th [width]="45">ลำดับ</th>
-        @for (header of columns; track $index) {
-          <th [width]="header.width ?? 'auto'">
-            {{ header.text }}
-          </th>
-        }
-      </tr>
-    </thead>
-    <tbody>
-      @for (item of data; track $index; let i = $index) {
-        <tr
-          class="header"
-          (dragover)="dragOver($event, $index)"
-          (dragleave)="dragLeave($event)"
-          (drop)="drop($event, $index)"
-          [class.is-drag-over]="dragOverIndex === $index"
-          [class.isSelect]="i === selectedItem"
-          (click)="selected(item, i)"
-        >
-          <td
-            class="drag-icon"
-            draggable="true"
-            (dragstart)="dragStart($event, $index)"
-            (dragend)="dragEnd($event)"
-          >
-            <i class="fa-solid fa-grip-vertical"></i>
-          </td>
-          <td>
-            {{ i + 1 }}
-          </td>
-          @for (col of columns; track $index) {
-            <td>
-              @if (!isActionColumn(col)) {
-                <div class="text-ellipsis" [title]="(getCellValue(item, col) ?? '').toString()">
-                  {{ col?.type === 'date' ? (getCellValue(item, col) | dateFormat) : getCellValue(item, col) }}
-                </div>
-              } @else {
-                <div class="action-bar">
-                  <span [title]="'Edit'">
-                    <i class="fa-regular fa-pen-to-square"></i>
-                  </span>
-                  <span [title]="'Remove'">
-                    <i class="fa-regular fa-trash-can"></i>
-                  </span>
-                </div>
-              }
-            </td>
+  <div class="grid-scroll-area">
+    <table class="grid-table">
+      <thead>
+        <tr>
+          <th [width]="20"></th>
+          <th [width]="45">ลำดับ</th>
+          @for (header of columns; track $index) {
+            <th [width]="header.width ?? 'auto'">
+              {{ header.text }}
+            </th>
           }
         </tr>
-      }
-    </tbody>
-  </table>
-  <!-- <div class="grid-column">
-      <div class="grid-header-column">
-        {{ header.text }}
-      </div>
-    }
+      </thead>
+      <tbody>
+        @for (item of data; track $index; let i = $index) {
+          <tr
+            class="header"
+            (dragover)="dragOver($event, $index)"
+            (dragleave)="dragLeave($event)"
+            (drop)="drop($event, $index)"
+            [class.is-drag-over]="dragOverIndex === $index"
+            [class.isSelect]="i === selectedItem"
+            (click)="selected(item, i)"
+          >
+            <td
+              class="drag-icon"
+              draggable="true"
+              (dragstart)="dragStart($event, $index)"
+              (dragend)="dragEnd($event)"
+            >
+              <i class="fa-solid fa-grip-vertical"></i>
+            </td>
+            <td>
+              {{ i + 1 }}
+            </td>
+            @for (col of columns; track $index) {
+              <td>
+                @if (!isActionColumn(col)) {
+                  <div class="text-ellipsis" [title]="(getCellValue(item, col) ?? '').toString()">
+                    {{ col?.type === 'date' ? (getCellValue(item, col) | dateFormat) : getCellValue(item, col) }}
+                  </div>
+                } @else {
+                  <div class="action-bar">
+                    <span [title]="'Edit'">
+                      <i class="fa-regular fa-pen-to-square"></i>
+                    </span>
+                    <span [title]="'Remove'">
+                      <i class="fa-regular fa-trash-can"></i>
+                    </span>
+                  </div>
+                }
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
   </div>
-  <div class="grid-body"></div> -->
+
+  <div class="pagination-bar">
+    <div class="pagination-summary">
+      <span>Page {{ currentPage }}</span>
+      <span *ngIf="totalCount !== null">{{ totalCount }} items</span>
+      <span *ngIf="totalCount === null">{{ data.length }} items on this page</span>
+    </div>
+
+    <div class="pagination-actions">
+      <label class="page-size-control">
+        <span>Rows</span>
+        <select [ngModel]="pageSize" (ngModelChange)="onPageSizeChange($event)">
+          @for (option of pageSizeOptions; track option) {
+            <option [ngValue]="option">{{ option }}</option>
+          }
+        </select>
+      </label>
+      <button type="button" class="btn-page" (click)="previousPage()" [disabled]="currentPage === 1">
+        Previous
+      </button>
+      <span class="page-indicator">{{ currentPage }} / {{ totalPages }}</span>
+      <button type="button" class="btn-page" (click)="nextPage()" [disabled]="!hasNextPage && currentPage >= totalPages">
+        Next
+      </button>
+    </div>
+  </div>
 </div>

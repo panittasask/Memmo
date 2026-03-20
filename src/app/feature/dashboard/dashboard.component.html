@@ -1,6 +1,10 @@
-<div class="dashboard-container">
-  <app-side-bar></app-side-bar>
-  <div class="content">
-    <router-outlet></router-outlet>
+<div class="dashboard-container" [class.login-layout]="isLoginRoute()">
+  <app-side-bar *ngIf="!isLoginRoute()"></app-side-bar>
+  <div
+    class="content"
+    [class.login-content]="isLoginRoute()"
+    [@routeAnimations]="prepareRoute(outlet)"
+  >
+    <router-outlet #outlet="outlet"></router-outlet>
   </div>
 </div>

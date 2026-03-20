@@ -2,6 +2,26 @@ import { HttpClient } from "@angular/common/http";
 import { inject, Injectable, signal } from "@angular/core";
 import { AppConfigService } from "./app-config.service";
 
+export interface HistoryQueryRequest {
+  page: number;
+  pageSize: number;
+  filterDate?: string;
+  isAllFilter?: boolean;
+}
+
+export interface HistoryPagedResult<T> {
+  items: T[];
+  totalCount?: number;
+  totalRows?: number;
+  totalRecords?: number;
+  rowCount?: number;
+  totalPages?: number;
+  page?: number;
+  currentPage?: number;
+  pageSize?: number;
+  hasNext?: boolean;
+}
+
 @Injectable({
   providedIn:'root'  
 })
@@ -20,9 +40,9 @@ export class HistoryService{
     notifyDataChanged() {
       this.refreshSignal.update(value => value + 1);
     }
-    getTask(){
+    getTask(query: HistoryQueryRequest){
       const url = `${this.baseUrl}/History`;
-        return this.http.get(url);
+      return this.http.post<HistoryPagedResult<any> | any[]>(url, query);
     }
     addNewTask(model:any){
       const url = `${this.baseUrl}/History/AddNew`;

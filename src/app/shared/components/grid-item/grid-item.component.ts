@@ -6,23 +6,36 @@ import {
   Output,
   SimpleChanges,
 } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { DateFormatPipe } from '../../pipes/date-format.pipe';
 import { ColumnSettings } from '../../models/column-settings.model';
+
+export interface GridPageChangeEvent {
+  page: number;
+  pageSize: number;
+}
 
 @Component({
   selector: 'app-grid-item',
   standalone: true,
-  imports: [CommonModule, DateFormatPipe],
+  imports: [CommonModule, FormsModule, DateFormatPipe],
   templateUrl: './grid-item.component.html',
   styleUrl: './grid-item.component.scss',
 })
 export class GridItemComponent {
   @Input() columns: ColumnSettings[] = [];
   @Input() data: any[] = [];
+  @Input() currentPage = 1;
+  @Input() totalPages = 1;
+  @Input() totalCount: number | null = null;
+  @Input() hasNextPage = false;
+  @Input() pageSize = 10;
+  @Input() pageSizeOptions: number[] = [10, 20, 50, 100];
   public draggedIndex: number | null = null;
   public dragOverIndex: number | null = null;
   public selectedItem: number = 0;
   @Output() selectedClick = new EventEmitter();
+  @Output() pageChange = new EventEmitter<GridPageChangeEvent>();
 
   ngOnInit() {
     console.log('Column', this.columns);
@@ -82,5 +95,31 @@ export class GridItemComponent {
     }
 
     return item?.[col.field];
+  }
+
+  previousPage(): void {
+    if (this.currentPage <= 1) {
+      return;
+    }
+
+    this.pageChange.emit({ page: this.currentPage - 1, pageSize: this.pageSize });
+  }
+
+  nextPage(): void {
+    if (!this.hasNextPage && this.currentPage >= this.totalPages) {
+      return;
+    }
+
+    this.pageChange.emit({ page: this.currentPage + 1, pageSize: this.pageSize });
+  }
+
+  onPageSizeChange(value: string | number): void {
+    const pageSize = Number(value);
+
+    if (!Number.isFinite(pageSize) || pageSize <= 0 || pageSize === this.pageSize) {
+      return;
+    }
+
+    this.pageChange.emit({ page: 1, pageSize });
   }
 }

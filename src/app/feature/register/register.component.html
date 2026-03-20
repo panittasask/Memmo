@@ -1,0 +1,69 @@
+<section class="register-page">
+  <div class="register-card">
+    <div class="brand-row">
+      <span class="logo-circle"><i class="fa-solid fa-user-plus"></i></span>
+      <div>
+        <h1>Create Account</h1>
+        <p>Start tracking your work with Memmo in minutes</p>
+      </div>
+    </div>
+
+    <form class="register-form" [formGroup]="form" (ngSubmit)="onSubmit()">
+      <label for="fullName">Full Name</label>
+      <input
+        id="fullName"
+        type="text"
+        formControlName="fullName"
+        placeholder="Your full name"
+      />
+      <small class="error" [class.error--show]="fullName.touched && fullName.invalid">Full name is required.</small>
+
+      <label for="userName">Username</label>
+      <input
+        id="userName"
+        type="text"
+        formControlName="userName"
+        placeholder="Your username"
+      />
+      <small class="error" [class.error--show]="userName.touched && userName.invalid">Username is required.</small>
+
+      <label for="email">Email</label>
+      <input
+        id="email"
+        type="email"
+        formControlName="email"
+        placeholder="you@example.com"
+      />
+      <small class="error" [class.error--show]="email.touched && email.invalid">Please enter a valid email address.</small>
+
+      <label for="password">Password</label>
+      <input
+        id="password"
+        type="password"
+        formControlName="password"
+        placeholder="At least 6 characters"
+      />
+      <small class="error" [class.error--show]="password.touched && password.invalid">Password must be at least 6 characters.</small>
+
+      <label for="confirmPassword">Confirm Password</label>
+      <input
+        id="confirmPassword"
+        type="password"
+        formControlName="confirmPassword"
+        placeholder="Re-enter password"
+      />
+      <small class="error" [class.error--show]="isPasswordMismatch">Password and confirm password do not match.</small>
+
+      <small class="error error--api" *ngIf="errorMessage">{{ errorMessage }}</small>
+
+      <button type="submit" [disabled]="isSubmitting">
+        {{ isSubmitting ? 'Creating account...' : 'Create Account' }}
+      </button>
+
+      <p class="auth-switch">
+        Already have an account?
+        <a routerLink="/login">Sign in</a>
+      </p>
+    </form>
+  </div>
+</section>

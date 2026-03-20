@@ -1,11 +1,28 @@
 import { CommonModule } from '@angular/common';
 import { Component, effect, inject } from '@angular/core';
-import { GridItemComponent } from '../../shared/components/grid-item/grid-item.component';
-import { HistoryService } from '../../shared/services/history.service';
+import {
+  GridItemComponent,
+  GridPageChangeEvent,
+} from '../../shared/components/grid-item/grid-item.component';
+import {
+  HistoryPagedResult,
+  HistoryQueryRequest,
+  HistoryService,
+} from '../../shared/services/history.service';
 import { firstValueFrom } from 'rxjs';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePickerDirective } from '../../shared/directive/input-date.directive';
 import { ColumnSettings } from '../../shared/models/column-settings.model';
+
+interface HistoryItem {
+  id: string;
+  startDate: string;
+  taskName: string;
+  projectName: string;
+  status: string;
+  duration: number;
+  description?: string;
+}
 
 @Component({
   selector: 'app-history',
@@ -75,8 +92,14 @@ export class HistoryComponent {
       width: 80,
     },
   ];
-  public data: any[] = [];
-  private allData: any[] = [];
+  public data: HistoryItem[] = [];
+  private allData: HistoryItem[] = [];
+  pageSize = 10;
+  readonly pageSizeOptions = [10, 20, 50, 100];
+  currentPage = 1;
+  totalPages = 1;
+  totalCount: number | null = null;
+  hasNextPage = false;
 
   selectedItem(item: any) {
     this.formUpdate.patchValue({
@@ -93,7 +116,23 @@ export class HistoryComponent {
   }
   async fetchData(){
     try{
-      this.allData = await firstValueFrom(this.HistoryService.getTask()) as any[];
+      const request: HistoryQueryRequest = {
+        page: this.currentPage,
+        pageSize: this.pageSize,
+        filterDate: this.filterDate,
+        isAllFilter: this.isAllFilter,
+      };
+
+      const response = await firstValueFrom(
+        this.HistoryService.getTask(request),
+      );
+      const normalized = this.normalizePagedResponse(response);
+      this.allData = normalized.items;
+      this.currentPage = normalized.currentPage;
+      this.totalPages = normalized.totalPages;
+      this.totalCount = normalized.totalCount;
+      this.hasNextPage = normalized.hasNextPage;
+      this.pageSize = normalized.pageSize;
       this.applyDateFilter();
     }catch(ex:any){
       console.log("Error >>",ex)
@@ -114,7 +153,32 @@ export class HistoryComponent {
 
   setAllFilter() {
     this.isAllFilter = true;
-    this.data = [...this.allData];
+    this.fetchData();
+    // this.data = [...this.allData];
+  }
+
+  async onPageChange(event: GridPageChangeEvent) {
+    const { page, pageSize } = event;
+
+    const isPageSizeChanged = pageSize !== this.pageSize;
+    if (isPageSizeChanged) {
+      this.pageSize = pageSize;
+    }
+
+    if (page < 1 || page === this.currentPage) {
+      if (isPageSizeChanged) {
+        this.currentPage = 1;
+        await this.fetchData();
+      }
+      return;
+    }
+
+    if (page > this.totalPages && !this.hasNextPage) {
+      return;
+    }
+
+    this.currentPage = page;
+    await this.fetchData();
   }
 
   private applyDateFilter() {
@@ -168,5 +232,59 @@ export class HistoryComponent {
 
   private getToday(): string {
     return this.getDate(new Date());
+  }
+
+  private normalizePagedResponse(
+    response: HistoryPagedResult<HistoryItem> | HistoryItem[],
+  ): {
+    items: HistoryItem[];
+    currentPage: number;
+    totalPages: number;
+    totalCount: number | null;
+    hasNextPage: boolean;
+    pageSize: number;
+  } {
+    if (Array.isArray(response)) {
+      return {
+        items: response,
+        currentPage: this.currentPage,
+        totalPages:
+          response.length < this.pageSize ? this.currentPage : this.currentPage + 1,
+        totalCount: null,
+        hasNextPage: response.length === this.pageSize,
+        pageSize: this.pageSize,
+      };
+    }
+
+    const items = response.items ?? [];
+    const currentPage = response.currentPage ?? response.page ?? this.currentPage;
+    const totalCount =
+      response.totalCount ??
+      response.totalRows ??
+      response.totalRecords ??
+      response.rowCount ??
+      null;
+    const pageSize = response.pageSize ?? this.pageSize;
+    const totalPages =
+      response.totalPages ??
+      (typeof totalCount === 'number'
+        ? Math.max(1, Math.ceil(totalCount / pageSize))
+        : items.length < pageSize
+          ? currentPage
+          : currentPage + 1);
+    const hasNextPage =
+      response.hasNext ??
+      (typeof response.totalPages === 'number'
+        ? currentPage < response.totalPages
+        : items.length === pageSize);
+
+    return {
+      items,
+      currentPage,
+      totalPages,
+      totalCount,
+      hasNextPage,
+      pageSize,
+    };
   }
 }
