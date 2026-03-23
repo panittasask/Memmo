@@ -6,9 +6,9 @@ import {
   Output,
   SimpleChanges,
 } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { DateFormatPipe } from '../../pipes/date-format.pipe';
 import { ColumnSettings } from '../../models/column-settings.model';
+import { DropdownListComponent } from '../dropdown-list/dropdown-list.component';
 
 export interface GridPageChangeEvent {
   page: number;
@@ -18,7 +18,7 @@ export interface GridPageChangeEvent {
 @Component({
   selector: 'app-grid-item',
   standalone: true,
-  imports: [CommonModule, FormsModule, DateFormatPipe],
+  imports: [CommonModule, DateFormatPipe, DropdownListComponent],
   templateUrl: './grid-item.component.html',
   styleUrl: './grid-item.component.scss',
 })

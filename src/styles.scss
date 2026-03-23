@@ -1,4 +1,5 @@
 /* You can add global styles to this file, and also import other style files */
+@import "@angular/cdk/overlay-prebuilt.css";
 @import "../src/assets/font/fontawesome/css/all.css";
 @font-face {
   font-family: "Noto Sans Thai";
@@ -43,7 +44,6 @@ body {
   margin: 0;
   background-color: #c7c7c7;
   font-family: "Noto Sans Thai", "Noto Sans", sans-serif !important;
-  scrollbar-gutter: stable;
   overflow: hidden;
 }
 

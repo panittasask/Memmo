@@ -66,14 +66,14 @@
     </div>
 
     <div class="pagination-actions">
-      <label class="page-size-control">
-        <span>Rows</span>
-        <select [ngModel]="pageSize" (ngModelChange)="onPageSizeChange($event)">
-          @for (option of pageSizeOptions; track option) {
-            <option [ngValue]="option">{{ option }}</option>
-          }
-        </select>
-      </label>
+      <div class="page-size-control">
+        <app-dropdown-list
+          label="Rows"
+          [value]="pageSize"
+          [options]="pageSizeOptions"
+          (valueChange)="onPageSizeChange($event)"
+        ></app-dropdown-list>
+      </div>
       <button type="button" class="btn-page" (click)="previousPage()" [disabled]="currentPage === 1">
         Previous
       </button>

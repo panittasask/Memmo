@@ -1,0 +1,55 @@
+<div class="dropdown-field">
+  @if (label) {
+    <span class="dropdown-label">{{ label }}</span>
+  }
+
+  <button
+    #triggerButton
+    cdkOverlayOrigin
+    #triggerOrigin="cdkOverlayOrigin"
+    type="button"
+    class="dropdown-trigger"
+    [class.is-open]="isOpen"
+    [attr.aria-expanded]="isOpen"
+    aria-haspopup="listbox"
+    (click)="toggleDropdown()"
+  >
+    <span class="dropdown-value">{{ displayValue }}</span>
+    <span class="dropdown-icon" aria-hidden="true">
+      <svg viewBox="0 0 20 20" fill="none">
+        <path d="M5 7.5 10 12.5 15 7.5" />
+      </svg>
+    </span>
+  </button>
+</div>
+
+<ng-template
+  cdkConnectedOverlay
+  [cdkConnectedOverlayOrigin]="triggerOrigin"
+  [cdkConnectedOverlayOpen]="isOpen"
+  [cdkConnectedOverlayPositions]="overlayPositions"
+  [cdkConnectedOverlayPush]="false"
+  [cdkConnectedOverlayViewportMargin]="0"
+  [cdkConnectedOverlayFlexibleDimensions]="false"
+  [cdkConnectedOverlayScrollStrategy]="overlayScrollStrategy"
+  [cdkConnectedOverlayHasBackdrop]="true"
+  [cdkConnectedOverlayBackdropClass]="'cdk-overlay-transparent-backdrop'"
+  (backdropClick)="closePopover()"
+  (detach)="onOverlayDetach()"
+>
+  <div class="dropdown-popover" [style.min-width.px]="triggerWidth">
+    <div class="dropdown-options" role="listbox">
+      @for (option of options; track trackByValue($index, option)) {
+        <button
+          type="button"
+          class="dropdown-option"
+          [class.is-selected]="option === value"
+          [attr.aria-selected]="option === value"
+          (click)="selectOption(option)"
+        >
+          <span>{{ option }}</span>
+        </button>
+      }
+    </div>
+  </div>
+</ng-template>
