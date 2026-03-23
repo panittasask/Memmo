@@ -1,12 +1,17 @@
+import { inject } from '@angular/core';
 import { Routes } from '@angular/router';
 import { authGuard } from './shared/guard/auth.guard';
+import { AuthService } from './shared/services/auth.service';
 
 export const routes: Routes = [];
 
 routes.push(
   {
     path: '',
-    redirectTo: 'history',
+    redirectTo: () => {
+      const authService = inject(AuthService);
+      return authService.isTokenValid() ? 'history' : 'login';
+    },
     pathMatch: 'full',
   },
   {
@@ -56,6 +61,6 @@ routes.push(
   },
   {
     path: '**',
-    redirectTo: 'history',
+    redirectTo: 'login',
   },
 );

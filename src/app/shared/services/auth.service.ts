@@ -18,7 +18,12 @@ export interface LoginRequest {
 
 export interface AuthResponse {
   token: string;
+  refreshToken?: string;
   message: string;
+}
+
+export interface RefreshTokenRequest {
+  refreshToken: string;
 }
 
 @Injectable({
@@ -28,6 +33,7 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly appConfig = inject(AppConfigService);
   private readonly tokenKey = 'token';
+  private readonly refreshTokenKey = 'refreshToken';
 
   private get baseUrl(): string {
     return this.appConfig.getApiBaseUrl();
@@ -37,25 +43,90 @@ export class AuthService {
     const url = `${this.baseUrl}/Auth/register`;
     return this.http
       .post<AuthResponse>(url, payload)
-      .pipe(tap((response) => this.setToken(response.token)));
+      .pipe(tap((response) => this.setAuthTokens(response)));
   }
 
   login(payload: LoginRequest): Observable<AuthResponse> {
     const url = `${this.baseUrl}/Auth/login`;
     return this.http
       .post<AuthResponse>(url, payload)
-      .pipe(tap((response) => this.setToken(response.token)));
+      .pipe(tap((response) => this.setAuthTokens(response)));
+  }
+
+  refreshToken(): Observable<AuthResponse> {
+    const url = `${this.baseUrl}/Auth/refresh-token`;
+    const payload: RefreshTokenRequest = {
+      refreshToken: this.getRefreshToken() ?? '',
+    };
+
+    return this.http
+      .post<AuthResponse>(url, payload)
+      .pipe(tap((response) => this.setAuthTokens(response)));
   }
 
   getToken(): string | null {
     return localStorage.getItem(this.tokenKey);
   }
 
-  clearToken(): void {
+  getRefreshToken(): string | null {
+    return localStorage.getItem(this.refreshTokenKey);
+  }
+
+  isTokenValid(): boolean {
+    const token = this.getToken();
+
+    if (!token) {
+      return false;
+    }
+
+    const exp = this.getTokenExp(token);
+    if (!exp) {
+      return false;
+    }
+
+    const nowInSeconds = Math.floor(Date.now() / 1000);
+    return exp > nowInSeconds;
+  }
+
+  clearAuth(): void {
     localStorage.removeItem(this.tokenKey);
+    localStorage.removeItem(this.refreshTokenKey);
+  }
+
+  clearToken(): void {
+    this.clearAuth();
+  }
+
+  private setAuthTokens(response: AuthResponse): void {
+    this.setToken(response.token);
+
+    if (response.refreshToken) {
+      this.setRefreshToken(response.refreshToken);
+    }
   }
 
   private setToken(token: string): void {
     localStorage.setItem(this.tokenKey, token);
+  }
+
+  private setRefreshToken(refreshToken: string): void {
+    localStorage.setItem(this.refreshTokenKey, refreshToken);
+  }
+
+  private getTokenExp(token: string): number | null {
+    try {
+      const payload = token.split('.')[1];
+      if (!payload) {
+        return null;
+      }
+
+      const normalizedPayload = payload.replace(/-/g, '+').replace(/_/g, '/');
+      const decodedPayload = JSON.parse(atob(normalizedPayload));
+      const exp = Number(decodedPayload?.exp);
+
+      return Number.isFinite(exp) ? exp : null;
+    } catch {
+      return null;
+    }
   }
 }
