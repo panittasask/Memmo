@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, ElementRef, ViewChild, HostListener } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import {
   HistoryService,
@@ -21,7 +22,11 @@ interface WFNode {
   id: string;
   x: number;
   y: number;
-  task: WorkflowTask;
+  /** 'task' = pulled from history, 'custom' = user-created free-text box */
+  type: 'task' | 'custom';
+  task?: WorkflowTask;
+  label: string;   // custom node title
+  note: string;    // custom node body text
 }
 
 interface WFConnection {
@@ -32,11 +37,12 @@ interface WFConnection {
 
 const NODE_W = 230;
 const NODE_H = 95;
+const CUSTOM_NODE_W = 230;
 
 @Component({
   selector: 'app-workflow',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './workflow.component.html',
   styleUrl: './workflow.component.scss',
 })
@@ -67,10 +73,10 @@ export class WorkflowComponent implements OnInit {
   isPanning = false;
   panStartX = 0;
   panStartY = 0;
-  isSpaceDown = false;
 
   readonly NODE_W = NODE_W;
   readonly NODE_H = NODE_H;
+  readonly CUSTOM_NODE_W = CUSTOM_NODE_W;
 
   @ViewChild('canvasWrapper') canvasWrapperEl!: ElementRef<HTMLDivElement>;
 
@@ -95,7 +101,7 @@ export class WorkflowComponent implements OnInit {
   }
 
   isOnCanvas(task: WorkflowTask): boolean {
-    return this.nodes.some((n) => n.task.id === task.id);
+    return this.nodes.some((n) => n.type === 'task' && n.task?.id === task.id);
   }
 
   addNodeFromTask(task: WorkflowTask) {
@@ -105,7 +111,22 @@ export class WorkflowComponent implements OnInit {
       id: `node-${task.id}`,
       x: 80 + (i % 3) * 270,
       y: 60 + Math.floor(i / 3) * 160,
+      type: 'task',
       task,
+      label: task.taskName,
+      note: '',
+    });
+  }
+
+  addCustomNode() {
+    const i = this.nodes.length;
+    this.nodes.push({
+      id: `custom-${Date.now()}`,
+      x: 100 + (i % 3) * 260,
+      y: 80 + Math.floor(i / 3) * 180,
+      type: 'custom',
+      label: 'Custom Box',
+      note: '',
     });
   }
 
@@ -129,7 +150,8 @@ export class WorkflowComponent implements OnInit {
 
   // ── Node drag ──────────────────────────────────────────
   onNodeMouseDown(e: MouseEvent, node: WFNode) {
-    if ((e.target as HTMLElement).closest('.port, .node-delete')) return;
+    const target = e.target as HTMLElement;
+    if (target.closest('.port, .node-delete, .custom-label, .custom-note')) return;
     e.preventDefault();
     e.stopPropagation();
     this.draggingNode = node;
@@ -143,9 +165,10 @@ export class WorkflowComponent implements OnInit {
     e.preventDefault();
     e.stopPropagation();
     const p = this.screenToInner(e.clientX, e.clientY);
+    const nodeW = node.type === 'custom' ? CUSTOM_NODE_W : NODE_W;
     this.drawingConn = {
       fromNodeId: node.id,
-      fromX: node.x + NODE_W,
+      fromX: node.x + nodeW,
       fromY: node.y + NODE_H / 2,
       toX: p.x,
       toY: p.y,
@@ -172,29 +195,14 @@ export class WorkflowComponent implements OnInit {
     this.drawingConn = null;
   }
 
-  // ── Canvas panning ─────────────────────────────────────
+  // ── Canvas panning: left-click drag on canvas background ──
   onCanvasMouseDown(e: MouseEvent) {
-    if (e.button === 1 || e.button === 2 || this.isSpaceDown) {
+    // middle or right button also works
+    if (e.button === 0 || e.button === 1 || e.button === 2) {
       e.preventDefault();
       this.isPanning = true;
       this.panStartX = e.clientX - this.panX;
       this.panStartY = e.clientY - this.panY;
-    }
-  }
-
-  @HostListener('window:keydown', ['$event'])
-  onKeyDown(e: KeyboardEvent) {
-    if (e.code === 'Space' && !this.isSpaceDown) {
-      this.isSpaceDown = true;
-      e.preventDefault();
-    }
-  }
-
-  @HostListener('window:keyup', ['$event'])
-  onKeyUp(e: KeyboardEvent) {
-    if (e.code === 'Space') {
-      this.isSpaceDown = false;
-      this.isPanning = false;
     }
   }
 
@@ -218,7 +226,7 @@ export class WorkflowComponent implements OnInit {
   onMouseUp() {
     this.draggingNode = null;
     this.drawingConn = null;
-    if (!this.isSpaceDown) this.isPanning = false;
+    this.isPanning = false;
   }
 
   onCanvasWheel(e: WheelEvent) {
@@ -255,9 +263,9 @@ export class WorkflowComponent implements OnInit {
   }
 
   get cursorStyle(): string {
-    if (this.isSpaceDown) return this.isPanning ? 'grabbing' : 'grab';
+    if (this.draggingNode) return 'grabbing';
     if (this.isPanning) return 'grabbing';
-    return 'default';
+    return 'grab';
   }
 
   connPath(conn: WFConnection): string {

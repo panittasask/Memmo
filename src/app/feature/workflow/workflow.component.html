@@ -6,6 +6,14 @@
       <i class="fa-solid fa-list-check"></i>
       Tasks
     </div>
+
+    <!-- Add Custom Box button -->
+    <div class="panel-custom-add">
+      <button class="btn-add-custom" (click)="addCustomNode()">
+        <i class="fa-solid fa-plus"></i> Custom Box
+      </button>
+    </div>
+
     <div class="task-list">
       @for (task of tasks; track task.id) {
         <div
@@ -39,7 +47,7 @@
     <!-- Toolbar -->
     <div class="canvas-toolbar">
       <span class="toolbar-hint">
-        <i class="fa-solid fa-hand"></i> Space+drag หรือ กดล้อเมาส์ เพื่อ Pan &nbsp;|&nbsp;
+        <i class="fa-solid fa-hand"></i> ลากเพื่อ Pan &nbsp;|&nbsp;
         <i class="fa-solid fa-scroll"></i> Scroll เพื่อ Zoom
       </span>
       <span class="zoom-badge">{{ zoomPercent }}%</span>
@@ -54,76 +62,89 @@
       <!-- SVG connections layer -->
       <svg class="connections-svg" overflow="visible">
         @for (conn of connections; track conn.id) {
-          <!-- Hit area path (transparent, wide) -->
           <path
             class="conn-hit"
             [attr.d]="connPath(conn)"
             (click)="removeConnection(conn.id)"
           />
-          <!-- Visual path -->
           <path class="conn-visual" [attr.d]="connPath(conn)" />
-          <!-- Midpoint delete dot -->
           <g class="conn-mid-group" [attr.transform]="'translate(' + connMid(conn).x + ',' + connMid(conn).y + ')'">
             <circle class="conn-mid-bg" r="10" />
             <text class="conn-mid-x" text-anchor="middle" dominant-baseline="central">×</text>
           </g>
         }
-        <!-- Active drawing line -->
         @if (drawingConn) {
           <path class="conn-drawing" [attr.d]="drawingPath()" />
         }
       </svg>
 
-      <!-- Nodes -->
+      <!-- ── Task nodes ── -->
       @for (node of nodes; track node.id) {
-        <div
-          class="wf-node"
-          [style.left.px]="node.x"
-          [style.top.px]="node.y"
-          [style.width.px]="NODE_W"
-          (mousedown)="onNodeMouseDown($event, node)"
-        >
-          <!-- Input port (left) -->
+        @if (node.type === 'task') {
           <div
-            class="port port-in"
-            (mouseup)="onInputPortMouseUp($event, node)"
-            title="Input"
-          ></div>
-
-          <!-- Node header -->
-          <div class="node-header">
-            <span class="node-project">{{ node.task.projectName }}</span>
-            <span
-              class="node-delete"
-              (click)="removeNode(node.id, $event)"
-              title="ลบออกจาก canvas"
-            >×</span>
-          </div>
-
-          <!-- Node body -->
-          <div class="node-body">
-            <div class="node-task-name">{{ node.task.taskName }}</div>
-            <div class="node-meta">
-              <span class="node-status">{{ node.task.status }}</span>
-              <span class="node-duration">{{ node.task.duration }}h</span>
+            class="wf-node wf-node-task"
+            [style.left.px]="node.x"
+            [style.top.px]="node.y"
+            [style.width.px]="NODE_W"
+            (mousedown)="onNodeMouseDown($event, node)"
+          >
+            <div class="port port-in" (mouseup)="onInputPortMouseUp($event, node)"></div>
+            <div class="node-header">
+              <span class="node-project">{{ node.task?.projectName }}</span>
+              <span class="node-delete" (click)="removeNode(node.id, $event)">×</span>
             </div>
+            <div class="node-body">
+              <div class="node-task-name">{{ node.task?.taskName }}</div>
+              <div class="node-meta">
+                <span class="node-status">{{ node.task?.status }}</span>
+                <span class="node-duration">{{ node.task?.duration }}h</span>
+              </div>
+            </div>
+            <div class="port port-out" (mousedown)="onOutputPortMouseDown($event, node)"></div>
           </div>
+        }
 
-          <!-- Output port (right) -->
+        <!-- ── Custom nodes ── -->
+        @if (node.type === 'custom') {
           <div
-            class="port port-out"
-            (mousedown)="onOutputPortMouseDown($event, node)"
-            title="Output – ลากเพื่อเชื่อมต่อ"
-          ></div>
-        </div>
+            class="wf-node wf-node-custom"
+            [style.left.px]="node.x"
+            [style.top.px]="node.y"
+            [style.width.px]="CUSTOM_NODE_W"
+            (mousedown)="onNodeMouseDown($event, node)"
+          >
+            <div class="port port-in" (mouseup)="onInputPortMouseUp($event, node)"></div>
+            <div class="node-header custom-node-header">
+              <input
+                class="custom-label"
+                [(ngModel)]="node.label"
+                placeholder="ชื่อ Box..."
+                (mousedown)="$event.stopPropagation()"
+                (click)="$event.stopPropagation()"
+              />
+              <span class="node-delete" (click)="removeNode(node.id, $event)">×</span>
+            </div>
+            <div class="node-body">
+              <textarea
+                class="custom-note"
+                [(ngModel)]="node.note"
+                rows="3"
+                placeholder="พิมพ์ข้อความ / action ต่อไป..."
+                (mousedown)="$event.stopPropagation()"
+                (click)="$event.stopPropagation()"
+              ></textarea>
+            </div>
+            <div class="port port-out" (mousedown)="onOutputPortMouseDown($event, node)"></div>
+          </div>
+        }
       }
     </div>
 
-    <!-- Empty state hint -->
     @if (nodes.length === 0) {
       <div class="canvas-hint">
         <i class="fa-solid fa-diagram-project"></i>
         <p>Double-click task ทางซ้ายเพื่อเพิ่มลง canvas</p>
+        <p class="hint-sub">หรือกด "Custom Box" เพื่อสร้าง node เปล่า</p>
         <p class="hint-sub">ลากวงกลมขวา → วงกลมซ้ายของ node อื่น เพื่อเชื่อมต่อ</p>
       </div>
     }
