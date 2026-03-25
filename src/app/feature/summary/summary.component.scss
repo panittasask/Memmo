@@ -10,6 +10,7 @@
     border-radius: 8px;
     background-color: white;
     width: 100%;
+    overflow: auto;
     .header {
       display: flex;
       flex-direction: column;
@@ -65,6 +66,73 @@
       }
     }
     .body {
+      padding-top: 16px;
+
+      .chart-controls {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+
+        .chart-stats {
+          display: flex;
+          gap: 12px;
+
+          .stat-card {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 10px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            background: #f8fafc;
+
+            .stat-value {
+              font-size: 20px;
+              font-weight: 700;
+              color: #0f172a;
+              line-height: 1;
+            }
+
+            .stat-label {
+              font-size: 12px;
+              color: #64748b;
+            }
+          }
+        }
+      }
+
+      .loading-state {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        height: 180px;
+        color: #64748b;
+        font-size: 14px;
+      }
+
+      .charts-row {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+
+        .chart-card {
+          flex: 1;
+          min-width: 240px;
+          padding: 14px;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
+          background: #fafafa;
+
+          .chart-card-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 10px;
+          }
+        }
+      }
     }
   }
   .summary-activity {
@@ -97,21 +165,92 @@
       .body {
         scroll-behavior: smooth;
         min-height: 0;
-        padding: 20px;
+        padding: 12px;
         flex: 1 1 auto;
         overflow: auto;
         display: flex;
-        overflow: auto;
         flex-direction: column;
+        gap: 2px;
+
+        .empty-activity {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 100%;
+          color: #94a3b8;
+          font-size: 13px;
+        }
+
+        .activity-item {
+          display: flex;
+          align-items: flex-start;
+          gap: 10px;
+          padding: 8px 6px;
+          border-radius: 8px;
+          transition: background 0.15s;
+          &:hover { background: #f8fafc; }
+
+          .activity-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #3b82f6;
+            margin-top: 5px;
+            flex-shrink: 0;
+          }
+
+          .activity-info {
+            flex: 1;
+            min-width: 0;
+
+            .activity-name {
+              font-size: 13px;
+              font-weight: 500;
+              color: #0f172a;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+
+            .activity-meta {
+              display: flex;
+              gap: 8px;
+              margin-top: 2px;
+              flex-wrap: wrap;
+
+              .activity-project {
+                font-size: 11px;
+                color: #64748b;
+              }
+              .activity-status {
+                font-size: 11px;
+                color: #3b82f6;
+                background: #eff6ff;
+                border-radius: 4px;
+                padding: 0 5px;
+              }
+              .activity-date {
+                font-size: 11px;
+                color: #94a3b8;
+              }
+            }
+          }
+
+          .activity-duration {
+            font-size: 12px;
+            font-weight: 600;
+            color: #475569;
+            flex-shrink: 0;
+          }
+        }
       }
     }
     .quick-action {
-      flex: 1;
+      flex: 0 0 auto;
       border-radius: 8px;
       display: flex;
       flex-direction: column;
       background-color: white;
-      height: 100%;
       .header {
         display: flex;
         flex: 0 0 40px;
@@ -130,28 +269,29 @@
         flex: 1;
         overflow: auto;
         display: flex;
-        overflow: auto;
         flex-direction: column;
         gap: 5px;
         .quick-button {
-          flex: 1;
           cursor: pointer;
           font-size: 14px;
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 5px;
+          gap: 8px;
+          padding: 10px 16px;
           border-radius: 8px;
-          border: 1px solid hsl(from grey h s 90%);
-          transition: 0.3s ease-in-out;
-          &.new-task {
+          border: 1px solid hsl(from grey h s 85%);
+          transition: background-color 0.2s ease, box-shadow 0.2s ease;
+          &.primary {
             color: white;
-            background-color: hsl(from #0d6efd h s 60%);
+            background-color: #0d6efd;
+            border-color: transparent;
+            &:hover {
+              background-color: #0b5ed7;
+              box-shadow: 0 2px 8px rgba(13, 110, 253, 0.35);
+            }
           }
-          &.new-task:hover {
-            background-color: hsl(from #0d6efd h s 50%);
-          }
-          &:not(.new-task):hover {
+          &:not(.primary):hover {
             background-color: hsl(from grey h s 95%);
           }
         }

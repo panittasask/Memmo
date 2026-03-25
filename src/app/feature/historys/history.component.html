@@ -8,13 +8,11 @@
       <div class="header-filter-group">
         <label for="history-date-filter">วันที่</label>
         <div class="filter-control">
-          <input
-            id="history-date-filter"
-            type="date"
-            class="date-filter-input"
+          <app-datepicker
             [ngModel]="filterDate"
             (ngModelChange)="onFilterDateChange($event)"
-          >
+            placeholder="เลือกวันที่"
+          ></app-datepicker>
           <button type="button" class="btn-filter btn-today" [class.active]="!isAllFilter" (click)="setTodayFilter()">วันนี้</button>
           <button type="button" class="btn-filter btn-all" [class.active]="isAllFilter" (click)="setAllFilter()">ทั้งหมด</button>
         </div>
@@ -31,6 +29,8 @@
         [pageSize]="pageSize"
         [pageSizeOptions]="pageSizeOptions"
         (selectedClick)="selectedItem($event)"
+        (cloneClick)="cloneItem($event)"
+        (removeClick)="deleteItem($event)"
         (pageChange)="onPageChange($event)"
       ></app-grid-item>
     </div>
@@ -45,21 +45,31 @@
     <div class="content-container ">
         <div class="input-container-content">
           <label >วันที่</label>
-          <input formControlName="date" type="date" class="form-input">
+          <app-datepicker formControlName="date"></app-datepicker>
         </div>
         <div class="input-container-content">
           <label >ระยะเวลา</label>
-          <input formControlName="time" type="number" class="form-input">
+          <input formControlName="time" type="number" class="form-input time-input">
         </div>
     </div>
     <div class="content-container">
       <div class="input-container-content">
         <label >Project</label>
-        <input formControlName="projectName" type="text" class="form-input">
+        <app-dropdown-list
+          [value]="formUpdate.controls.projectName.value ?? null"
+          [options]="projectOptionNames"
+          placeholder="-- เลือก Project --"
+          (valueChange)="formUpdate.controls.projectName.setValue($event.toString())"
+        ></app-dropdown-list>
       </div>
       <div class="input-container-content">
         <label >Status</label>
-        <input formControlName="status" type="text" class="form-input">
+        <app-dropdown-list
+          [value]="formUpdate.controls.status.value ?? null"
+          [options]="statusOptionNames"
+          placeholder="-- เลือก Status --"
+          (valueChange)="formUpdate.controls.status.setValue($event.toString())"
+        ></app-dropdown-list>
       </div>
     </div>
     <div class="content-container">

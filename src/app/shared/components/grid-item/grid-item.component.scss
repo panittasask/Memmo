@@ -90,6 +90,14 @@
                 background-color: rgba(25, 118, 210, 20%);
               }
             }
+            &.clone-btn {
+              color: #6c757d;
+              background-color: rgba(108, 117, 125, 10%);
+              &:hover {
+                color: #495057;
+                background-color: rgba(73, 80, 87, 20%);
+              }
+            }
             &:last-child {
               padding: 5px 6px;
               color: #dc3545;

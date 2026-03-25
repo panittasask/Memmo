@@ -52,4 +52,9 @@ export class HistoryService{
       const url = `${this.baseUrl}/History/Update`;
         return this.http.post(url,model);
     }
+
+    deleteTask(id: string) {
+      const url = `${this.baseUrl}/History/task/${id}`;
+      return this.http.post(url, {});
+    }
 } 

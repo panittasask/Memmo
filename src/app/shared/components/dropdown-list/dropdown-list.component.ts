@@ -31,23 +31,23 @@ export class DropdownListComponent implements AfterViewInit, OnDestroy {
   private readonly positions: ConnectedPosition[] = [
     {
       originX: 'start',
-      originY: 'top',
-      overlayX: 'start',
-      overlayY: 'bottom',
-    },
-    {
-      originX: 'start',
       originY: 'bottom',
       overlayX: 'start',
       overlayY: 'top',
     },
+    {
+      originX: 'start',
+      originY: 'top',
+      overlayX: 'start',
+      overlayY: 'bottom',
+    },
   ];
 
   @Input() label = '';
-  @Input() value: number | null = null;
-  @Input() options: number[] = [];
+  @Input() value: string | number | null = null;
+  @Input() options: (string | number)[] = [];
   @Input() placeholder = 'Select';
-  @Output() valueChange = new EventEmitter<number>();
+  @Output() valueChange = new EventEmitter<string | number>();
   @ViewChild('triggerButton') triggerButton?: ElementRef<HTMLButtonElement>;
 
   isOpen = false;
@@ -76,11 +76,11 @@ export class DropdownListComponent implements AfterViewInit, OnDestroy {
     return String(this.value);
   }
 
-  trackByValue(_: number, option: number): number {
+  trackByValue(_: number, option: string | number): string | number {
     return option;
   }
 
-  selectOption(option: number): void {
+  selectOption(option: string | number): void {
     if (option !== this.value) {
       this.valueChange.emit(option);
     }

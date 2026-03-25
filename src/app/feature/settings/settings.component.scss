@@ -1,0 +1,312 @@
+.settings-container {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  min-height: 0;
+  gap: 10px;
+  overflow: hidden;
+
+  .main-settings-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    flex: 1;
+    border-radius: 8px;
+    background-color: white;
+    min-height: 0;
+    overflow: hidden;
+
+    .header {
+      display: flex;
+      padding: 14px 16px;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid #e5e7eb;
+      background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+
+      .header-title-group {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        .title {
+          font-size: 20px;
+          font-weight: 700;
+          color: #0f172a;
+          line-height: 1.2;
+        }
+
+        .subtitle {
+          font-size: 13px;
+          color: #64748b;
+        }
+      }
+
+      .header-actions {
+        .btn-add, .btn-add-child {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          height: 38px;
+          padding: 0 16px;
+          border: 1px solid #3b82f6;
+          border-radius: 8px;
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+          background-color: #ffffff;
+          color: #3b82f6;
+          transition: background-color 0.2s ease, transform 0.2s ease;
+
+          &:hover:not(:disabled) {
+            background-color: #eff6ff;
+          }
+
+          &:active:not(:disabled) {
+            transform: translateY(1px);
+          }
+
+          &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+          }
+
+          i {
+            font-size: 12px;
+            color: #3b82f6;
+          }
+        }
+      }
+    }
+
+    .tab-bar {
+      display: flex;
+      gap: 0;
+      padding: 0 16px;
+      border-bottom: 2px solid #e5e7eb;
+      background-color: #fafbfc;
+
+      .tab-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        border: none;
+        background: none;
+        font-size: 14px;
+        font-weight: 500;
+        color: #64748b;
+        cursor: pointer;
+        position: relative;
+        transition: color 0.2s ease;
+
+        .tab-delete {
+          font-size: 11px;
+          color: #94a3b8;
+          opacity: 0;
+          transition: opacity 0.2s ease, color 0.2s ease;
+
+          &:hover {
+            color: #ef4444;
+          }
+        }
+
+        &:hover .tab-delete {
+          opacity: 1;
+        }
+
+        &::after {
+          content: '';
+          position: absolute;
+          bottom: -2px;
+          left: 0;
+          right: 0;
+          height: 2px;
+          background-color: transparent;
+          transition: background-color 0.2s ease;
+        }
+
+        &:hover {
+          color: #0f172a;
+        }
+
+        &.active {
+          color: #2563eb;
+          font-weight: 600;
+
+          &::after {
+            background-color: #2563eb;
+          }
+        }
+      }
+    }
+
+    .body {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+      flex-direction: column;
+      padding: 10px;
+      overflow: hidden;
+
+      .body-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 8px;
+
+        .btn-add-child {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          height: 34px;
+          padding: 0 14px;
+          border: 1px solid #cbd5e1;
+          border-radius: 8px;
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+          background: #fff;
+          color: #334155;
+          transition: background 0.15s, border-color 0.15s;
+
+          &:hover:not(:disabled) {
+            background: #f1f5f9;
+            border-color: #94a3b8;
+          }
+
+          &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+          }
+
+          i {
+            font-size: 11px;
+          }
+        }
+      }
+
+      app-grid-item {
+        flex: 1;
+        min-height: 0;
+      }
+    }
+  }
+
+  .detail-settings-container {
+    display: flex;
+    padding: 20px;
+    flex-direction: column;
+    width: 40%;
+    height: 100%;
+    max-height: 100%;
+    border-radius: 8px;
+    background-color: white;
+    position: absolute;
+    top: 0;
+    right: 0;
+    transition: 0.3s ease-in-out;
+    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+    transform: translateX(101%);
+    z-index: 2;
+    gap: 10px;
+
+    &.is-show {
+      transform: translateX(0px);
+    }
+
+    .header-settings-container {
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+      position: relative;
+      width: 100%;
+      min-height: 50px;
+
+      .header-content {
+        font-weight: bold;
+        font-size: 25px;
+        color: black;
+      }
+
+      .close-icon {
+        font-size: 20px;
+        transition: 0.3s ease-in-out;
+        cursor: pointer;
+        position: absolute;
+        top: 5px;
+        right: 10px;
+
+        > i {
+          color: black;
+        }
+
+        &:hover {
+          opacity: 0.6;
+        }
+      }
+    }
+
+    .content-container {
+      display: flex;
+      flex-direction: row;
+      align-content: center;
+      gap: 30px;
+      padding: 10px;
+
+      > * {
+        flex: 1;
+      }
+    }
+  }
+}
+
+.back-drop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(3px);
+  transition: 0.3s ease-in-out;
+}
+
+.button-wrapper {
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+}
+
+.btn-save {
+  width: 100%;
+  padding: 12px 24px;
+  background-color: #3b82f6;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-save:hover:not(:disabled) {
+  background-color: #2563eb;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btn-save:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-save:disabled {
+  background-color: #e2e8f0;
+  color: #94a3b8;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}

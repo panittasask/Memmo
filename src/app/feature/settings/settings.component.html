@@ -1,0 +1,114 @@
+<div class="settings-container">
+  <div class="main-settings-container">
+    <div class="header">
+      <div class="header-title-group">
+        <div class="title">ตั้งค่า</div>
+        <div class="subtitle">จัดการข้อมูล Enum ของระบบ</div>
+      </div>
+      <div class="header-actions">
+        <button type="button" class="btn-add-child" (click)="openAddForm()" [disabled]="!activeParentId">
+          <i class="fa-solid fa-plus"></i>
+          เพิ่มรายการ
+        </button>
+        <!-- <button type="button" class="btn-add" (click)="openAddParentForm()">
+          <i class="fa-solid fa-plus"></i>
+          เพิ่มหมวดหมู่
+        </button> -->
+      </div>
+    </div>
+
+    <div class="tab-bar">
+      @for (parent of parents; track parent.id) {
+        <button
+          type="button"
+          class="tab-item"
+          [class.active]="activeParentId === parent.id"
+          (click)="switchTab(parent.id)"
+        >
+          {{ parent.name }}
+          <i class="fa-solid fa-xmark tab-delete" (click)="deleteParent(parent); $event.stopPropagation()"></i>
+        </button>
+      }
+    </div>
+
+    <div class="body">
+      <div class="body-actions">
+        <!-- <button type="button" class="btn-add-child" (click)="openAddForm()" [disabled]="!activeParentId">
+          <i class="fa-solid fa-plus"></i>
+          เพิ่มรายการ
+        </button> -->
+      </div>
+      <app-grid-item
+        [data]="data"
+        [columns]="columns"
+        [showClone]="false"
+        (selectedClick)="selectedItem($event)"
+        (removeClick)="deleteChild($event)"
+      ></app-grid-item>
+    </div>
+  </div>
+
+  <div [class.is-show]="isShowParentForm" class="detail-settings-container" [formGroup]="formParent">
+    <div class="header-settings-container">
+      <div class="header-content">{{ editingParent ? 'แก้ไขหมวดหมู่' : 'เพิ่มหมวดหมู่ใหม่' }}</div>
+      <div class="close-icon">
+        <i class="fa-solid fa-xmark" (click)="isShowParentForm = false"></i>
+      </div>
+    </div>
+    <div class="content-container">
+      <div class="input-container-content">
+        <label>Key</label>
+        <input formControlName="key" type="text" class="form-input" />
+      </div>
+    </div>
+    <div class="content-container">
+      <div class="input-container-content">
+        <label>ชื่อ</label>
+        <input formControlName="name" type="text" class="form-input" />
+      </div>
+    </div>
+    <div class="button-wrapper">
+      <button
+        type="submit"
+        class="btn-save"
+        [disabled]="formParent.invalid"
+        (click)="onSaveParent()"
+      >
+        บันทึกข้อมูล
+      </button>
+    </div>
+  </div>
+
+  <div [class.is-show]="isShowForm" class="detail-settings-container" [formGroup]="formChild">
+    <div class="header-settings-container">
+      <div class="header-content">{{ editingChild ? 'แก้ไขรายการ' : 'เพิ่มรายการใหม่' }}</div>
+      <div class="close-icon">
+        <i class="fa-solid fa-xmark" (click)="isShowForm = false"></i>
+      </div>
+    </div>
+    <div class="content-container">
+      <div class="input-container-content">
+        <label>Key</label>
+        <input formControlName="key" type="text" class="form-input" />
+      </div>
+    </div>
+    <div class="content-container">
+      <div class="input-container-content">
+        <label>ชื่อ</label>
+        <input formControlName="name" type="text" class="form-input" />
+      </div>
+    </div>
+    <div class="button-wrapper">
+      <button
+        type="submit"
+        class="btn-save"
+        [disabled]="formChild.invalid"
+        (click)="onSave()"
+      >
+        บันทึกข้อมูล
+      </button>
+    </div>
+  </div>
+</div>
+
+<div [class.back-drop]="isShowForm || isShowParentForm"></div>

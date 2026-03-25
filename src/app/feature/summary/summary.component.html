@@ -1,25 +1,104 @@
 <div class="summary-container">
   <div class="summary-chart-container">
-    <div class="header">
+    <!-- <div class="header">
       <span>Weekly Log Summary</span>
       <span>Hour worked Per day</span>
       <div class="dropdown-container">
         <div type="button" class="dropdown-item">Month View</div>
       </div>
+    </div> -->
+    <div class="body">
+      <div class="chart-controls">
+        <div class="chart-stats">
+          <div class="stat-card">
+            <div class="stat-value">{{ totalTasks }}</div>
+            <div class="stat-label">งานทั้งหมด</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">{{ totalDuration }}</div>
+            <div class="stat-label">รวมระยะเวลา (ชม.)</div>
+          </div>
+        </div>
+        <app-dropdown-list
+          [value]="selectedPeriod"
+          [options]="periodOptions"
+          (valueChange)="onPeriodChange($event)"
+        ></app-dropdown-list>
+      </div>
+
+      @if (isLoading) {
+        <div class="loading-state">
+          <i class="fa-solid fa-spinner fa-spin"></i>
+          <span>กำลังโหลด...</span>
+        </div>
+      } @else {
+        <div class="charts-row">
+          <div class="chart-card">
+            <div class="chart-card-title">สถานะงาน</div>
+            <app-donut-chart
+              [data]="statusSlices"
+              centerLabel="งาน"
+              emptyMessage="ไม่มีข้อมูลในช่วงเวลานี้"
+            ></app-donut-chart>
+          </div>
+          <div class="chart-card">
+            <div class="chart-card-title">ระยะเวลาตาม Project (ชม.)</div>
+            <app-donut-chart
+              [data]="projectSlices"
+              centerLabel="ชม."
+              emptyMessage="ไม่มีข้อมูลในช่วงเวลานี้"
+            ></app-donut-chart>
+          </div>
+          <div class="chart-card">
+            <div class="chart-card-title">จำนวน Task ตาม Project</div>
+            <app-donut-chart
+              [data]="projectTaskSlices"
+              centerLabel="Task"
+              emptyMessage="ไม่มีข้อมูลในช่วงเวลานี้"
+            ></app-donut-chart>
+          </div>
+        </div>
+      }
     </div>
-    <div class="body"></div>
   </div>
   <div class="summary-activity">
     <div class="recent-activity">
       <div class="header">Recent Activity</div>
-      <div class="body"></div>
+      <div class="body">
+        @if (recentTasks.length === 0) {
+          <div class="empty-activity">ไม่มีข้อมูลงานล่าสุด</div>
+        }
+        @for (task of recentTasks; track $index) {
+          <div class="activity-item">
+            <div class="activity-dot"></div>
+            <div class="activity-info">
+              <div class="activity-name">{{ task.taskName ?? task.description ?? '(ไม่ระบุ)' }}</div>
+              <div class="activity-meta">
+                <span class="activity-project">{{ task.projectName ?? '-' }}</span>
+                @if (task.status) {
+                  <span class="activity-status">{{ task.status }}</span>
+                }
+                @if (task.startDate ?? task.date) {
+                  <span class="activity-date">{{ (task.startDate ?? task.date) | date:'d MMM':'':'th' }}</span>
+                }
+              </div>
+            </div>
+            @if (task.duration) {
+              <div class="activity-duration">{{ task.duration }} ชม.</div>
+            }
+          </div>
+        }
+      </div>
     </div>
     <div class="quick-action">
       <div class="header">Quick Action</div>
       <div class="body">
-        <div class="quick-button new-task">New Task</div>
-        <div class="quick-button">Generate Report</div>
-        <div class="quick-button">Manage Projects</div>
+        <div class="quick-button primary" (click)="goToAnalytics()">
+          <i class="fa-solid fa-file-chart-column"></i> ออกรายงาน
+        </div>
+        <div class="quick-button primary" (click)="goToSettings()">
+          <i class="fa-solid fa-calendar-day"></i> ออกรายงาน รายวัน
+        </div>
       </div>
     </div>
   </div>

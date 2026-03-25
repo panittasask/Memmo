@@ -60,6 +60,14 @@ routes.push(
       ),
   },
   {
+    path: 'settings',
+    loadComponent: () =>
+      import('../app/feature/settings/settings.component').then(
+        (m) => m.SettingsComponent,
+      ),
+    canActivate: [authGuard],
+  },
+  {
     path: '**',
     redirectTo: 'login',
   },

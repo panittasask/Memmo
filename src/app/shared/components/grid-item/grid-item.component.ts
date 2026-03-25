@@ -31,10 +31,15 @@ export class GridItemComponent {
   @Input() hasNextPage = false;
   @Input() pageSize = 10;
   @Input() pageSizeOptions: number[] = [10, 20, 50, 100];
+  @Input() showEdit = true;
+  @Input() showClone = true;
+  @Input() showRemove = true;
   public draggedIndex: number | null = null;
   public dragOverIndex: number | null = null;
   public selectedItem: number = 0;
   @Output() selectedClick = new EventEmitter();
+  @Output() cloneClick = new EventEmitter();
+  @Output() removeClick = new EventEmitter();
   @Output() pageChange = new EventEmitter<GridPageChangeEvent>();
 
   ngOnInit() {
@@ -87,6 +92,17 @@ export class GridItemComponent {
 
   isActionColumn(col: ColumnSettings): boolean {
     return col.type === 'action';
+  }
+
+  isToday(item: any): boolean {
+    const d = item?.startDate;
+    if (!d) return false;
+    const date = new Date(d);
+    if (Number.isNaN(date.getTime())) return false;
+    const now = new Date();
+    return date.getFullYear() === now.getFullYear()
+      && date.getMonth() === now.getMonth()
+      && date.getDate() === now.getDate();
   }
 
   getCellValue(item: any, col: ColumnSettings): unknown {

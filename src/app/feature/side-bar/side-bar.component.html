@@ -24,13 +24,20 @@
   >
     History
   </div>
-  <!-- <div
+  <div
+    [class.active]="currentRoute === 'settings'"
+    class="side-bar-item"
+    (click)="navigate('settings')"
+  >
+    Settings
+  </div>
+  <div
     [class.active]="currentRoute === 'analytics'"
     class="side-bar-item"
     (click)="navigate('analytics')"
   >
     Analytics
-  </div> -->
+  </div>
   <div class="search-box-container">
     <input class="search-box" placeholder="Search..." />
   </div>
@@ -50,7 +57,7 @@
     <div class="content-container ">
         <div class="input-container-content">
           <label >วันที่</label>
-          <input formControlName="date" type="date" class="form-input">
+          <app-datepicker formControlName="date"></app-datepicker>
         </div>
         <div class="input-container-content">
           <label >ระยะเวลา</label>
@@ -60,11 +67,21 @@
     <div class="content-container">
       <div class="input-container-content">
         <label >Project</label>
-        <input formControlName="projectName" type="text" class="form-input">
+        <select formControlName="projectName" class="form-input">
+          <option value="">-- เลือก Project --</option>
+          @for (opt of projectOptions; track opt.id) {
+            <option [value]="opt.name">{{ opt.name }}</option>
+          }
+        </select>
       </div>
       <div class="input-container-content">
         <label >Status</label>
-        <input formControlName="status" type="text" class="form-input">
+        <select formControlName="status" class="form-input">
+          <option value="">-- เลือก Status --</option>
+          @for (opt of statusOptions; track opt.id) {
+            <option [value]="opt.name">{{ opt.name }}</option>
+          }
+        </select>
       </div>
     </div>
     <div class="content-container">

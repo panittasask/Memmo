@@ -2,19 +2,26 @@ import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { DatePickerDirective } from '../../shared/directive/input-date.directive';
+import { DatepickerComponent } from '../../shared/components/datepicker/datepicker.component';
 import { firstValueFrom } from 'rxjs';
 import { HistoryService } from '../../shared/services/history.service';
+import { ToastService } from '../../shared/services/toast.service';
+import { DropdownChildItem, SettingsService } from '../../shared/services/settings.service';
 
 @Component({
   selector: 'app-side-bar',
   standalone: true,
-  imports: [CommonModule,ReactiveFormsModule,FormsModule,DatePickerDirective],
+  imports: [CommonModule,ReactiveFormsModule,FormsModule,DatepickerComponent],
   templateUrl: './side-bar.component.html',
   styleUrl: './side-bar.component.scss',
 })
 export class SideBarComponent {
   private readonly historyService = inject(HistoryService);
+  private readonly toast = inject(ToastService);
+  private readonly settingsService = inject(SettingsService);
+
+  projectOptions: DropdownChildItem[] = [];
+  statusOptions: DropdownChildItem[] = [];
 
   formAddNew = new FormGroup({
     date:new FormControl(this.getToday(),[Validators.required]),
@@ -36,6 +43,22 @@ export class SideBarComponent {
   isAddNew:boolean = false;
   ngOnInit() {
     this.routes.navigate([this.currentRoute]);
+    this.loadSettings();
+  }
+
+  async loadSettings() {
+    try {
+      const res = await firstValueFrom(this.settingsService.getSettings());
+      const parents = res.parents ?? [];
+      const children = res.children ?? [];
+      const projectParent = parents.find(p => p.key === 'project');
+      const statusParent = parents.find(p => p.key === 'status');
+      this.projectOptions = projectParent ? children.filter(c => c.parentId === projectParent.id) : [];
+      this.statusOptions = statusParent ? children.filter(c => c.parentId === statusParent.id) : [];
+    } catch {
+      this.projectOptions = [];
+      this.statusOptions = [];
+    }
   }
   navigate(route: string) {
     this.currentRoute = route;
@@ -60,7 +83,7 @@ export class SideBarComponent {
     try{
       const result = await firstValueFrom(this.historyService.addNewTask(model));
       if(result){
-        // console.log("result");
+        this.toast.success('เพิ่มงานใหม่สำเร็จ');
         this.isAddNew = false;
         // this.formAddNew.reset();
         this.formAddNew.patchValue({
@@ -74,6 +97,7 @@ export class SideBarComponent {
         this.historyService.notifyDataChanged();
       }
     }catch(ex:any){
+      this.toast.error('ไม่สามารถเพิ่มงานได้', { detail: ex?.error ?? ex?.message ?? String(ex) });
       console.log("Error >>>",ex)
     }
   }

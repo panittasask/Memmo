@@ -8,6 +8,8 @@ import {
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../shared/services/auth.service';
+import { ToastService } from '../../shared/services/toast.service';
+import { inject } from '@angular/core';
 
 @Component({
   selector: 'app-register',
@@ -26,6 +28,8 @@ export class RegisterComponent {
   });
   isSubmitting = false;
   errorMessage = '';
+
+  private readonly toast = inject(ToastService);
 
   constructor(
     private readonly router: Router,
@@ -78,12 +82,14 @@ export class RegisterComponent {
     this.authService.register(payload).subscribe({
       next: () => {
         this.isSubmitting = false;
+        this.toast.success('สมัครสมาชิกสำเร็จ');
         this.router.navigate(['/history']);
       },
       error: (error) => {
         this.isSubmitting = false;
         this.errorMessage =
           error?.error ?? 'Register failed. Please check your information.';
+        this.toast.error(this.errorMessage, { detail: JSON.stringify(error?.error ?? error?.message, null, 2) });
       },
     });
   }

@@ -42,12 +42,21 @@
                   </div>
                 } @else {
                   <div class="action-bar">
-                    <span [title]="'Edit'">
-                      <i class="fa-regular fa-pen-to-square"></i>
-                    </span>
-                    <span [title]="'Remove'">
-                      <i class="fa-regular fa-trash-can"></i>
-                    </span>
+                    @if (showEdit) {
+                      <span [title]="'Edit'">
+                        <i class="fa-regular fa-pen-to-square"></i>
+                      </span>
+                    }
+                    @if (showClone && !isToday(item)) {
+                      <span class="clone-btn" [title]="'Clone to today'" (click)="cloneClick.emit(item); $event.stopPropagation()">
+                        <i class="fa-regular fa-clone"></i>
+                      </span>
+                    }
+                    @if (showRemove) {
+                      <span [title]="'Remove'" (click)="removeClick.emit(item); $event.stopPropagation()">
+                        <i class="fa-regular fa-trash-can"></i>
+                      </span>
+                    }
                   </div>
                 }
               </td>

@@ -1,1 +1,49 @@
-<p>analytics works!</p>
+<div class="analytics-container">
+  <div class="header">
+    <div class="header-title-group">
+      <div class="title">วิเคราะห์ข้อมูล</div>
+      <div class="subtitle">สรุปการทำงาน</div>
+    </div>
+    <div class="header-controls">
+      <app-dropdown-list
+        [value]="selectedPeriod"
+        [options]="periodOptions"
+        (valueChange)="onPeriodChange($event)"
+      ></app-dropdown-list>
+    </div>
+  </div>
+
+  <div class="summary-row">
+    <div class="summary-card">
+      <div class="summary-value">{{ totalTasks }}</div>
+      <div class="summary-label">งานทั้งหมด</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-value">{{ totalDuration }}</div>
+      <div class="summary-label">รวมระยะเวลา (ชม.)</div>
+    </div>
+  </div>
+
+  @if (isLoading) {
+    <div class="loading-state">
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      <span>กำลังโหลด...</span>
+    </div>
+  } @else {
+    <div class="chart-section">
+      <div class="chart-title">ระยะเวลาตาม Project (ชม.)</div>
+      <app-bar-chart [data]="projectDurationChart" emptyMessage="ไม่มีข้อมูลในช่วงเวลานี้"></app-bar-chart>
+    </div>
+
+    <div class="chart-section">
+      <div class="chart-title">จำนวน Task ตาม Project</div>
+      <app-bar-chart [data]="projectTaskChart" emptyMessage="ไม่มีข้อมูลในช่วงเวลานี้"></app-bar-chart>
+    </div>
+
+    <div class="chart-section">
+      <div class="chart-title">จำนวน Task ตาม Status</div>
+      <app-bar-chart [data]="statusChart" emptyMessage="ไม่มีข้อมูลในช่วงเวลานี้"></app-bar-chart>
+    </div>
+  }
+</div>
+

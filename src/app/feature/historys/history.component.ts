@@ -11,8 +11,12 @@ import {
 } from '../../shared/services/history.service';
 import { firstValueFrom } from 'rxjs';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { DatePickerDirective } from '../../shared/directive/input-date.directive';
+import { DatepickerComponent } from '../../shared/components/datepicker/datepicker.component';
 import { ColumnSettings } from '../../shared/models/column-settings.model';
+import { ToastService } from '../../shared/services/toast.service';
+import { DropdownListComponent } from '../../shared/components/dropdown-list/dropdown-list.component';
+import { DropdownChildItem, SettingsService } from '../../shared/services/settings.service';
+import { ConfirmService } from '../../shared/services/confirm.service';
 
 interface HistoryItem {
   id: string;
@@ -27,13 +31,27 @@ interface HistoryItem {
 @Component({
   selector: 'app-history',
   standalone: true,
-  imports: [CommonModule, GridItemComponent,ReactiveFormsModule,FormsModule,DatePickerDirective],
+  imports: [CommonModule, GridItemComponent,ReactiveFormsModule,FormsModule,DatepickerComponent,DropdownListComponent],
   templateUrl: './history.component.html',
   styleUrl: './history.component.scss',
 })
 export class HistoryComponent {
 
   private readonly HistoryService = inject(HistoryService);
+  private readonly toast = inject(ToastService);
+  private readonly settingsService = inject(SettingsService);
+  private readonly confirmService = inject(ConfirmService);
+
+  projectOptions: DropdownChildItem[] = [];
+  statusOptions: DropdownChildItem[] = [];
+
+  get projectOptionNames(): string[] {
+    return this.projectOptions.map(o => o.name);
+  }
+
+  get statusOptionNames(): string[] {
+    return this.statusOptions.map(o => o.name);
+  }
    formUpdate = new FormGroup({
       id:new FormControl('',[Validators.required]),
       date:new FormControl('',[Validators.required]),
@@ -93,7 +111,6 @@ export class HistoryComponent {
     },
   ];
   public data: HistoryItem[] = [];
-  private allData: HistoryItem[] = [];
   pageSize = 10;
   readonly pageSizeOptions = [10, 20, 50, 100];
   currentPage = 1;
@@ -127,14 +144,14 @@ export class HistoryComponent {
         this.HistoryService.getTask(request),
       );
       const normalized = this.normalizePagedResponse(response);
-      this.allData = normalized.items;
+      this.data = normalized.items;
       this.currentPage = normalized.currentPage;
       this.totalPages = normalized.totalPages;
       this.totalCount = normalized.totalCount;
       this.hasNextPage = normalized.hasNextPage;
       this.pageSize = normalized.pageSize;
-      this.applyDateFilter();
     }catch(ex:any){
+      this.toast.error('ไม่สามารถโหลดข้อมูลได้', { detail: ex?.error ?? ex?.message ?? String(ex) });
       console.log("Error >>",ex)
     }
   }
@@ -142,19 +159,21 @@ export class HistoryComponent {
   onFilterDateChange(value: string) {
     this.isAllFilter = false;
     this.filterDate = value || this.getToday();
-    this.applyDateFilter();
+    this.currentPage = 1;
+    this.fetchData();
   }
 
   setTodayFilter() {
     this.isAllFilter = false;
     this.filterDate = this.getToday();
-    this.applyDateFilter();
+    this.currentPage = 1;
+    this.fetchData();
   }
 
   setAllFilter() {
     this.isAllFilter = true;
+    this.currentPage = 1;
     this.fetchData();
-    // this.data = [...this.allData];
   }
 
   async onPageChange(event: GridPageChangeEvent) {
@@ -181,20 +200,25 @@ export class HistoryComponent {
     await this.fetchData();
   }
 
-  private applyDateFilter() {
-    if (this.isAllFilter) {
-      this.data = [...this.allData];
-      return;
-    }
 
-    const selectedDateKey = this.filterDate;
-    this.data = this.allData.filter((item) => {
-      const itemDateKey = this.getDate(item?.startDate);
-      return itemDateKey === selectedDateKey;
-    });
-  }
   async ngOnInit(){
+    await this.loadSettings();
     await this.fetchData();
+  }
+
+  async loadSettings() {
+    try {
+      const res = await firstValueFrom(this.settingsService.getSettings());
+      const parents = res.parents ?? [];
+      const children = res.children ?? [];
+      const projectParent = parents.find(p => p.key === 'project');
+      const statusParent = parents.find(p => p.key === 'status');
+      this.projectOptions = projectParent ? children.filter(c => c.parentId === projectParent.id) : [];
+      this.statusOptions = statusParent ? children.filter(c => c.parentId === statusParent.id) : [];
+    } catch {
+      this.projectOptions = [];
+      this.statusOptions = [];
+    }
   }
   async onSave(){
     if(!this.formUpdate.valid) return;
@@ -211,14 +235,53 @@ export class HistoryComponent {
     try{
       const result = await firstValueFrom(this.HistoryService.updateTask(model));
       if(result){
-        console.log("result");
+        this.toast.success('บันทึกข้อมูลสำเร็จ');
         this.isShowDetail = false;
         this.fetchData();
       }
     }catch(ex:any){
+      this.toast.error('ไม่สามารถบันทึกข้อมูลได้', { detail: ex?.error ?? ex?.message ?? String(ex) });
       console.log("Error >>>",ex)
     }
   }
+  async cloneItem(item: any) {
+    const model = {
+      duration: item.duration,
+      projectName: item.projectName,
+      taskName: item.taskName,
+      description: item.description,
+      status: item.status,
+      startDate: new Date(),
+    };
+    try {
+      const result = await firstValueFrom(this.HistoryService.addNewTask(model));
+      if (result) {
+        this.toast.success('คัดลอกงานไปวันนี้สำเร็จ');
+        this.fetchData();
+      }
+    } catch (ex: any) {
+      this.toast.error('ไม่สามารถคัดลอกงานได้', { detail: ex?.error ?? ex?.message ?? String(ex) });
+      console.log('Clone Error >>>', ex);
+    }
+  }
+
+  async deleteItem(item: any) {
+    const confirmed = await this.confirmService.confirm({
+      title: 'ลบรายการ',
+      message: `ต้องการลบงาน "${item.taskName}" หรือไม่?`,
+      confirmText: 'ลบ',
+    });
+    if (!confirmed) return;
+
+    try {
+      await firstValueFrom(this.HistoryService.deleteTask(item.id));
+      this.toast.success('ลบงานสำเร็จ');
+      await this.fetchData();
+    } catch (ex: any) {
+      this.toast.error('ไม่สามารถลบงานได้', { detail: ex?.error ?? ex?.message ?? String(ex) });
+    }
+  }
+
    private getDate(date:any): string {
     const today = new Date(date);
     if (Number.isNaN(today.getTime())) {
