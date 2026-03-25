@@ -38,6 +38,13 @@
   >
     Analytics
   </div>
+  <div
+    [class.active]="currentRoute === 'workflow'"
+    class="side-bar-item"
+    (click)="navigate('workflow')"
+  >
+    Workflow
+  </div>
   <div class="search-box-container">
     <input class="search-box" placeholder="Search..." />
   </div>

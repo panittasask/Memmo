@@ -1,0 +1,132 @@
+<div class="workflow-page">
+
+  <!-- ── Left: Task Panel ─────────────────────── -->
+  <div class="task-panel">
+    <div class="panel-header">
+      <i class="fa-solid fa-list-check"></i>
+      Tasks
+    </div>
+    <div class="task-list">
+      @for (task of tasks; track task.id) {
+        <div
+          class="task-item"
+          [class.on-canvas]="isOnCanvas(task)"
+          (dblclick)="addNodeFromTask(task)"
+          title="Double-click เพื่อเพิ่มลง canvas"
+        >
+          <div class="task-name">{{ task.taskName }}</div>
+          <div class="task-meta">
+            <span class="project-tag">{{ task.projectName }}</span>
+            <span class="status-tag">{{ task.status }}</span>
+          </div>
+        </div>
+      }
+      @if (tasks.length === 0) {
+        <div class="empty-list">ไม่พบ task</div>
+      }
+    </div>
+  </div>
+
+  <!-- ── Right: Canvas ───────────────────────── -->
+  <div
+    class="canvas-wrapper"
+    #canvasWrapper
+    [style.cursor]="cursorStyle"
+    (mousedown)="onCanvasMouseDown($event)"
+    (wheel)="onCanvasWheel($event)"
+    (contextmenu)="$event.preventDefault()"
+  >
+    <!-- Toolbar -->
+    <div class="canvas-toolbar">
+      <span class="toolbar-hint">
+        <i class="fa-solid fa-hand"></i> Space+drag หรือ กดล้อเมาส์ เพื่อ Pan &nbsp;|&nbsp;
+        <i class="fa-solid fa-scroll"></i> Scroll เพื่อ Zoom
+      </span>
+      <span class="zoom-badge">{{ zoomPercent }}%</span>
+      <button class="btn-clear" (click)="clearCanvas()">
+        <i class="fa-solid fa-trash"></i> Clear
+      </button>
+    </div>
+
+    <!-- Inner canvas (transformed) -->
+    <div class="canvas-inner" [style.transform]="canvasTransform">
+
+      <!-- SVG connections layer -->
+      <svg class="connections-svg" overflow="visible">
+        @for (conn of connections; track conn.id) {
+          <!-- Hit area path (transparent, wide) -->
+          <path
+            class="conn-hit"
+            [attr.d]="connPath(conn)"
+            (click)="removeConnection(conn.id)"
+          />
+          <!-- Visual path -->
+          <path class="conn-visual" [attr.d]="connPath(conn)" />
+          <!-- Midpoint delete dot -->
+          <g class="conn-mid-group" [attr.transform]="'translate(' + connMid(conn).x + ',' + connMid(conn).y + ')'">
+            <circle class="conn-mid-bg" r="10" />
+            <text class="conn-mid-x" text-anchor="middle" dominant-baseline="central">×</text>
+          </g>
+        }
+        <!-- Active drawing line -->
+        @if (drawingConn) {
+          <path class="conn-drawing" [attr.d]="drawingPath()" />
+        }
+      </svg>
+
+      <!-- Nodes -->
+      @for (node of nodes; track node.id) {
+        <div
+          class="wf-node"
+          [style.left.px]="node.x"
+          [style.top.px]="node.y"
+          [style.width.px]="NODE_W"
+          (mousedown)="onNodeMouseDown($event, node)"
+        >
+          <!-- Input port (left) -->
+          <div
+            class="port port-in"
+            (mouseup)="onInputPortMouseUp($event, node)"
+            title="Input"
+          ></div>
+
+          <!-- Node header -->
+          <div class="node-header">
+            <span class="node-project">{{ node.task.projectName }}</span>
+            <span
+              class="node-delete"
+              (click)="removeNode(node.id, $event)"
+              title="ลบออกจาก canvas"
+            >×</span>
+          </div>
+
+          <!-- Node body -->
+          <div class="node-body">
+            <div class="node-task-name">{{ node.task.taskName }}</div>
+            <div class="node-meta">
+              <span class="node-status">{{ node.task.status }}</span>
+              <span class="node-duration">{{ node.task.duration }}h</span>
+            </div>
+          </div>
+
+          <!-- Output port (right) -->
+          <div
+            class="port port-out"
+            (mousedown)="onOutputPortMouseDown($event, node)"
+            title="Output – ลากเพื่อเชื่อมต่อ"
+          ></div>
+        </div>
+      }
+    </div>
+
+    <!-- Empty state hint -->
+    @if (nodes.length === 0) {
+      <div class="canvas-hint">
+        <i class="fa-solid fa-diagram-project"></i>
+        <p>Double-click task ทางซ้ายเพื่อเพิ่มลง canvas</p>
+        <p class="hint-sub">ลากวงกลมขวา → วงกลมซ้ายของ node อื่น เพื่อเชื่อมต่อ</p>
+      </div>
+    }
+  </div>
+
+</div>

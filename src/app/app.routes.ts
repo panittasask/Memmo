@@ -68,6 +68,14 @@ routes.push(
     canActivate: [authGuard],
   },
   {
+    path: 'workflow',
+    loadComponent: () =>
+      import('../app/feature/workflow/workflow.component').then(
+        (m) => m.WorkflowComponent,
+      ),
+    canActivate: [authGuard],
+  },
+  {
     path: '**',
     redirectTo: 'login',
   },
