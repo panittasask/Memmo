@@ -55,6 +55,6 @@ export class HistoryService{
 
     deleteTask(id: string) {
       const url = `${this.baseUrl}/History/task/${id}`;
-      return this.http.post(url, {});
+      return this.http.delete(url);
     }
 } 
