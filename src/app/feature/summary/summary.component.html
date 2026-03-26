@@ -19,11 +19,21 @@
             <div class="stat-label">รวมระยะเวลา (ชม.)</div>
           </div>
         </div>
-        <app-dropdown-list
-          [value]="selectedPeriod"
-          [options]="periodOptions"
-          (valueChange)="onPeriodChange($event)"
-        ></app-dropdown-list>
+        <div class="dropdown-group">
+          <app-dropdown-list
+            [value]="selectedPeriod"
+            [options]="periodOptions"
+            (valueChange)="onPeriodChange($event)"
+          ></app-dropdown-list>
+          @if (selectedPeriod === 'เดือน') {
+            <app-dropdown-list
+              [value]="selectedMonth"
+              [options]="monthOptions"
+              [maxHeight]="220"
+              (valueChange)="onMonthChange($event)"
+            ></app-dropdown-list>
+          }
+        </div>
       </div>
 
       @if (isLoading) {
@@ -76,7 +86,13 @@
               <div class="activity-meta">
                 <span class="activity-project">{{ task.projectName ?? '-' }}</span>
                 @if (task.status) {
-                  <span class="activity-status">{{ task.status }}</span>
+                  <span
+                    class="activity-status"
+                    [style.background]="getStatusColor(task.status) ? getStatusColor(task.status) + '25' : null"
+                    [style.color]="getStatusColor(task.status) || null"
+                    [style.border]="getStatusColor(task.status) ? '1px solid ' + getStatusColor(task.status) + '60' : null"
+                    [class.status-done]="!getStatusColor(task.status) && task.status?.toLowerCase() === 'done'"
+                  >{{ task.status }}</span>
                 }
                 @if (task.startDate ?? task.date) {
                   <span class="activity-date">{{ (task.startDate ?? task.date) | date:'d MMM':'':'th' }}</span>

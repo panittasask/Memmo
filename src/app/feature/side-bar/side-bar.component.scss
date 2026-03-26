@@ -178,8 +178,8 @@ i {
         cursor:pointer;
         color:rgb(229, 231, 235);
         position:absolute;
-        top:5px;
-        right:10px;
+        top:10px;
+        right:20px;
         > i {
           color:black;
         }
@@ -198,6 +198,22 @@ i {
       padding:10px;
       > * {
         flex:1;
+        min-width: 0;
+        app-dropdown-list {
+          display: block;
+          width: 100%;
+        }
+        ::ng-deep app-dropdown-list {
+          display: block !important;
+          width: 100%;
+          .dropdown-field {
+            display: flex;
+            width: 100%;
+          }
+          .dropdown-trigger {
+            width: 100%;
+          }
+        }
       }
     }
   }

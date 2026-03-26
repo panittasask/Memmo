@@ -4,7 +4,7 @@ import {
   provideZoneChangeDetection,
   LOCALE_ID,
 } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { PreloadAllModules, provideRouter, withPreloading } from '@angular/router';
 import { registerLocaleData } from '@angular/common';
 import localeTh from '@angular/common/locales/th';
 
@@ -23,7 +23,7 @@ export function initAppConfig(appConfigService: AppConfigService) {
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideRouter(routes),
+    provideRouter(routes, withPreloading(PreloadAllModules)),
     provideAnimations(),
     provideHttpClient(withInterceptors([authInterceptor])),
     { provide: LOCALE_ID, useValue: 'th' },

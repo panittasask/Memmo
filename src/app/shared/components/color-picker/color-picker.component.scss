@@ -1,0 +1,136 @@
+:host {
+  display: inline-flex;
+}
+
+.cp-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 88px;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: white;
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+  width: 100%;
+
+  &:hover {
+    border-color: #94a3b8;
+  }
+
+  &.is-open {
+    border-color: #3b82f6;
+    .cp-icon {
+      transform: rotate(180deg);
+    }
+  }
+}
+
+.cp-swatch {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  flex-shrink: 0;
+}
+
+.cp-hex {
+  flex: 1;
+  text-align: left;
+  line-height: 1;
+  color: #475569;
+  font-family: monospace;
+  font-size: 12px;
+}
+
+.cp-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  color: #64748b;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+
+  svg {
+    width: 14px;
+    height: 14px;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
+
+.cp-popover {
+  margin-top: 5px;
+  padding: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.16);
+  animation: cp-reveal 0.15s ease-out;
+}
+
+@keyframes cp-reveal {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.cp-presets {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.cp-preset-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.12s, border-color 0.12s;
+  outline: none;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+
+  &:hover {
+    transform: scale(1.15);
+  }
+
+  &.is-selected {
+    border-color: #3b82f6;
+    transform: scale(1.1);
+    box-shadow: 0 0 0 2px #bfdbfe;
+  }
+}
+
+.cp-custom-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.cp-custom-label {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.cp-native {
+  width: 32px;
+  height: 28px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 2px;
+  cursor: pointer;
+  background: white;
+}

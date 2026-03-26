@@ -13,6 +13,12 @@
     border-bottom: 1px solid #e5e7eb;
     background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
 
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
     .header-title-group {
       display: flex;
       flex-direction: column;

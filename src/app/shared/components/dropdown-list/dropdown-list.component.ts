@@ -47,6 +47,7 @@ export class DropdownListComponent implements AfterViewInit, OnDestroy {
   @Input() value: string | number | null = null;
   @Input() options: (string | number)[] = [];
   @Input() placeholder = 'Select';
+  @Input() maxHeight: number | null = null;
   @Output() valueChange = new EventEmitter<string | number>();
   @ViewChild('triggerButton') triggerButton?: ElementRef<HTMLButtonElement>;
 

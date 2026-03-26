@@ -20,11 +20,12 @@ import {
 import { ColumnSettings } from '../../shared/models/column-settings.model';
 import { ToastService } from '../../shared/services/toast.service';
 import { ConfirmService } from '../../shared/services/confirm.service';
+import { ColorPickerComponent } from '../../shared/components/color-picker/color-picker.component';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, GridItemComponent, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, GridItemComponent, ReactiveFormsModule, FormsModule, ColorPickerComponent],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',
 })
@@ -45,6 +46,7 @@ export class SettingsComponent {
   columns: ColumnSettings[] = [
     { field: 'key', type: 'text', text: 'Key', width: 150 },
     { field: 'name', type: 'text', text: 'ชื่อ', width: 250 },
+    { field: 'color', type: 'color', text: 'สี', width: 80 },
     { type: 'action', text: 'จัดการ', width: 80 },
   ];
 
@@ -57,6 +59,7 @@ export class SettingsComponent {
     id: new FormControl(''),
     key: new FormControl('', [Validators.required]),
     name: new FormControl('', [Validators.required]),
+    color: new FormControl(''),
   });
 
   isShowParentForm = false;
@@ -76,8 +79,8 @@ export class SettingsComponent {
     });
   }
 
-  async ngOnInit() {
-    await this.loadSettings();
+  ngOnInit(): void {
+    this.loadSettings();
   }
 
   async loadSettings() {
@@ -115,7 +118,7 @@ export class SettingsComponent {
 
   openAddForm() {
     this.editingChild = null;
-    this.formChild.reset({ id: '', key: '', name: '' });
+    this.formChild.reset({ id: '', key: '', name: '', color: '' });
     this.isShowForm = true;
   }
 
@@ -125,6 +128,7 @@ export class SettingsComponent {
       id: item.id,
       key: item.key,
       name: item.name,
+      color: item.color ?? '',
     });
     this.isShowForm = true;
   }
@@ -141,6 +145,7 @@ export class SettingsComponent {
           parentId: this.activeParentId,
           key: raw.key!,
           name: raw.name!,
+          color: raw.color ?? undefined,
         }),
       );
       if (result) {

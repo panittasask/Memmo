@@ -13,6 +13,7 @@ export interface DropdownChildItem {
   parentId: string;
   key: string;
   name: string;
+  color?: string;
 }
 
 export interface SettingsResponse {
@@ -31,6 +32,7 @@ export interface UpdateChildSettingRequest {
   parentId: string;
   key: string;
   name: string;
+  color?: string;
 }
 
 @Injectable({
@@ -59,12 +61,12 @@ export class SettingsService {
   }
 
   updateParent(model: UpdateParentSettingRequest) {
-    const url = `${this.baseUrl}/Settings/settings/parent`;
+    const url = `${this.baseUrl}/Settings/settings/parent/update`;
     return this.http.post<DropdownParentItem>(url, model);
   }
 
   updateChild(model: UpdateChildSettingRequest) {
-    const url = `${this.baseUrl}/Settings/settings/child`;
+    const url = `${this.baseUrl}/Settings/settings/child/update`;
     return this.http.post<DropdownChildItem>(url, model);
   }
 

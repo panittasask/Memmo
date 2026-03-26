@@ -3,6 +3,7 @@ import { Component, inject } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { DatepickerComponent } from '../../shared/components/datepicker/datepicker.component';
+import { DropdownListComponent } from '../../shared/components/dropdown-list/dropdown-list.component';
 import { firstValueFrom } from 'rxjs';
 import { HistoryService } from '../../shared/services/history.service';
 import { ToastService } from '../../shared/services/toast.service';
@@ -11,7 +12,7 @@ import { DropdownChildItem, SettingsService } from '../../shared/services/settin
 @Component({
   selector: 'app-side-bar',
   standalone: true,
-  imports: [CommonModule,ReactiveFormsModule,FormsModule,DatepickerComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, DatepickerComponent, DropdownListComponent],
   templateUrl: './side-bar.component.html',
   styleUrl: './side-bar.component.scss',
 })
@@ -22,6 +23,14 @@ export class SideBarComponent {
 
   projectOptions: DropdownChildItem[] = [];
   statusOptions: DropdownChildItem[] = [];
+
+  get projectOptionNames(): string[] {
+    return this.projectOptions.map(o => o.name);
+  }
+
+  get statusOptionNames(): string[] {
+    return this.statusOptions.map(o => o.name);
+  }
 
   formAddNew = new FormGroup({
     date:new FormControl(this.getToday(),[Validators.required]),

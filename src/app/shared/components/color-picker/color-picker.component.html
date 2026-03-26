@@ -1,0 +1,55 @@
+<button
+  #triggerBtn
+  cdkOverlayOrigin
+  #triggerOrigin="cdkOverlayOrigin"
+  type="button"
+  class="cp-trigger"
+  [class.is-open]="isOpen"
+  (click)="toggle()"
+>
+  <span class="cp-swatch" [style.background]="displayColor"></span>
+  <span class="cp-hex">{{ value || '—' }}</span>
+  <span class="cp-icon" aria-hidden="true">
+    <svg viewBox="0 0 20 20" fill="none">
+      <path d="M5 7.5 10 12.5 15 7.5" />
+    </svg>
+  </span>
+</button>
+
+<ng-template
+  cdkConnectedOverlay
+  [cdkConnectedOverlayOrigin]="triggerOrigin"
+  [cdkConnectedOverlayOpen]="isOpen"
+  [cdkConnectedOverlayPositions]="overlayPositions"
+  [cdkConnectedOverlayScrollStrategy]="overlayScrollStrategy"
+  [cdkConnectedOverlayHasBackdrop]="true"
+  [cdkConnectedOverlayBackdropClass]="'cdk-overlay-transparent-backdrop'"
+  [cdkConnectedOverlayPush]="false"
+  [cdkConnectedOverlayFlexibleDimensions]="false"
+  (backdropClick)="close()"
+  (detach)="close()"
+>
+  <div class="cp-popover" [style.min-width.px]="triggerWidth">
+    <div class="cp-presets">
+      @for (color of presets; track color) {
+        <button
+          type="button"
+          class="cp-preset-swatch"
+          [class.is-selected]="color === value"
+          [style.background]="color"
+          [title]="color"
+          (click)="selectPreset(color)"
+        ></button>
+      }
+    </div>
+    <div class="cp-custom-row">
+      <label class="cp-custom-label">กำหนดเอง</label>
+      <input
+        type="color"
+        class="cp-native"
+        [value]="value || '#3b82f6'"
+        (input)="onNativeInput($event)"
+      />
+    </div>
+  </div>
+</ng-template>

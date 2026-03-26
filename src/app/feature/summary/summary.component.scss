@@ -66,13 +66,19 @@
       }
     }
     .body {
-      padding-top: 16px;
+      // padding-top: 16px;
 
       .chart-controls {
         display: flex;
         align-items: center;
         justify-content: space-between;
         margin-bottom: 16px;
+
+        .dropdown-group {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
 
         .chart-stats {
           display: flex;
@@ -228,6 +234,10 @@
                 background: #eff6ff;
                 border-radius: 4px;
                 padding: 0 5px;
+                &.status-done {
+                  color: #16a34a;
+                  background: #dcfce7;
+                }
               }
               .activity-date {
                 font-size: 11px;

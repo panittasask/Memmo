@@ -98,6 +98,15 @@
         <input formControlName="name" type="text" class="form-input" />
       </div>
     </div>
+    <div class="content-container">
+      <div class="input-container-content">
+        <label>สี</label>
+        <app-color-picker
+          [value]="formChild.controls.color.value ?? ''"
+          (valueChange)="formChild.controls.color.setValue($event)"
+        ></app-color-picker>
+      </div>
+    </div>
     <div class="button-wrapper">
       <button
         type="submit"

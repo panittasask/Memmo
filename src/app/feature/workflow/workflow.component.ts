@@ -80,8 +80,8 @@ export class WorkflowComponent implements OnInit {
 
   @ViewChild('canvasWrapper') canvasWrapperEl!: ElementRef<HTMLDivElement>;
 
-  async ngOnInit() {
-    await this.loadTasks();
+  ngOnInit(): void {
+    this.loadTasks();
   }
 
   async loadTasks() {

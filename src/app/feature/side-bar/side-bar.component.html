@@ -66,29 +66,29 @@
           <label >วันที่</label>
           <app-datepicker formControlName="date"></app-datepicker>
         </div>
-        <div class="input-container-content">
+        <div class="input-container-content" >
           <label >ระยะเวลา</label>
-          <input formControlName="time" type="number" class="form-input">
+          <input style="height:36px" formControlName="time" type="number" class="form-input">
         </div>
     </div>
     <div class="content-container">
       <div class="input-container-content">
-        <label >Project</label>
-        <select formControlName="projectName" class="form-input">
-          <option value="">-- เลือก Project --</option>
-          @for (opt of projectOptions; track opt.id) {
-            <option [value]="opt.name">{{ opt.name }}</option>
-          }
-        </select>
+        <label>Project</label>
+        <app-dropdown-list
+          [value]="formAddNew.controls.projectName.value ?? null"
+          [options]="projectOptionNames"
+          placeholder="-- เลือก Project --"
+          (valueChange)="formAddNew.controls.projectName.setValue($event.toString())"
+        ></app-dropdown-list>
       </div>
       <div class="input-container-content">
-        <label >Status</label>
-        <select formControlName="status" class="form-input">
-          <option value="">-- เลือก Status --</option>
-          @for (opt of statusOptions; track opt.id) {
-            <option [value]="opt.name">{{ opt.name }}</option>
-          }
-        </select>
+        <label>Status</label>
+        <app-dropdown-list
+          [value]="formAddNew.controls.status.value ?? null"
+          [options]="statusOptionNames"
+          placeholder="-- เลือก Status --"
+          (valueChange)="formAddNew.controls.status.setValue($event.toString())"
+        ></app-dropdown-list>
       </div>
     </div>
     <div class="content-container">

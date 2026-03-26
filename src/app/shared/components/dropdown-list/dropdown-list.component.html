@@ -38,7 +38,9 @@
   (detach)="onOverlayDetach()"
 >
   <div class="dropdown-popover" [style.min-width.px]="triggerWidth">
-    <div class="dropdown-options" role="listbox">
+    <div class="dropdown-options" role="listbox"
+      [style.max-height]="maxHeight ? maxHeight + 'px' : null"
+      [style.overflow-y]="maxHeight ? 'auto' : null">
       @for (option of options; track trackByValue($index, option)) {
         <button
           type="button"

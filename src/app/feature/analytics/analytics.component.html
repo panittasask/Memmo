@@ -10,6 +10,15 @@
         [options]="periodOptions"
         (valueChange)="onPeriodChange($event)"
       ></app-dropdown-list>
+      @if (selectedPeriod === 'เดือน') {
+        <app-dropdown-list
+          class="month-dropdown"
+          [value]="selectedMonth"
+          [options]="monthOptions"
+          [maxHeight]="220"
+          (valueChange)="onMonthChange($event)"
+        ></app-dropdown-list>
+      }
     </div>
   </div>
 
@@ -42,6 +51,16 @@
 
     <div class="chart-section">
       <div class="chart-title">จำนวน Task ตาม Status</div>
+
+    <div class="chart-section">
+      <div class="chart-title">สัดส่วนระยะเวลาตาม Project</div>
+      <app-donut-chart [data]="projectDurationDonut" centerLabel="ชม." emptyMessage="ไม่มีข้อมูลในช่วงเวลานี้"></app-donut-chart>
+    </div>
+
+    <div class="chart-section">
+      <div class="chart-title">สัดส่วน Task ตาม Status</div>
+      <app-donut-chart [data]="statusDonut" centerLabel="Task" emptyMessage="ไม่มีข้อมูลในช่วงเวลานี้"></app-donut-chart>
+    </div>
       <app-bar-chart [data]="statusChart" emptyMessage="ไม่มีข้อมูลในช่วงเวลานี้"></app-bar-chart>
     </div>
   }

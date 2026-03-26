@@ -201,9 +201,8 @@ export class HistoryComponent {
   }
 
 
-  async ngOnInit(){
-    await this.loadSettings();
-    await this.fetchData();
+  ngOnInit(): void {
+    this.loadSettings().then(() => this.fetchData());
   }
 
   async loadSettings() {
