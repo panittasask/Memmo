@@ -8,6 +8,8 @@ import {
   DropdownParentItem,
   DropdownChildItem,
   SettingsService,
+  AddParentSettingRequest,
+  AddChildSettingRequest,
 } from '../../shared/services/settings.service';
 import { firstValueFrom } from 'rxjs';
 import {
@@ -137,17 +139,25 @@ export class SettingsComponent {
     if (!this.formChild.valid || !this.activeParentId) return;
 
     const raw = this.formChild.getRawValue();
+    const isNew = !this.editingChild;
 
     try {
-      const result = await firstValueFrom(
-        this.settingsService.updateChild({
-          id: raw.id ?? '',
-          parentId: this.activeParentId,
-          key: raw.key!,
-          name: raw.name!,
-          color: raw.color ?? undefined,
-        }),
-      );
+      const call = isNew
+        ? this.settingsService.addChild({
+            parentId: this.activeParentId,
+            key: raw.key!,
+            name: raw.name!,
+            color: raw.color ?? undefined,
+          })
+        : this.settingsService.updateChild({
+            id: raw.id ?? '',
+            parentId: this.activeParentId,
+            key: raw.key!,
+            name: raw.name!,
+            color: raw.color ?? undefined,
+          });
+
+      const result = await firstValueFrom(call);
       if (result) {
         this.toast.success('บันทึกข้อมูลสำเร็จ');
         this.isShowForm = false;
@@ -170,15 +180,21 @@ export class SettingsComponent {
     if (!this.formParent.valid) return;
 
     const raw = this.formParent.getRawValue();
+    const isNew = !this.editingParent;
 
     try {
-      const result = await firstValueFrom(
-        this.settingsService.updateParent({
-          id: raw.id ?? '',
-          key: raw.key!,
-          name: raw.name!,
-        }),
-      );
+      const call = isNew
+        ? this.settingsService.addParent({
+            key: raw.key!,
+            name: raw.name!,
+          })
+        : this.settingsService.updateParent({
+            id: raw.id ?? '',
+            key: raw.key!,
+            name: raw.name!,
+          });
+
+      const result = await firstValueFrom(call);
       if (result) {
         this.toast.success('บันทึกข้อมูลสำเร็จ');
         this.isShowParentForm = false;

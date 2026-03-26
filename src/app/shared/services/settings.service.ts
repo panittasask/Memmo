@@ -35,6 +35,18 @@ export interface UpdateChildSettingRequest {
   color?: string;
 }
 
+export interface AddParentSettingRequest {
+  key: string;
+  name: string;
+}
+
+export interface AddChildSettingRequest {
+  parentId: string;
+  key: string;
+  name: string;
+  color?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -60,9 +72,19 @@ export class SettingsService {
     return this.http.get<SettingsResponse>(url);
   }
 
+  addParent(model: AddParentSettingRequest) {
+    const url = `${this.baseUrl}/Settings/settings/parent`;
+    return this.http.post<DropdownParentItem>(url, model);
+  }
+
   updateParent(model: UpdateParentSettingRequest) {
     const url = `${this.baseUrl}/Settings/settings/parent/update`;
     return this.http.post<DropdownParentItem>(url, model);
+  }
+
+  addChild(model: AddChildSettingRequest) {
+    const url = `${this.baseUrl}/Settings/settings/child`;
+    return this.http.post<DropdownChildItem>(url, model);
   }
 
   updateChild(model: UpdateChildSettingRequest) {
