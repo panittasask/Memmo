@@ -245,7 +245,7 @@ export class HistoryComponent {
   }
   async cloneItem(item: any) {
     const model = {
-      duration: item.duration,
+      duration: 0,
       projectName: item.projectName,
       taskName: item.taskName,
       description: item.description,
