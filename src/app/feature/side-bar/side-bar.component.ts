@@ -21,6 +21,8 @@ export class SideBarComponent {
   private readonly toast = inject(ToastService);
   private readonly settingsService = inject(SettingsService);
 
+  saveInProcess:boolean = false;
+
   projectOptions: DropdownChildItem[] = [];
   statusOptions: DropdownChildItem[] = [];
 
@@ -81,6 +83,7 @@ export class SideBarComponent {
       return;
     }
     const value:any = this.formAddNew.getRawValue();
+    this.saveInProcess = true;
     const model = {
         duration: value.time,
         projectName: value.projectName,
@@ -92,6 +95,7 @@ export class SideBarComponent {
     try{
       const result = await firstValueFrom(this.historyService.addNewTask(model));
       if(result){
+        this.saveInProcess = false;
         this.toast.success('เพิ่มงานใหม่สำเร็จ');
         this.isAddNew = false;
         // this.formAddNew.reset();
@@ -106,6 +110,7 @@ export class SideBarComponent {
         this.historyService.notifyDataChanged();
       }
     }catch(ex:any){
+      this.saveInProcess = false;
       this.toast.error('ไม่สามารถเพิ่มงานได้', { detail: ex?.error ?? ex?.message ?? String(ex) });
       console.log("Error >>>",ex)
     }

@@ -42,6 +42,8 @@ export class HistoryComponent {
   private readonly settingsService = inject(SettingsService);
   private readonly confirmService = inject(ConfirmService);
 
+  saveInProcess:boolean = false;
+
   projectOptions: DropdownChildItem[] = [];
   statusOptions: DropdownChildItem[] = [];
 
@@ -232,13 +234,16 @@ export class HistoryComponent {
         startDate: new Date(value.date),
     };
     try{
+      this.saveInProcess = true;
       const result = await firstValueFrom(this.HistoryService.updateTask(model));
       if(result){
+        this.saveInProcess = false;
         this.toast.success('บันทึกข้อมูลสำเร็จ');
         this.isShowDetail = false;
         this.fetchData();
       }
     }catch(ex:any){
+      this.saveInProcess = false;
       this.toast.error('ไม่สามารถบันทึกข้อมูลได้', { detail: ex?.error ?? ex?.message ?? String(ex) });
       console.log("Error >>>",ex)
     }

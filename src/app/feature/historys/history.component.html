@@ -88,7 +88,7 @@
     <button 
       type="submit" 
       class="btn-save" 
-      [disabled]="formUpdate.invalid"
+      [disabled]="formUpdate.invalid || saveInProcess"
       (click)="onSave()">
       บันทึกข้อมูล
   </button>
