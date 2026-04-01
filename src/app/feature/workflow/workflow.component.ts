@@ -47,6 +47,7 @@ const CUSTOM_NODE_W = 230;
   templateUrl: './workflow.component.html',
   styleUrl: './workflow.component.scss',
 })
+export class WorkflowComponent implements OnInit {
   private readonly historyService = inject(HistoryService);
   private readonly toast = inject(ToastService);
   private readonly workflowService = inject(WorkflowService);
@@ -78,6 +79,8 @@ const CUSTOM_NODE_W = 230;
   readonly NODE_W = NODE_W;
   readonly NODE_H = NODE_H;
   readonly CUSTOM_NODE_W = CUSTOM_NODE_W;
+
+  private draggingTask: WorkflowTask | null = null;
 
   @ViewChild('canvasWrapper') canvasWrapperEl!: ElementRef<HTMLDivElement>;
 
@@ -302,22 +305,24 @@ const CUSTOM_NODE_W = 230;
     const from = this.nodes.find((n) => n.id === conn.fromNodeId);
     const to = this.nodes.find((n) => n.id === conn.toNodeId);
     if (!from || !to) return { x: 0, y: 0 };
+    const fromW = from.type === 'custom' ? CUSTOM_NODE_W : NODE_W;
     return {
-      x: (from.x + NODE_W + to.x) / 2,
+      x: (from.x + fromW + to.x) / 2,
       y: (from.y + NODE_H / 2 + to.y + NODE_H / 2) / 2,
     };
   }
-    // ── Drag & Drop Task from Panel ───────────────
-  private draggingTask: WorkflowTask | null = null;
+
+  // Drag & Drop Task from Panel
 
   onTaskDragStart(event: DragEvent, task: WorkflowTask) {
     this.draggingTask = task;
     event.dataTransfer?.setData('text/plain', task.id);
-    // Optionally, set drag image
-    // event.dataTransfer?.setDragImage(event.target as HTMLElement, 0, 0);
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = 'copy';
+    }
   }
 
-  onTaskDragEnd(event: DragEvent) {
+  onTaskDragEnd(_: DragEvent) {
     this.draggingTask = null;
   }
 
@@ -347,26 +352,54 @@ const CUSTOM_NODE_W = 230;
     }
     this.draggingTask = null;
   }
-    saveWorkflow() {
-      // ตัวอย่าง: เรียก API สร้าง edge (เส้นเชื่อม) สำหรับ workflowId สมมุติ (1)
-      const workflowId = 1; // สมมุติใช้ workflowId = 1 (ควรเปลี่ยนเป็นค่าจริงในโปรเจกต์)
-      if (this.connections.length === 0) {
-        this.toast.info('ไม่มีเส้นเชื่อมให้บันทึก');
-        return;
-      }
-      // ตัวอย่าง: สร้าง edge แรก
-      const edge = this.connections[0];
-      this.workflowService.createEdge(workflowId, {
-        fromNodeId: Number(edge.fromNodeId.replace(/\D/g, '')),
-        toNodeId: Number(edge.toNodeId.replace(/\D/g, '')),
-      }).subscribe({
-        next: (res) => {
-          this.toast.success('บันทึกเส้นเชื่อมสำเร็จ!');
-          console.log('API response:', res);
+
+  saveWorkflow() {
+    const workflowId = 1;
+    if (this.connections.length === 0) {
+      this.toast.warning('ไม่มีเส้นเชื่อมให้บันทึก', {
+        duration: 2500,
+        showDetailOnClick: false,
+      });
+      return;
+    }
+
+    const invalidConnection = this.connections.find((connection) => {
+      const fromNode = this.nodes.find((node) => node.id === connection.fromNodeId);
+      const toNode = this.nodes.find((node) => node.id === connection.toNodeId);
+
+      return !fromNode?.task?.id || !toNode?.task?.id;
+    });
+
+    if (invalidConnection) {
+      this.toast.error('ยังบันทึกไม่ได้', {
+        detail: 'รองรับการบันทึกเฉพาะเส้นเชื่อมระหว่าง task ที่มี id จากระบบเท่านั้น',
+      });
+      return;
+    }
+
+    const edge = this.connections[0];
+    const fromNode = this.nodes.find((node) => node.id === edge.fromNodeId);
+    const toNode = this.nodes.find((node) => node.id === edge.toNodeId);
+
+    if (!fromNode?.task?.id || !toNode?.task?.id) {
+      this.toast.error('ไม่พบข้อมูล node สำหรับบันทึก');
+      return;
+    }
+
+    this.workflowService
+      .createEdge(workflowId, {
+        fromNodeId: Number(fromNode.task.id),
+        toNodeId: Number(toNode.task.id),
+      })
+      .subscribe({
+        next: () => {
+          this.toast.success('บันทึกเส้นเชื่อมสำเร็จ');
         },
         error: (err) => {
-          this.toast.error('บันทึกเส้นเชื่อมไม่สำเร็จ', { detail: err?.message });
-        }
+          this.toast.error('บันทึกเส้นเชื่อมไม่สำเร็จ', {
+            detail: err?.error?.message ?? err?.message ?? 'Unknown error',
+          });
+        },
       });
-    }
+  }
 }
