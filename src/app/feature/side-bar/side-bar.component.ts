@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { DatepickerComponent } from '../../shared/components/datepicker/datepicker.component';
@@ -25,6 +25,14 @@ export class SideBarComponent {
 
   projectOptions: DropdownChildItem[] = [];
   statusOptions: DropdownChildItem[] = [];
+
+  constructor(){
+    effect(()=>{
+      if(this.settingsService.refreshTrigger() > 0){
+        this.loadSettings();
+      }
+    })
+  }
 
   get projectOptionNames(): string[] {
     return this.projectOptions.map(o => o.name);

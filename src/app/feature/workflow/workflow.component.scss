@@ -196,6 +196,29 @@
     text-align: center;
   }
 
+  .btn-save {
+    background: rgba(168, 255, 172, 0.13);
+    color: #86efac;
+    border: 1px solid rgba(168, 255, 172, 0.3);
+    border-radius: 6px;
+    padding: 4px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    i { font-size: 12px; }
+
+    &:hover {
+      background: rgba(168, 255, 172, 0.22);
+      border-color: rgba(168, 255, 172, 0.5);
+      color: #4ade80;
+    }
+  }
+
   .btn-clear {
     background: rgba(255, 77, 79, 0.15);
     color: #ff6b6b;

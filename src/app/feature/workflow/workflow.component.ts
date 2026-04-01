@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { WorkflowService } from '../../shared/services/workflow.service';
 import { Component, inject, OnInit, ElementRef, ViewChild, HostListener } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
@@ -46,9 +47,9 @@ const CUSTOM_NODE_W = 230;
   templateUrl: './workflow.component.html',
   styleUrl: './workflow.component.scss',
 })
-export class WorkflowComponent implements OnInit {
   private readonly historyService = inject(HistoryService);
   private readonly toast = inject(ToastService);
+  private readonly workflowService = inject(WorkflowService);
 
   tasks: WorkflowTask[] = [];
   nodes: WFNode[] = [];
@@ -272,11 +273,17 @@ export class WorkflowComponent implements OnInit {
     const from = this.nodes.find((n) => n.id === conn.fromNodeId);
     const to = this.nodes.find((n) => n.id === conn.toNodeId);
     if (!from || !to) return '';
+    // คำนวณจุดศูนย์กลางของ port-out (ขวา) และ port-in (ซ้าย)
+    const fromW = from.type === 'custom' ? CUSTOM_NODE_W : NODE_W;
+    const fromPortOutX = from.x + fromW - 8 + 7; // left + width - 8px (port offset) + 7px (port radius)
+    const fromPortOutY = from.y + (NODE_H / 2);
+    const toPortInX = to.x - 8 + 7; // left - 8px (port offset) + 7px (port radius)
+    const toPortInY = to.y + (NODE_H / 2);
     return this.bezier(
-      from.x + NODE_W,
-      from.y + NODE_H / 2,
-      to.x,
-      to.y + NODE_H / 2
+      fromPortOutX,
+      fromPortOutY,
+      toPortInX,
+      toPortInY
     );
   }
 
@@ -300,4 +307,66 @@ export class WorkflowComponent implements OnInit {
       y: (from.y + NODE_H / 2 + to.y + NODE_H / 2) / 2,
     };
   }
+    // ── Drag & Drop Task from Panel ───────────────
+  private draggingTask: WorkflowTask | null = null;
+
+  onTaskDragStart(event: DragEvent, task: WorkflowTask) {
+    this.draggingTask = task;
+    event.dataTransfer?.setData('text/plain', task.id);
+    // Optionally, set drag image
+    // event.dataTransfer?.setDragImage(event.target as HTMLElement, 0, 0);
+  }
+
+  onTaskDragEnd(event: DragEvent) {
+    this.draggingTask = null;
+  }
+
+  onCanvasDragOver(event: DragEvent) {
+    // Allow drop
+    event.preventDefault();
+  }
+
+  onCanvasDrop(event: DragEvent) {
+    event.preventDefault();
+    if (!this.draggingTask) return;
+    // Get drop position relative to canvas
+    const rect = this.canvasWrapperEl.nativeElement.getBoundingClientRect();
+    const x = (event.clientX - rect.left - this.panX) / this.zoom;
+    const y = (event.clientY - rect.top - this.panY) / this.zoom;
+    // Add node at drop position
+    if (!this.isOnCanvas(this.draggingTask)) {
+      this.nodes.push({
+        id: `node-${this.draggingTask.id}`,
+        x,
+        y,
+        type: 'task',
+        task: this.draggingTask,
+        label: this.draggingTask.taskName,
+        note: '',
+      });
+    }
+    this.draggingTask = null;
+  }
+    saveWorkflow() {
+      // ตัวอย่าง: เรียก API สร้าง edge (เส้นเชื่อม) สำหรับ workflowId สมมุติ (1)
+      const workflowId = 1; // สมมุติใช้ workflowId = 1 (ควรเปลี่ยนเป็นค่าจริงในโปรเจกต์)
+      if (this.connections.length === 0) {
+        this.toast.info('ไม่มีเส้นเชื่อมให้บันทึก');
+        return;
+      }
+      // ตัวอย่าง: สร้าง edge แรก
+      const edge = this.connections[0];
+      this.workflowService.createEdge(workflowId, {
+        fromNodeId: Number(edge.fromNodeId.replace(/\D/g, '')),
+        toNodeId: Number(edge.toNodeId.replace(/\D/g, '')),
+      }).subscribe({
+        next: (res) => {
+          this.toast.success('บันทึกเส้นเชื่อมสำเร็จ!');
+          console.log('API response:', res);
+        },
+        error: (err) => {
+          this.toast.error('บันทึกเส้นเชื่อมไม่สำเร็จ', { detail: err?.message });
+        }
+      });
+    }
 }

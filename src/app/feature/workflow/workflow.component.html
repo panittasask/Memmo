@@ -17,10 +17,13 @@
     <div class="task-list">
       @for (task of tasks; track task.id) {
         <div
-          class="task-item"
-          [class.on-canvas]="isOnCanvas(task)"
-          (dblclick)="addNodeFromTask(task)"
-          title="Double-click เพื่อเพิ่มลง canvas"
+           class="task-item"
+           [class.on-canvas]="isOnCanvas(task)"
+           (dblclick)="addNodeFromTask(task)"
+           draggable="true"
+           (dragstart)="onTaskDragStart($event, task)"
+           (dragend)="onTaskDragEnd($event)"
+           title="Double-click หรือ ลากเพื่อเพิ่มลง canvas"
         >
           <div class="task-name">{{ task.taskName }}</div>
           <div class="task-meta">
@@ -43,6 +46,8 @@
     (mousedown)="onCanvasMouseDown($event)"
     (wheel)="onCanvasWheel($event)"
     (contextmenu)="$event.preventDefault()"
+    (dragover)="onCanvasDragOver($event)"
+    (drop)="onCanvasDrop($event)"
   >
     <!-- Toolbar -->
     <div class="canvas-toolbar">
@@ -51,6 +56,9 @@
         <i class="fa-solid fa-scroll"></i> Scroll เพื่อ Zoom
       </span>
       <span class="zoom-badge">{{ zoomPercent }}%</span>
+      <button class="btn-save" (click)="saveWorkflow()">
+        <i class="fa-solid fa-floppy-disk"></i> Save
+      </button>
       <button class="btn-clear" (click)="clearCanvas()">
         <i class="fa-solid fa-trash"></i> Clear
       </button>
