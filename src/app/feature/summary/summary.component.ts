@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { DonutChartComponent, DonutSlice } from '../../shared/components/donut-chart/donut-chart.component';
 import { DropdownListComponent } from '../../shared/components/dropdown-list/dropdown-list.component';
+import { ImportantThingsComponent } from '../../shared/components/important-things/important-things.component';
 import { DashboardService } from '../../shared/services/dashboard.service';
 import { HistoryService } from '../../shared/services/history.service';
 import { SettingsService } from '../../shared/services/settings.service';
@@ -12,7 +13,7 @@ import { ToastService } from '../../shared/services/toast.service';
 @Component({
   selector: 'app-summary',
   standalone: true,
-  imports: [CommonModule, DonutChartComponent, DropdownListComponent],
+  imports: [CommonModule, DonutChartComponent, DropdownListComponent, ImportantThingsComponent],
   templateUrl: './summary.component.html',
   styleUrl: './summary.component.scss'
 })

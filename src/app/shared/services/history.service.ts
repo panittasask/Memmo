@@ -7,6 +7,7 @@ export interface HistoryQueryRequest {
   pageSize: number;
   filterDate?: string;
   isAllFilter?: boolean;
+  nameType?: string;
 }
 
 export interface HistoryPagedResult<T> {

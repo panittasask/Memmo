@@ -1,0 +1,97 @@
+<div class="important-things-wrapper">
+  <div class="important-header">
+    <div class="title-group">
+      <span class="title">Focus Task</span>
+      <span class="sub-title">โน้ตสำคัญที่ต้องโฟกัส</span>
+    </div>
+    <button class="btn-add" (click)="openAddNew()">
+      <i class="fa-solid fa-plus"></i>
+      เพิ่ม
+    </button>
+  </div>
+
+  @if (isLoading) {
+    <div class="important-loading">
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      <span>กำลังโหลด Focus Task...</span>
+    </div>
+  } @else {
+    <div class="important-scroll">
+      @if (importantItems.length === 0) {
+        <div class="empty-postit">ยังไม่มีรายการ Focus Task</div>
+      }
+      @for (item of importantItems; track item?.id ?? $index) {
+        <article class="postit-card" [class]="'postit-card tone-'">
+          <div class="postit-pin"></div>
+          <!-- <div class="postit-title">{{ item?.taskName ?? item?.description ?? '(ไม่ระบุ)' }}</div>
+          <div class="postit-body">{{ item?.description ?? '-' }}</div>
+          <div class="postit-footer">
+            <span>{{ item?.projectName ?? '-' }}</span>
+            <span>{{ (item?.startDate ?? item?.date) | date:'d MMM':'':'th' }}</span>
+          </div> -->
+        </article>
+      }
+    </div>
+  }
+</div>
+
+<div [class.isShow]="isAddNew" class="add-new-container">
+  <div [formGroup]="formAddNew" class="add-new-content">
+    <div class="header-content">เพิ่ม Important Thing</div>
+    <div class="close-icon">
+      <i class="fa-solid fa-xmark" (click)="closeAddNew()"></i>
+    </div>
+    <div class="content-container">
+      <div class="input-container-content">
+        <label>วันที่</label>
+        <app-datepicker formControlName="date"></app-datepicker>
+      </div>
+      <div class="input-container-content">
+        <label>ระยะเวลา</label>
+        <input style="height: 36px" formControlName="time" type="number" class="form-input">
+      </div>
+    </div>
+    <div class="content-container">
+      <div class="input-container-content">
+        <label>Project</label>
+        <app-dropdown-list
+          [value]="formAddNew.controls.projectName.value ?? null"
+          [options]="projectOptionNames"
+          placeholder="-- เลือก Project --"
+          (valueChange)="formAddNew.controls.projectName.setValue($event.toString())"
+        ></app-dropdown-list>
+      </div>
+      <div class="input-container-content">
+        <label>Status</label>
+        <app-dropdown-list
+          [value]="formAddNew.controls.status.value ?? null"
+          [options]="statusOptionNames"
+          placeholder="-- เลือก Status --"
+          (valueChange)="formAddNew.controls.status.setValue($event.toString())"
+        ></app-dropdown-list>
+      </div>
+    </div>
+    <div class="content-container">
+      <div class="input-container-content">
+        <label>Task</label>
+        <input formControlName="taskName" type="text" class="form-input">
+      </div>
+    </div>
+    <div class="content-container">
+      <div class="input-container-content">
+        <label>รายละเอียด</label>
+        <textarea formControlName="description" type="text" class="form-input"></textarea>
+      </div>
+    </div>
+    <div class="button-wrapper">
+      <button
+        type="submit"
+        class="btn-save"
+        [disabled]="formAddNew.invalid || saveInProcess"
+        (click)="onSave()"
+      >
+        บันทึกข้อมูล
+      </button>
+    </div>
+  </div>
+</div>
