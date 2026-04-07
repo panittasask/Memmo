@@ -54,7 +54,10 @@ interface CalendarDay {
         ></i>
       </div>
 
-      <div class="calendar-dropdown" *ngIf="isOpen" [@dropdownAnim]="'visible'">
+      <div class="calendar-dropdown" *ngIf="isOpen" [@dropdownAnim]="'visible'"
+        [style.top.px]="calendarTop"
+        [style.left.px]="calendarLeft"
+      >
         <div class="calendar-header">
           <button type="button" class="nav-btn" (click)="prevMonth()">
             <i class="fa-solid fa-chevron-left"></i>
@@ -167,10 +170,8 @@ interface CalendarDay {
     }
 
     .calendar-dropdown {
-      position: absolute;
-      top: calc(100% + 6px);
-      left: 0;
-      z-index: 1000;
+      position: fixed;
+      z-index: 99999;
       background: #fff;
       border-radius: 12px;
       box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
@@ -392,6 +393,8 @@ export class DatepickerComponent implements ControlValueAccessor {
   value = '';
   isOpen = false;
   isYearView = false;
+  calendarTop = 0;
+  calendarLeft = 0;
 
   viewMonth = new Date().getMonth();
   viewYear = new Date().getFullYear();
@@ -454,6 +457,9 @@ export class DatepickerComponent implements ControlValueAccessor {
     if (this.isOpen) {
       this.onTouched();
       this.buildCalendar();
+      const rect = (this.wrapperRef.nativeElement as HTMLElement).getBoundingClientRect();
+      this.calendarTop = rect.bottom + 6;
+      this.calendarLeft = rect.left;
     }
   }
 
