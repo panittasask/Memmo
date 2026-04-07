@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -25,6 +25,14 @@ export class SummaryComponent {
   private readonly settingsService = inject(SettingsService);
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
+
+  constructor() {
+    effect(() => {
+      if (this.historyService.refreshTrigger() > 0) {
+        void this.loadRecentTasks();
+      }
+    });
+  }
 
   private statusColorMap = new Map<string, string>();
 

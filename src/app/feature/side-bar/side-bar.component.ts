@@ -57,7 +57,7 @@ export class SideBarComponent {
     const day = String(today.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   }
-  public currentRoute = 'history';
+  public currentRoute = 'summary';
   private readonly routes = inject(Router);
   isAddNew:boolean = false;
   ngOnInit() {

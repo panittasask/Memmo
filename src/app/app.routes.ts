@@ -10,7 +10,7 @@ routes.push(
     path: '',
     redirectTo: () => {
       const authService = inject(AuthService);
-      return authService.isTokenValid() ? 'history' : 'login';
+      return authService.isTokenValid() ? 'summary' : 'login';
     },
     pathMatch: 'full',
   },
