@@ -21,12 +21,12 @@
             <div class="stat-label">รวมระยะเวลา (ชม.)</div>
           </div>
         </div>
+        <div class="dropdown-group">
         <app-dropdown-list
             [value]="selectedPeriod"
             [options]="periodOptions"
             (valueChange)="onPeriodChange($event)"
           ></app-dropdown-list>
-        <div class="dropdown-group">
           @if (selectedPeriod === 'เดือน') {
             <app-dropdown-list
               [value]="selectedMonth"
