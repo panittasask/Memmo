@@ -66,7 +66,8 @@ export class HistoryComponent {
       description:new FormControl(''),
       projectName:new FormControl('',[Validators.required]),
       taskName: new FormControl('',[Validators.required]) ,
-      status:new FormControl('')
+      status:new FormControl(''),
+      isFocusTask: new FormControl(false),
     });
 
   constructor(){
@@ -133,7 +134,8 @@ export class HistoryComponent {
       time:item.duration,
       projectName:item.projectName,
       taskName: item.taskName,
-      status:item.status
+      status:item.status,
+      isFocusTask: String(item.nameType ?? '').trim().toLowerCase() === 'important',
     });
     this.selectedData = item;
     this.isShowDetail = true;
@@ -244,6 +246,7 @@ export class HistoryComponent {
         description: value.description,
         status: value.status,
         startDate: new Date(value.date),
+        nameType: value.isFocusTask ? 'important' : null,
     };
     try{
       this.saveInProcess = true;

@@ -8,6 +8,7 @@ import { DropdownListComponent } from '../dropdown-list/dropdown-list.component'
 import { DropdownChildItem, SettingsService } from '../../services/settings.service';
 import { HistoryService, HistoryQueryRequest } from '../../services/history.service';
 import { ToastService } from '../../services/toast.service';
+import { ConfirmService } from '../../services/confirm.service';
 
 @Component({
   selector: 'app-focus-task',
@@ -21,6 +22,7 @@ export class FocusTaskComponent {
   private readonly historyService = inject(HistoryService);
   private readonly settingsService = inject(SettingsService);
   private readonly toast = inject(ToastService);
+  private readonly confirmService = inject(ConfirmService);
 
   isLoading = false;
   isAddNew = false;
@@ -96,7 +98,7 @@ export class FocusTaskComponent {
       description: item?.description ?? '',
       projectName: item?.projectName ?? '',
       taskName: item?.taskName ?? '',
-      status: item?.status ?? '',
+      status: item?.status ?? ''
     });
     this.isAddNew = true;
   }
@@ -106,6 +108,35 @@ export class FocusTaskComponent {
       return;
     }
     this.openEdit(item);
+  }
+
+  async onDelete(event: MouseEvent, item: any): Promise<void> {
+    event.stopPropagation();
+    const confirmed = await this.confirmService.confirm({
+      title: 'นำออกจาก Focus Task',
+      message: `ต้องการนำ "${item?.taskName ?? item?.description ?? 'รายการนี้'}" ออกจาก Focus Task ใช่หรือไม่?`,
+      confirmText: 'นำออก',
+      cancelText: 'ยกเลิก',
+    });
+    if (!confirmed) return;
+    try {
+      const model = {
+        id: String(item.id),
+        duration: item.duration,
+        projectName: item.projectName,
+        taskName: item.taskName,
+        description: item.description,
+        status: item.status,
+        startDate: item.startDate ?? item.date,
+        nameType: null,
+      };
+      await firstValueFrom(this.historyService.updateTask(model));
+      this.toast.success('นำออกจาก Focus Task สำเร็จ');
+      this.historyService.notifyDataChanged();
+      await this.loadFocusTasks();
+    } catch (ex: any) {
+      this.toast.error('ไม่สามารถนำออกจาก Focus Task ได้', { detail: ex?.error ?? ex?.message ?? String(ex) });
+    }
   }
 
   onDrop(event: CdkDragDrop<any[]>): void {
@@ -214,7 +245,7 @@ export class FocusTaskComponent {
       description: '',
       projectName: '',
       taskName: '',
-      status: '',
+      status: ''
     });
   }
 

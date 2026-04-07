@@ -53,6 +53,9 @@
           <div class="postit-footer">
             <span>{{ item?.projectName ?? '-' }}</span>
             <span>{{ (item?.startDate ?? item?.date) | date:'d MMM':'':'th' }}</span>
+            <button class="postit-delete" (click)="onDelete($event, item)" title="ลบ">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
           </div>
 
           <ng-template cdkDragPreview [matchSize]="true">

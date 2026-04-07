@@ -61,6 +61,11 @@ export class HistoryService{
       return this.http.delete(url);
     }
 
+    summaryToday(date?: string) {
+      const url = `${this.baseUrl}/Dashboard/summarytoday`;
+      return this.http.post<any>(url, date ? { date } : {});
+    }
+
     private toQueryPayload(query: HistoryQueryRequest): Partial<HistoryQueryRequest> {
       const payload: Partial<HistoryQueryRequest> = { ...query };
       Object.keys(payload).forEach((key) => {

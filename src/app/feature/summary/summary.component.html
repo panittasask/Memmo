@@ -114,10 +114,84 @@
         <div class="quick-button primary" (click)="goToAnalytics()">
           <i class="fa-solid fa-file-chart-column"></i> ออกรายงาน
         </div>
-        <div class="quick-button primary" (click)="goToSettings()">
+        <div class="quick-button primary" (click)="openDailyReport()">
           <i class="fa-solid fa-calendar-day"></i> ออกรายงาน รายวัน
         </div>
       </div>
     </div>
   </div>
 </div>
+
+@if (isDailyReportOpen) {
+  <div class="daily-report-backdrop" (click)="closeDailyReport()">
+    <div class="daily-report-modal" (click)="$event.stopPropagation()">
+      <div class="dr-header">
+        <div class="dr-title">
+          <i class="fa-solid fa-calendar-day"></i>
+          รายงานรายวัน
+        </div>
+        <div class="dr-header-right">
+          <app-datepicker
+            [ngModel]="dailyReportDate"
+            (ngModelChange)="onDailyReportDateChange($event)"
+          ></app-datepicker>
+          <button class="dr-close" (click)="closeDailyReport()">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      @if (isDailyReportLoading) {
+        <div class="dr-loading">
+          <i class="fa-solid fa-spinner fa-spin"></i>
+          <span>กำลังโหลด...</span>
+        </div>
+      } @else if (dailyReport) {
+        <div class="dr-stats">
+          <div class="dr-stat-card">
+            <div class="dr-stat-value">{{ dailyReport.totalTasks ?? 0 }}</div>
+            <div class="dr-stat-label">งานทั้งหมด</div>
+          </div>
+          <div class="dr-stat-card">
+            <div class="dr-stat-value">{{ dailyReport.totalHours ?? 0 }}</div>
+            <div class="dr-stat-label">ชั่วโมงรวม</div>
+          </div>
+        </div>
+
+        <div class="dr-table-wrapper">
+          @if ((dailyReport.tasks ?? []).length === 0) {
+            <div class="dr-empty">ไม่มีงานวันนี้</div>
+          } @else {
+            <table class="dr-table">
+              <thead>
+                <tr>
+                  <th>Project</th>
+                  <th>Task</th>
+                  <th>Status</th>
+                  <th class="text-right">ชม.</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (task of dailyReport.tasks; track task.taskId) {
+                  <tr>
+                    <td>{{ task.projectName ?? '-' }}</td>
+                    <td>{{ task.taskName ?? '-' }}</td>
+                    <td>
+                      <span
+                        class="dr-status-badge"
+                        [style.background]="getStatusColor(task.status) ? getStatusColor(task.status) + '22' : '#f1f5f9'"
+                        [style.color]="getStatusColor(task.status) || '#475569'"
+                        [style.border]="getStatusColor(task.status) ? '1px solid ' + getStatusColor(task.status) + '55' : '1px solid #e2e8f0'"
+                      >{{ task.status ?? '-' }}</span>
+                    </td>
+                    <td class="text-right">{{ task.duration ?? 0 }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </div>
+      }
+    </div>
+  </div>
+}

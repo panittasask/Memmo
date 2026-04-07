@@ -1,10 +1,12 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { DonutChartComponent, DonutSlice } from '../../shared/components/donut-chart/donut-chart.component';
 import { DropdownListComponent } from '../../shared/components/dropdown-list/dropdown-list.component';
 import { FocusTaskComponent } from '../../shared/components/focus-task/focus-task.component';
+import { DatepickerComponent } from '../../shared/components/datepicker/datepicker.component';
 import { DashboardService } from '../../shared/services/dashboard.service';
 import { HistoryService } from '../../shared/services/history.service';
 import { SettingsService } from '../../shared/services/settings.service';
@@ -13,7 +15,7 @@ import { ToastService } from '../../shared/services/toast.service';
 @Component({
   selector: 'app-summary',
   standalone: true,
-  imports: [CommonModule, DonutChartComponent, DropdownListComponent, FocusTaskComponent],
+  imports: [CommonModule, FormsModule, DonutChartComponent, DropdownListComponent, FocusTaskComponent, DatepickerComponent],
   templateUrl: './summary.component.html',
   styleUrl: './summary.component.scss'
 })
@@ -71,6 +73,46 @@ export class SummaryComponent {
   goToSettings(): void {
     this.router.navigate(['settings']);
   }
+
+  // ---------- Daily Report ----------
+  isDailyReportOpen = false;
+  isDailyReportLoading = false;
+  dailyReport: any = null;
+  dailyReportDate = this.getTodayStr();
+
+  async openDailyReport(): Promise<void> {
+    this.dailyReportDate = this.getTodayStr();
+    this.isDailyReportOpen = true;
+    await this.fetchDailyReport();
+  }
+
+  async onDailyReportDateChange(value: string): Promise<void> {
+    this.dailyReportDate = value;
+    await this.fetchDailyReport();
+  }
+
+  private async fetchDailyReport(): Promise<void> {
+    this.isDailyReportLoading = true;
+    this.dailyReport = null;
+    try {
+      this.dailyReport = await firstValueFrom(this.historyService.summaryToday(this.dailyReportDate));
+    } catch (ex: any) {
+      this.toast.error('ไม่สามารถโหลดรายงานรายวันได้', { detail: ex?.error ?? ex?.message ?? String(ex) });
+    } finally {
+      this.isDailyReportLoading = false;
+    }
+  }
+
+  closeDailyReport(): void {
+    this.isDailyReportOpen = false;
+    this.dailyReport = null;
+  }
+
+  private getTodayStr(): string {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+  // ----------------------------------
 
   goToAnalytics(): void {
     this.router.navigate(['analytics']);
