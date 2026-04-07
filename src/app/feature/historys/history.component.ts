@@ -43,6 +43,7 @@ export class HistoryComponent {
   private readonly confirmService = inject(ConfirmService);
 
   saveInProcess:boolean = false;
+  selectedStatus = 'ทั้งหมด';
 
   projectOptions: DropdownChildItem[] = [];
   statusOptions: DropdownChildItem[] = [];
@@ -53,6 +54,10 @@ export class HistoryComponent {
 
   get statusOptionNames(): string[] {
     return this.statusOptions.map(o => o.name);
+  }
+
+  get statusFilterOptions(): string[] {
+    return ['ทั้งหมด', ...this.statusOptionNames];
   }
    formUpdate = new FormGroup({
       id:new FormControl('',[Validators.required]),
@@ -140,6 +145,7 @@ export class HistoryComponent {
         pageSize: this.pageSize,
         filterDate: this.filterDate,
         isAllFilter: this.isAllFilter,
+        status: this.selectedStatus !== 'ทั้งหมด' ? this.selectedStatus : undefined,
       };
 
       const response = await firstValueFrom(
@@ -156,6 +162,12 @@ export class HistoryComponent {
       this.toast.error('ไม่สามารถโหลดข้อมูลได้', { detail: ex?.error ?? ex?.message ?? String(ex) });
       console.log("Error >>",ex)
     }
+  }
+
+  onStatusFilterChange(value: string | number): void {
+    this.selectedStatus = String(value || 'ทั้งหมด');
+    this.currentPage = 1;
+    this.fetchData();
   }
 
   onFilterDateChange(value: string) {
@@ -354,4 +366,5 @@ export class HistoryComponent {
       pageSize,
     };
   }
+
 }

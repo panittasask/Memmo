@@ -57,6 +57,12 @@
           display: flex;
           align-items: center;
           gap: 8px;
+
+          app-dropdown-list {
+            ::ng-deep .dropdown-trigger {
+              height: 38px;
+            }
+          }
         }
 
         .date-filter-input {

@@ -1,34 +1,75 @@
-<div class="important-things-wrapper">
-  <div class="important-header">
+<div class="focus-task-wrapper">
+  <div class="focus-header">
     <div class="title-group">
       <span class="title">Focus Task</span>
       <span class="sub-title">โน้ตสำคัญที่ต้องโฟกัส</span>
     </div>
+    <div class="header-actions">
+      <app-dropdown-list
+        [value]="selectedStatus"
+        [options]="statusFilterOptions"
+        placeholder="-- เลือกสถานะ --"
+        (valueChange)="onStatusFilterChange($event)"
+      ></app-dropdown-list>
     <button class="btn-add" (click)="openAddNew()">
       <i class="fa-solid fa-plus"></i>
       เพิ่ม
     </button>
+    </div>
   </div>
 
   @if (isLoading) {
-    <div class="important-loading">
+    <div class="focus-loading">
       <i class="fa-solid fa-spinner fa-spin"></i>
       <span>กำลังโหลด Focus Task...</span>
     </div>
   } @else {
-    <div class="important-scroll">
-      @if (importantItems.length === 0) {
+    <div
+      class="focus-scroll"
+      cdkDropList
+      cdkDropListOrientation="horizontal"
+      [cdkDropListData]="focusTaskItems"
+      (cdkDropListDropped)="onDrop($event)"
+    >
+      @if (focusTaskItems.length === 0) {
         <div class="empty-postit">ยังไม่มีรายการ Focus Task</div>
       }
-      @for (item of importantItems; track item?.id ?? $index) {
-        <article class="postit-card" [class]="'postit-card tone-'">
-          <div class="postit-pin"></div>
-          <!-- <div class="postit-title">{{ item?.taskName ?? item?.description ?? '(ไม่ระบุ)' }}</div>
+      @for (item of focusTaskItems; track trackFocusTaskItem($index, item)) {
+        <article
+          class="postit-card clickable"
+          [ngClass]="'tone-' + ($index % 4)"
+          cdkDrag
+          cdkDragLockAxis="x"
+          cdkDragPlaceholderClass="focus-task-drag-placeholder"
+          (click)="onCardClick(item)"
+        >
+          <div
+            class="postit-pin"
+            [style.background]="getStatusColor(item?.status)"
+            [style.box-shadow]="'0 0 0 2px ' + getStatusShadowColor(item?.status)"
+          ></div>
+          <div class="postit-title">{{ item?.taskName ?? item?.description ?? '(ไม่ระบุ)' }}</div>
           <div class="postit-body">{{ item?.description ?? '-' }}</div>
           <div class="postit-footer">
             <span>{{ item?.projectName ?? '-' }}</span>
             <span>{{ (item?.startDate ?? item?.date) | date:'d MMM':'':'th' }}</span>
-          </div> -->
+          </div>
+
+          <ng-template cdkDragPreview [matchSize]="true">
+            <div class="drag-preview">
+              <div
+                class="postit-pin"
+                [style.background]="getStatusColor(item?.status)"
+                [style.box-shadow]="'0 0 0 2px ' + getStatusShadowColor(item?.status)"
+              ></div>
+              <div class="postit-title">{{ item?.taskName ?? item?.description ?? '(ไม่ระบุ)' }}</div>
+              <div class="postit-body">{{ item?.description ?? '-' }}</div>
+              <div class="postit-footer">
+                <span>{{ item?.projectName ?? '-' }}</span>
+                <span>{{ (item?.startDate ?? item?.date) | date:'d MMM':'':'th' }}</span>
+              </div>
+            </div>
+          </ng-template>
         </article>
       }
     </div>
@@ -37,7 +78,7 @@
 
 <div [class.isShow]="isAddNew" class="add-new-container">
   <div [formGroup]="formAddNew" class="add-new-content">
-    <div class="header-content">เพิ่ม Important Thing</div>
+    <div class="header-content">{{ isEditMode ? 'แก้ไข Focus Task' : 'เพิ่ม Focus Task' }}</div>
     <div class="close-icon">
       <i class="fa-solid fa-xmark" (click)="closeAddNew()"></i>
     </div>
@@ -90,7 +131,7 @@
         [disabled]="formAddNew.invalid || saveInProcess"
         (click)="onSave()"
       >
-        บันทึกข้อมูล
+        {{ isEditMode ? 'บันทึกการแก้ไข' : 'บันทึกข้อมูล' }}
       </button>
     </div>
   </div>

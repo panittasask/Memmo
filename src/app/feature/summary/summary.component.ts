@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { DonutChartComponent, DonutSlice } from '../../shared/components/donut-chart/donut-chart.component';
 import { DropdownListComponent } from '../../shared/components/dropdown-list/dropdown-list.component';
-import { ImportantThingsComponent } from '../../shared/components/important-things/important-things.component';
+import { FocusTaskComponent } from '../../shared/components/focus-task/focus-task.component';
 import { DashboardService } from '../../shared/services/dashboard.service';
 import { HistoryService } from '../../shared/services/history.service';
 import { SettingsService } from '../../shared/services/settings.service';
@@ -13,7 +13,7 @@ import { ToastService } from '../../shared/services/toast.service';
 @Component({
   selector: 'app-summary',
   standalone: true,
-  imports: [CommonModule, DonutChartComponent, DropdownListComponent, ImportantThingsComponent],
+  imports: [CommonModule, DonutChartComponent, DropdownListComponent, FocusTaskComponent],
   templateUrl: './summary.component.html',
   styleUrl: './summary.component.scss'
 })
@@ -48,7 +48,10 @@ export class SummaryComponent {
   }
 
   ngOnInit(): void {
-    Promise.all([this.buildMonthOptions(), this.loadRecentTasks(), this.loadStatusColors()]).then(() => this.load());
+    void this.buildMonthOptions();
+    void this.loadRecentTasks();
+    void this.loadStatusColors();
+    void this.load();
   }
 
   async onPeriodChange(value: string | number): Promise<void> {

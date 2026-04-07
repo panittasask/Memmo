@@ -13,6 +13,12 @@
             (ngModelChange)="onFilterDateChange($event)"
             placeholder="เลือกวันที่"
           ></app-datepicker>
+          <app-dropdown-list
+            [value]="selectedStatus"
+            [options]="statusFilterOptions"
+            placeholder="-- เลือกสถานะ --"
+            (valueChange)="onStatusFilterChange($event)"
+          ></app-dropdown-list>
           <button type="button" class="btn-filter btn-today" [class.active]="!isAllFilter" (click)="setTodayFilter()">วันนี้</button>
           <button type="button" class="btn-filter btn-all" [class.active]="isAllFilter" (click)="setAllFilter()">ทั้งหมด</button>
         </div>

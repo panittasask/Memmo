@@ -8,7 +8,9 @@ export interface HistoryQueryRequest {
   filterDate?: string;
   isAllFilter?: boolean;
   nameType?: string;
+  status?: string;
 }
+
 
 export interface HistoryPagedResult<T> {
   items: T[];
@@ -43,7 +45,7 @@ export class HistoryService{
     }
     getTask(query: HistoryQueryRequest){
       const url = `${this.baseUrl}/History`;
-      return this.http.post<HistoryPagedResult<any> | any[]>(url, query);
+      return this.http.post<HistoryPagedResult<any> | any[]>(url, this.toQueryPayload(query));
     }
     addNewTask(model:any){
       const url = `${this.baseUrl}/History/AddNew`;
@@ -57,5 +59,16 @@ export class HistoryService{
     deleteTask(id: string) {
       const url = `${this.baseUrl}/History/task/${id}`;
       return this.http.delete(url);
+    }
+
+    private toQueryPayload(query: HistoryQueryRequest): Partial<HistoryQueryRequest> {
+      const payload: Partial<HistoryQueryRequest> = { ...query };
+      Object.keys(payload).forEach((key) => {
+        const value = payload[key as keyof HistoryQueryRequest];
+        if (value === null || value === undefined || value === '') {
+          delete payload[key as keyof HistoryQueryRequest];
+        }
+      });
+      return payload;
     }
 } 
