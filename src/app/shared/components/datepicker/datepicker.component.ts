@@ -20,6 +20,7 @@ import {
   transition,
   trigger,
 } from '@angular/animations';
+import { BuddhistYearPipe } from '../../pipes/buddhist-year.pipe';
 
 interface CalendarDay {
   date: number;
@@ -34,7 +35,7 @@ interface CalendarDay {
 @Component({
   selector: 'app-datepicker',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, BuddhistYearPipe],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -63,7 +64,7 @@ interface CalendarDay {
             <i class="fa-solid fa-chevron-left"></i>
           </button>
           <span class="month-year" (click)="toggleYearView()">
-            {{ monthNames[viewMonth] }} {{ viewYear }}
+            {{ monthNames[viewMonth] }} {{ viewYear | buddhistYear }}
           </span>
           <button type="button" class="nav-btn" (click)="nextMonth()">
             <i class="fa-solid fa-chevron-right"></i>
@@ -98,7 +99,7 @@ interface CalendarDay {
             [class.current-year]="y === todayYear"
             (click)="selectYear(y)"
           >
-            {{ y }}
+            {{ y | buddhistYear }}
           </button>
         </div>
 
@@ -419,7 +420,7 @@ export class DatepickerComponent implements ControlValueAccessor {
   get displayValue(): string {
     if (!this.value) return '';
     const [y, m, d] = this.value.split('-').map(Number);
-    return `${d} ${this.monthNames[m - 1]} ${y}`;
+    return `${d} ${this.monthNames[m - 1]} ${y + 543}`;
   }
 
   get yearRange(): number[] {
