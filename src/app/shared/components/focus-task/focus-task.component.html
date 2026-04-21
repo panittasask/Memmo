@@ -53,6 +53,11 @@
           <div class="postit-footer">
             <span>{{ item?.projectName ?? '-' }}</span>
             <span>{{ (item?.startDate ?? item?.date) | date:'d MMM':'':'th' }}</span>
+            @if (!isToday(item)) {
+              <button class="postit-clone" (click)="onCloneToToday($event, item)" title="Copy to today">
+                <i class="fa-regular fa-clone"></i>
+              </button>
+            }
             <button class="postit-delete" (click)="onDelete($event, item)" title="ลบ">
               <i class="fa-solid fa-trash-can"></i>
             </button>

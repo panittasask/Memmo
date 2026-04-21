@@ -139,6 +139,45 @@ export class FocusTaskComponent {
     }
   }
 
+  async onCloneToToday(event: MouseEvent, item: any): Promise<void> {
+    event.stopPropagation();
+
+    const cloneModel = {
+      duration: 0,
+      projectName: item?.projectName,
+      taskName: item?.taskName,
+      description: item?.description,
+      status: item?.status,
+      startDate: new Date(),
+      nameType: 'important',
+    };
+
+    const clearFocusModel = {
+      id: String(item?.id ?? ''),
+      duration: item?.duration,
+      projectName: item?.projectName,
+      taskName: item?.taskName,
+      description: item?.description,
+      status: item?.status,
+      startDate: item?.startDate ?? item?.date,
+      nameType: null,
+    };
+
+    try {
+      const result = await firstValueFrom(this.historyService.addNewTask(cloneModel));
+      if (!result) {
+        return;
+      }
+
+      await firstValueFrom(this.historyService.updateTask(clearFocusModel));
+      this.toast.success('คัดลอกงานไปวันนี้สำเร็จ');
+      this.historyService.notifyDataChanged();
+      await this.loadFocusTasks();
+    } catch (ex: any) {
+      this.toast.error('ไม่สามารถคัดลอกงานได้', { detail: ex?.error ?? ex?.message ?? String(ex) });
+    }
+  }
+
   onDrop(event: CdkDragDrop<any[]>): void {
     if (event.previousIndex === event.currentIndex) {
       return;
@@ -236,6 +275,23 @@ export class FocusTaskComponent {
 
   private isFocusTaskType(item: any): boolean {
     return String(item?.nameType ?? '').trim().toLowerCase() === 'important';
+  }
+
+  isToday(item: any): boolean {
+    const rawDate = item?.startDate ?? item?.date;
+    if (!rawDate) {
+      return false;
+    }
+
+    const date = new Date(rawDate);
+    if (Number.isNaN(date.getTime())) {
+      return false;
+    }
+
+    const now = new Date();
+    return date.getFullYear() === now.getFullYear()
+      && date.getMonth() === now.getMonth()
+      && date.getDate() === now.getDate();
   }
 
   private resetForm(): void {
