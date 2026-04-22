@@ -66,86 +66,90 @@
         <i class="fa-solid fa-xmark" (click)="isShowDetail = false"></i>
       </div>
     </div>
-    <div class="content-container">
-      <div class="input-container-content">
-        <label>วันที่</label>
-        <app-datepicker formControlName="date"></app-datepicker>
+    <div class="detail-history-container-body">
+      <div class="content-container">
+        <div class="input-container-content">
+          <label>วันที่</label>
+          <app-datepicker formControlName="date"></app-datepicker>
+        </div>
+        <div class="input-container-content">
+          <label>ระยะเวลา</label>
+          <input
+            formControlName="time"
+            type="number"
+            class="form-input time-input"
+          />
+        </div>
       </div>
-      <div class="input-container-content">
-        <label>ระยะเวลา</label>
-        <input
-          formControlName="time"
-          type="number"
-          class="form-input time-input"
-        />
+      <div class="content-container">
+        <div class="input-container-content">
+          <label>Project</label>
+          <app-dropdown-list
+            [value]="formUpdate.controls.projectName.value ?? null"
+            [options]="projectOptionNames"
+            placeholder="-- เลือก Project --"
+            (valueChange)="
+              formUpdate.controls.projectName.setValue($event.toString())
+            "
+          ></app-dropdown-list>
+        </div>
+        <div class="input-container-content">
+          <label>Status</label>
+          <app-dropdown-list
+            [value]="formUpdate.controls.status.value ?? null"
+            [options]="statusOptionNames"
+            placeholder="-- เลือก Status --"
+            (valueChange)="
+              formUpdate.controls.status.setValue($event.toString())
+            "
+          ></app-dropdown-list>
+        </div>
       </div>
-    </div>
-    <div class="content-container">
-      <div class="input-container-content">
-        <label>Project</label>
-        <app-dropdown-list
-          [value]="formUpdate.controls.projectName.value ?? null"
-          [options]="projectOptionNames"
-          placeholder="-- เลือก Project --"
-          (valueChange)="
-            formUpdate.controls.projectName.setValue($event.toString())
-          "
-        ></app-dropdown-list>
+      <div class="content-container">
+        <div class="input-container-content">
+          <label>Task</label>
+          <input formControlName="taskName" type="text" class="form-input" />
+        </div>
       </div>
-      <div class="input-container-content">
-        <label>Status</label>
-        <app-dropdown-list
-          [value]="formUpdate.controls.status.value ?? null"
-          [options]="statusOptionNames"
-          placeholder="-- เลือก Status --"
-          (valueChange)="formUpdate.controls.status.setValue($event.toString())"
-        ></app-dropdown-list>
+      <div class="content-container">
+        <div class="input-container-content focus-task-check">
+          <label class="checkbox-label">
+            <input type="checkbox" formControlName="isFocusTask" />
+            Focus Task
+          </label>
+        </div>
       </div>
-    </div>
-    <div class="content-container">
-      <div class="input-container-content">
-        <label>Task</label>
-        <input formControlName="taskName" type="text" class="form-input" />
+      <div class="content-container">
+        <div class="input-container-content">
+          <label>รายละเอียด</label>
+          <textarea
+            formControlName="description"
+            type="text"
+            class="form-input"
+          ></textarea>
+        </div>
       </div>
-    </div>
-    <div class="content-container">
-      <div class="input-container-content focus-task-check">
-        <label class="checkbox-label">
-          <input type="checkbox" formControlName="isFocusTask" />
-          Focus Task
-        </label>
+      <div class="content-container">
+        <div class="input-container-content">
+          <label>ลิงค์</label>
+          <input
+            formControlName="hyperlink"
+            type="url"
+            class="form-input"
+            placeholder="https://example.com"
+          />
+        </div>
       </div>
-    </div>
-    <div class="content-container">
-      <div class="input-container-content">
-        <label>รายละเอียด</label>
-        <textarea
-          formControlName="description"
-          type="text"
-          class="form-input"
-        ></textarea>
+      <div class="button-wrapper">
+        <button
+          type="submit"
+          class="btn-save"
+          [disabled]="formUpdate.invalid || saveInProcess"
+          (click)="onSave()"
+        >
+          บันทึกข้อมูล
+        </button>
       </div>
-    </div>
-    <div class="content-container">
-      <div class="input-container-content">
-        <label>ลิงค์</label>
-        <input
-          formControlName="hyperlink"
-          type="url"
-          class="form-input"
-          placeholder="https://example.com"
-        />
-      </div>
-    </div>
-    <div class="button-wrapper">
-      <button
-        type="submit"
-        class="btn-save"
-        [disabled]="formUpdate.invalid || saveInProcess"
-        (click)="onSave()"
-      >
-        บันทึกข้อมูล
-      </button>
     </div>
   </div>
 </div>
