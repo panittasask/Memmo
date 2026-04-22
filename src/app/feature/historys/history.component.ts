@@ -10,12 +10,21 @@ import {
   HistoryService,
 } from '../../shared/services/history.service';
 import { firstValueFrom } from 'rxjs';
-import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormControl,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { DatepickerComponent } from '../../shared/components/datepicker/datepicker.component';
 import { ColumnSettings } from '../../shared/models/column-settings.model';
 import { ToastService } from '../../shared/services/toast.service';
 import { DropdownListComponent } from '../../shared/components/dropdown-list/dropdown-list.component';
-import { DropdownChildItem, SettingsService } from '../../shared/services/settings.service';
+import {
+  DropdownChildItem,
+  SettingsService,
+} from '../../shared/services/settings.service';
 import { ConfirmService } from '../../shared/services/confirm.service';
 
 interface HistoryItem {
@@ -26,56 +35,64 @@ interface HistoryItem {
   status: string;
   duration: number;
   description?: string;
+  hyperlink?: string;
 }
 
 @Component({
   selector: 'app-history',
   standalone: true,
-  imports: [CommonModule, GridItemComponent,ReactiveFormsModule,FormsModule,DatepickerComponent,DropdownListComponent],
+  imports: [
+    CommonModule,
+    GridItemComponent,
+    ReactiveFormsModule,
+    FormsModule,
+    DatepickerComponent,
+    DropdownListComponent,
+  ],
   templateUrl: './history.component.html',
   styleUrl: './history.component.scss',
 })
 export class HistoryComponent {
-
   private readonly HistoryService = inject(HistoryService);
   private readonly toast = inject(ToastService);
   private readonly settingsService = inject(SettingsService);
   private readonly confirmService = inject(ConfirmService);
 
-  saveInProcess:boolean = false;
+  saveInProcess: boolean = false;
   selectedStatus = 'ทั้งหมด';
 
   projectOptions: DropdownChildItem[] = [];
   statusOptions: DropdownChildItem[] = [];
 
   get projectOptionNames(): string[] {
-    return this.projectOptions.map(o => o.name);
+    return this.projectOptions.map((o) => o.name);
   }
 
   get statusOptionNames(): string[] {
-    return this.statusOptions.map(o => o.name);
+    return this.statusOptions.map((o) => o.name);
   }
 
   get statusFilterOptions(): string[] {
     return ['ทั้งหมด', ...this.statusOptionNames];
   }
-   formUpdate = new FormGroup({
-      id:new FormControl('',[Validators.required]),
-      date:new FormControl('',[Validators.required]),
-      time:new FormControl(0),
-      description:new FormControl(''),
-      projectName:new FormControl('',[Validators.required]),
-      taskName: new FormControl('',[Validators.required]) ,
-      status:new FormControl(''),
-      isFocusTask: new FormControl(false),
-    });
+  formUpdate = new FormGroup({
+    id: new FormControl('', [Validators.required]),
+    date: new FormControl('', [Validators.required]),
+    time: new FormControl(0),
+    description: new FormControl(''),
+    projectName: new FormControl('', [Validators.required]),
+    taskName: new FormControl('', [Validators.required]),
+    status: new FormControl(''),
+    hyperlink: new FormControl(''),
+    isFocusTask: new FormControl(false),
+  });
 
-  constructor(){
-    effect(()=>{
-      if(this.HistoryService.refreshTrigger() > 0){
+  constructor() {
+    effect(() => {
+      if (this.HistoryService.refreshTrigger() > 0) {
         this.fetchData();
       }
-    })
+    });
   }
   public selectedData: object = {};
   public isShowDetail = false;
@@ -113,6 +130,12 @@ export class HistoryComponent {
       width: 80,
     },
     {
+      field: 'hyperlink',
+      type: 'hyperlink',
+      text: 'ลิงค์',
+      width: 100,
+    },
+    {
       type: 'action',
       text: 'จัดการ',
       width: 80,
@@ -128,26 +151,31 @@ export class HistoryComponent {
 
   selectedItem(item: any) {
     this.formUpdate.patchValue({
-      id:item.id,
-      date:this.getDate(item.startDate),
-      description:item.description,
-      time:item.duration,
-      projectName:item.projectName,
+      id: item.id,
+      date: this.getDate(item.startDate),
+      description: item.description,
+      time: item.duration,
+      projectName: item.projectName,
       taskName: item.taskName,
-      status:item.status,
-      isFocusTask: String(item.nameType ?? '').trim().toLowerCase() === 'important',
+      status: item.status,
+      hyperlink: item.hyperlink || '',
+      isFocusTask:
+        String(item.nameType ?? '')
+          .trim()
+          .toLowerCase() === 'important',
     });
     this.selectedData = item;
     this.isShowDetail = true;
   }
-  async fetchData(){
-    try{
+  async fetchData() {
+    try {
       const request: HistoryQueryRequest = {
         page: this.currentPage,
         pageSize: this.pageSize,
         filterDate: this.filterDate,
         isAllFilter: this.isAllFilter,
-        status: this.selectedStatus !== 'ทั้งหมด' ? this.selectedStatus : undefined,
+        status:
+          this.selectedStatus !== 'ทั้งหมด' ? this.selectedStatus : undefined,
       };
 
       const response = await firstValueFrom(
@@ -160,9 +188,11 @@ export class HistoryComponent {
       this.totalCount = normalized.totalCount;
       this.hasNextPage = normalized.hasNextPage;
       this.pageSize = normalized.pageSize;
-    }catch(ex:any){
-      this.toast.error('ไม่สามารถโหลดข้อมูลได้', { detail: ex?.error ?? ex?.message ?? String(ex) });
-      console.log("Error >>",ex)
+    } catch (ex: any) {
+      this.toast.error('ไม่สามารถโหลดข้อมูลได้', {
+        detail: ex?.error ?? ex?.message ?? String(ex),
+      });
+      console.log('Error >>', ex);
     }
   }
 
@@ -216,7 +246,6 @@ export class HistoryComponent {
     await this.fetchData();
   }
 
-
   ngOnInit(): void {
     this.loadSettings().then(() => this.fetchData());
   }
@@ -226,41 +255,50 @@ export class HistoryComponent {
       const res = await firstValueFrom(this.settingsService.getSettings());
       const parents = res.parents ?? [];
       const children = res.children ?? [];
-      const projectParent = parents.find(p => p.key === 'project');
-      const statusParent = parents.find(p => p.key === 'status');
-      this.projectOptions = projectParent ? children.filter(c => c.parentId === projectParent.id) : [];
-      this.statusOptions = statusParent ? children.filter(c => c.parentId === statusParent.id) : [];
+      const projectParent = parents.find((p) => p.key === 'project');
+      const statusParent = parents.find((p) => p.key === 'status');
+      this.projectOptions = projectParent
+        ? children.filter((c) => c.parentId === projectParent.id)
+        : [];
+      this.statusOptions = statusParent
+        ? children.filter((c) => c.parentId === statusParent.id)
+        : [];
     } catch {
       this.projectOptions = [];
       this.statusOptions = [];
     }
   }
-  async onSave(){
-    if(!this.formUpdate.valid) return;
-        const value:any = this.formUpdate.getRawValue();
+  async onSave() {
+    if (!this.formUpdate.valid) return;
+    const value: any = this.formUpdate.getRawValue();
     const model = {
-        id:value.id,
-        duration: value.time,
-        projectName: value.projectName,
-        taskName: value.taskName,
-        description: value.description,
-        status: value.status,
-        startDate: new Date(value.date),
-        nameType: value.isFocusTask ? 'important' : null,
+      id: value.id,
+      duration: value.time,
+      projectName: value.projectName,
+      taskName: value.taskName,
+      description: value.description,
+      status: value.status,
+      startDate: new Date(value.date),
+      hyperlink: value.hyperlink,
+      nameType: value.isFocusTask ? 'important' : null,
     };
-    try{
+    try {
       this.saveInProcess = true;
-      const result = await firstValueFrom(this.HistoryService.updateTask(model));
-      if(result){
+      const result = await firstValueFrom(
+        this.HistoryService.updateTask(model),
+      );
+      if (result) {
         this.saveInProcess = false;
         this.toast.success('บันทึกข้อมูลสำเร็จ');
         this.isShowDetail = false;
         this.fetchData();
       }
-    }catch(ex:any){
+    } catch (ex: any) {
       this.saveInProcess = false;
-      this.toast.error('ไม่สามารถบันทึกข้อมูลได้', { detail: ex?.error ?? ex?.message ?? String(ex) });
-      console.log("Error >>>",ex)
+      this.toast.error('ไม่สามารถบันทึกข้อมูลได้', {
+        detail: ex?.error ?? ex?.message ?? String(ex),
+      });
+      console.log('Error >>>', ex);
     }
   }
   async cloneItem(item: any) {
@@ -270,16 +308,21 @@ export class HistoryComponent {
       taskName: item.taskName,
       description: item.description,
       status: item.status,
+      hyperlink: item.hyperlink,
       startDate: new Date(),
     };
     try {
-      const result = await firstValueFrom(this.HistoryService.addNewTask(model));
+      const result = await firstValueFrom(
+        this.HistoryService.addNewTask(model),
+      );
       if (result) {
         this.toast.success('คัดลอกงานไปวันนี้สำเร็จ');
         this.fetchData();
       }
     } catch (ex: any) {
-      this.toast.error('ไม่สามารถคัดลอกงานได้', { detail: ex?.error ?? ex?.message ?? String(ex) });
+      this.toast.error('ไม่สามารถคัดลอกงานได้', {
+        detail: ex?.error ?? ex?.message ?? String(ex),
+      });
       console.log('Clone Error >>>', ex);
     }
   }
@@ -297,11 +340,13 @@ export class HistoryComponent {
       this.toast.success('ลบงานสำเร็จ');
       await this.fetchData();
     } catch (ex: any) {
-      this.toast.error('ไม่สามารถลบงานได้', { detail: ex?.error ?? ex?.message ?? String(ex) });
+      this.toast.error('ไม่สามารถลบงานได้', {
+        detail: ex?.error ?? ex?.message ?? String(ex),
+      });
     }
   }
 
-   private getDate(date:any): string {
+  private getDate(date: any): string {
     const today = new Date(date);
     if (Number.isNaN(today.getTime())) {
       return '';
@@ -331,7 +376,9 @@ export class HistoryComponent {
         items: response,
         currentPage: this.currentPage,
         totalPages:
-          response.length < this.pageSize ? this.currentPage : this.currentPage + 1,
+          response.length < this.pageSize
+            ? this.currentPage
+            : this.currentPage + 1,
         totalCount: null,
         hasNextPage: response.length === this.pageSize,
         pageSize: this.pageSize,
@@ -339,7 +386,8 @@ export class HistoryComponent {
     }
 
     const items = response.items ?? [];
-    const currentPage = response.currentPage ?? response.page ?? this.currentPage;
+    const currentPage =
+      response.currentPage ?? response.page ?? this.currentPage;
     const totalCount =
       response.totalCount ??
       response.totalRows ??
@@ -369,5 +417,4 @@ export class HistoryComponent {
       pageSize,
     };
   }
-
 }

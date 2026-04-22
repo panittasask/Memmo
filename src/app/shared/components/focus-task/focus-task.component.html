@@ -11,10 +11,10 @@
         placeholder="-- เลือกสถานะ --"
         (valueChange)="onStatusFilterChange($event)"
       ></app-dropdown-list>
-    <button class="btn-add" (click)="openAddNew()">
-      <i class="fa-solid fa-plus"></i>
-      เพิ่ม
-    </button>
+      <button class="btn-add" (click)="openAddNew()">
+        <i class="fa-solid fa-plus"></i>
+        เพิ่ม
+      </button>
     </div>
   </div>
 
@@ -46,19 +46,46 @@
           <div
             class="postit-pin"
             [style.background]="getStatusColor(item?.status)"
-            [style.box-shadow]="'0 0 0 2px ' + getStatusShadowColor(item?.status)"
+            [style.box-shadow]="
+              '0 0 0 2px ' + getStatusShadowColor(item?.status)
+            "
           ></div>
-          <div class="postit-title">{{ item?.taskName ?? item?.description ?? '(ไม่ระบุ)' }}</div>
-          <div class="postit-body">{{ item?.description ?? '-' }}</div>
+          <div class="postit-title">
+            {{ item?.taskName ?? item?.description ?? "(ไม่ระบุ)" }}
+          </div>
+          <div class="postit-body">{{ item?.description ?? "-" }}</div>
+          @if (item?.hyperlink) {
+            <div class="postit-link">
+              <a
+                [href]="item.hyperlink"
+                target="_blank"
+                rel="noopener noreferrer"
+                (click)="$event.stopPropagation()"
+              >
+                <i class="fa-solid fa-external-link-alt"></i>
+                ลิงค์
+              </a>
+            </div>
+          }
           <div class="postit-footer">
-            <span>{{ item?.projectName ?? '-' }}</span>
-            <span>{{ (item?.startDate ?? item?.date) | date:'d MMM':'':'th' }}</span>
+            <span>{{ item?.projectName ?? "-" }}</span>
+            <span>{{
+              item?.startDate ?? item?.date | date: "d MMM" : "" : "th"
+            }}</span>
             @if (!isToday(item)) {
-              <button class="postit-clone" (click)="onCloneToToday($event, item)" title="Copy to today">
+              <button
+                class="postit-clone"
+                (click)="onCloneToToday($event, item)"
+                title="Copy to today"
+              >
                 <i class="fa-regular fa-clone"></i>
               </button>
             }
-            <button class="postit-delete" (click)="onDelete($event, item)" title="ลบ">
+            <button
+              class="postit-delete"
+              (click)="onDelete($event, item)"
+              title="ลบ"
+            >
               <i class="fa-solid fa-trash-can"></i>
             </button>
           </div>
@@ -68,13 +95,19 @@
               <div
                 class="postit-pin"
                 [style.background]="getStatusColor(item?.status)"
-                [style.box-shadow]="'0 0 0 2px ' + getStatusShadowColor(item?.status)"
+                [style.box-shadow]="
+                  '0 0 0 2px ' + getStatusShadowColor(item?.status)
+                "
               ></div>
-              <div class="postit-title">{{ item?.taskName ?? item?.description ?? '(ไม่ระบุ)' }}</div>
-              <div class="postit-body">{{ item?.description ?? '-' }}</div>
+              <div class="postit-title">
+                {{ item?.taskName ?? item?.description ?? "(ไม่ระบุ)" }}
+              </div>
+              <div class="postit-body">{{ item?.description ?? "-" }}</div>
               <div class="postit-footer">
-                <span>{{ item?.projectName ?? '-' }}</span>
-                <span>{{ (item?.startDate ?? item?.date) | date:'d MMM':'':'th' }}</span>
+                <span>{{ item?.projectName ?? "-" }}</span>
+                <span>{{
+                  item?.startDate ?? item?.date | date: "d MMM" : "" : "th"
+                }}</span>
               </div>
             </div>
           </ng-template>
@@ -86,7 +119,9 @@
 
 <div [class.isShow]="isAddNew" class="add-new-container">
   <div [formGroup]="formAddNew" class="add-new-content">
-    <div class="header-content">{{ isEditMode ? 'แก้ไข Focus Task' : 'เพิ่ม Focus Task' }}</div>
+    <div class="header-content">
+      {{ isEditMode ? "แก้ไข Focus Task" : "เพิ่ม Focus Task" }}
+    </div>
     <div class="close-icon">
       <i class="fa-solid fa-xmark" (click)="closeAddNew()"></i>
     </div>
@@ -97,7 +132,12 @@
       </div>
       <div class="input-container-content">
         <label>ระยะเวลา</label>
-        <input style="height: 36px" formControlName="time" type="number" class="form-input">
+        <input
+          style="height: 36px"
+          formControlName="time"
+          type="number"
+          class="form-input"
+        />
       </div>
     </div>
     <div class="content-container">
@@ -107,7 +147,9 @@
           [value]="formAddNew.controls.projectName.value ?? null"
           [options]="projectOptionNames"
           placeholder="-- เลือก Project --"
-          (valueChange)="formAddNew.controls.projectName.setValue($event.toString())"
+          (valueChange)="
+            formAddNew.controls.projectName.setValue($event.toString())
+          "
         ></app-dropdown-list>
       </div>
       <div class="input-container-content">
@@ -123,13 +165,28 @@
     <div class="content-container">
       <div class="input-container-content">
         <label>Task</label>
-        <input formControlName="taskName" type="text" class="form-input">
+        <input formControlName="taskName" type="text" class="form-input" />
       </div>
     </div>
     <div class="content-container">
       <div class="input-container-content">
         <label>รายละเอียด</label>
-        <textarea formControlName="description" type="text" class="form-input"></textarea>
+        <textarea
+          formControlName="description"
+          type="text"
+          class="form-input"
+        ></textarea>
+      </div>
+    </div>
+    <div class="content-container">
+      <div class="input-container-content">
+        <label>ลิงค์</label>
+        <input
+          formControlName="hyperlink"
+          type="url"
+          class="form-input"
+          placeholder="https://example.com"
+        />
       </div>
     </div>
     <div class="button-wrapper">
@@ -139,7 +196,7 @@
         [disabled]="formAddNew.invalid || saveInProcess"
         (click)="onSave()"
       >
-        {{ isEditMode ? 'บันทึกการแก้ไข' : 'บันทึกข้อมูล' }}
+        {{ isEditMode ? "บันทึกการแก้ไข" : "บันทึกข้อมูล" }}
       </button>
     </div>
   </div>

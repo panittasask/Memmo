@@ -1,4 +1,10 @@
-export type ColumnType = 'text' | 'number' | 'date' | 'action' | 'color';
+export type ColumnType =
+  | 'text'
+  | 'number'
+  | 'date'
+  | 'action'
+  | 'color'
+  | 'hyperlink';
 
 export interface ColumnSettings {
   field?: string;

@@ -37,11 +37,32 @@
             @for (col of columns; track $index) {
               <td>
                 @if (!isActionColumn(col)) {
-                  <div class="text-ellipsis" [title]="(getCellValue(item, col) ?? '').toString()">
-                    @if (col?.type === 'color' && getCellValue(item, col)) {
-                      <span class="color-swatch" [style.background]="getCellValue(item, col)"></span>
+                  <div
+                    class="text-ellipsis"
+                    [title]="(getCellValue(item, col) ?? '').toString()"
+                  >
+                    @if (col?.type === "color" && getCellValue(item, col)) {
+                      <span
+                        class="color-swatch"
+                        [style.background]="getCellValue(item, col)"
+                      ></span>
+                    } @else if (
+                      col?.type === "hyperlink" && getCellValue(item, col)
+                    ) {
+                      <a
+                        [href]="getCellValue(item, col)"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="hyperlink-btn"
+                      >
+                        <i class="fa-solid fa-external-link-alt"></i> เปิดลิงค์
+                      </a>
                     } @else {
-                      {{ col?.type === 'date' ? (getCellValue(item, col) | dateFormat) : getCellValue(item, col) }}
+                      {{
+                        col?.type === "date"
+                          ? (getCellValue(item, col) | dateFormat)
+                          : getCellValue(item, col)
+                      }}
                     }
                   </div>
                 } @else {
@@ -52,12 +73,23 @@
                       </span>
                     }
                     @if (showClone && !isToday(item)) {
-                      <span class="clone-btn" [title]="'Clone to today'" (click)="cloneClick.emit(item); $event.stopPropagation()">
+                      <span
+                        class="clone-btn"
+                        [title]="'Clone to today'"
+                        (click)="
+                          cloneClick.emit(item); $event.stopPropagation()
+                        "
+                      >
                         <i class="fa-regular fa-clone"></i>
                       </span>
                     }
                     @if (showRemove) {
-                      <span [title]="'Remove'" (click)="removeClick.emit(item); $event.stopPropagation()">
+                      <span
+                        [title]="'Remove'"
+                        (click)="
+                          removeClick.emit(item); $event.stopPropagation()
+                        "
+                      >
                         <i class="fa-regular fa-trash-can"></i>
                       </span>
                     }
@@ -75,7 +107,9 @@
     <div class="pagination-summary">
       <span>Page {{ currentPage }}</span>
       <span *ngIf="totalCount !== null">{{ totalCount }} items</span>
-      <span *ngIf="totalCount === null">{{ data.length }} items on this page</span>
+      <span *ngIf="totalCount === null"
+        >{{ data.length }} items on this page</span
+      >
     </div>
 
     <div class="pagination-actions">
@@ -87,11 +121,21 @@
           (valueChange)="onPageSizeChange($event)"
         ></app-dropdown-list>
       </div>
-      <button type="button" class="btn-page" (click)="previousPage()" [disabled]="currentPage === 1">
+      <button
+        type="button"
+        class="btn-page"
+        (click)="previousPage()"
+        [disabled]="currentPage === 1"
+      >
         Previous
       </button>
       <span class="page-indicator">{{ currentPage }} / {{ totalPages }}</span>
-      <button type="button" class="btn-page" (click)="nextPage()" [disabled]="!hasNextPage && currentPage >= totalPages">
+      <button
+        type="button"
+        class="btn-page"
+        (click)="nextPage()"
+        [disabled]="!hasNextPage && currentPage >= totalPages"
+      >
         Next
       </button>
     </div>

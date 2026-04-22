@@ -1,22 +1,43 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, ViewEncapsulation } from '@angular/core';
-import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  CdkDragDrop,
+  DragDropModule,
+  moveItemInArray,
+} from '@angular/cdk/drag-drop';
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { DatepickerComponent } from '../datepicker/datepicker.component';
 import { DropdownListComponent } from '../dropdown-list/dropdown-list.component';
-import { DropdownChildItem, SettingsService } from '../../services/settings.service';
-import { HistoryService, HistoryQueryRequest } from '../../services/history.service';
+import {
+  DropdownChildItem,
+  SettingsService,
+} from '../../services/settings.service';
+import {
+  HistoryService,
+  HistoryQueryRequest,
+} from '../../services/history.service';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmService } from '../../services/confirm.service';
 
 @Component({
   selector: 'app-focus-task',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, DragDropModule, DatepickerComponent, DropdownListComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    DragDropModule,
+    DatepickerComponent,
+    DropdownListComponent,
+  ],
   templateUrl: './focus-task.component.html',
   styleUrl: './focus-task.component.scss',
-  encapsulation:ViewEncapsulation.None,
+  encapsulation: ViewEncapsulation.None,
 })
 export class FocusTaskComponent {
   private readonly historyService = inject(HistoryService);
@@ -43,14 +64,15 @@ export class FocusTaskComponent {
     projectName: new FormControl('', [Validators.required]),
     taskName: new FormControl('', [Validators.required]),
     status: new FormControl(''),
+    hyperlink: new FormControl(''),
   });
 
   get projectOptionNames(): string[] {
-    return this.projectOptions.map(o => o.name);
+    return this.projectOptions.map((o) => o.name);
   }
 
   get statusOptionNames(): string[] {
-    return this.statusOptions.map(o => o.name);
+    return this.statusOptions.map((o) => o.name);
   }
 
   get statusFilterOptions(): string[] {
@@ -59,7 +81,9 @@ export class FocusTaskComponent {
 
   getStatusColor(status: string): string {
     const color = this.statusOptions.find(
-      o => (o.name ?? '').trim().toLowerCase() === (status ?? '').trim().toLowerCase(),
+      (o) =>
+        (o.name ?? '').trim().toLowerCase() ===
+        (status ?? '').trim().toLowerCase(),
     )?.color;
     return color || '#ef4444';
   }
@@ -98,7 +122,8 @@ export class FocusTaskComponent {
       description: item?.description ?? '',
       projectName: item?.projectName ?? '',
       taskName: item?.taskName ?? '',
-      status: item?.status ?? ''
+      status: item?.status ?? '',
+      hyperlink: item?.hyperlink ?? '',
     });
     this.isAddNew = true;
   }
@@ -135,7 +160,9 @@ export class FocusTaskComponent {
       this.historyService.notifyDataChanged();
       await this.loadFocusTasks();
     } catch (ex: any) {
-      this.toast.error('ไม่สามารถนำออกจาก Focus Task ได้', { detail: ex?.error ?? ex?.message ?? String(ex) });
+      this.toast.error('ไม่สามารถนำออกจาก Focus Task ได้', {
+        detail: ex?.error ?? ex?.message ?? String(ex),
+      });
     }
   }
 
@@ -164,7 +191,9 @@ export class FocusTaskComponent {
     };
 
     try {
-      const result = await firstValueFrom(this.historyService.addNewTask(cloneModel));
+      const result = await firstValueFrom(
+        this.historyService.addNewTask(cloneModel),
+      );
       if (!result) {
         return;
       }
@@ -174,7 +203,9 @@ export class FocusTaskComponent {
       this.historyService.notifyDataChanged();
       await this.loadFocusTasks();
     } catch (ex: any) {
-      this.toast.error('ไม่สามารถคัดลอกงานได้', { detail: ex?.error ?? ex?.message ?? String(ex) });
+      this.toast.error('ไม่สามารถคัดลอกงานได้', {
+        detail: ex?.error ?? ex?.message ?? String(ex),
+      });
     }
   }
 
@@ -183,7 +214,11 @@ export class FocusTaskComponent {
       return;
     }
 
-    moveItemInArray(this.focusTaskItems, event.previousIndex, event.currentIndex);
+    moveItemInArray(
+      this.focusTaskItems,
+      event.previousIndex,
+      event.currentIndex,
+    );
     this.suppressOpenFromDrag = true;
     setTimeout(() => {
       this.suppressOpenFromDrag = false;
@@ -210,6 +245,7 @@ export class FocusTaskComponent {
       description: value.description,
       status: value.status,
       startDate: new Date(value.date),
+      hyperlink: value.hyperlink,
       nameType: 'important',
     };
     if (this.isEditMode) {
@@ -219,18 +255,29 @@ export class FocusTaskComponent {
     try {
       this.saveInProcess = true;
       const result = await firstValueFrom(
-        this.isEditMode ? this.historyService.updateTask(model) : this.historyService.addNewTask(model),
+        this.isEditMode
+          ? this.historyService.updateTask(model)
+          : this.historyService.addNewTask(model),
       );
       if (result) {
-        this.toast.success(this.isEditMode ? 'แก้ไข Focus Task สำเร็จ' : 'เพิ่ม Focus Task สำเร็จ');
+        this.toast.success(
+          this.isEditMode
+            ? 'แก้ไข Focus Task สำเร็จ'
+            : 'เพิ่ม Focus Task สำเร็จ',
+        );
         this.closeAddNew();
         this.historyService.notifyDataChanged();
         await this.loadFocusTasks();
       }
     } catch (ex: any) {
-      this.toast.error(this.isEditMode ? 'ไม่สามารถแก้ไข Focus Task ได้' : 'ไม่สามารถเพิ่ม Focus Task ได้', {
-        detail: ex?.error ?? ex?.message ?? String(ex),
-      });
+      this.toast.error(
+        this.isEditMode
+          ? 'ไม่สามารถแก้ไข Focus Task ได้'
+          : 'ไม่สามารถเพิ่ม Focus Task ได้',
+        {
+          detail: ex?.error ?? ex?.message ?? String(ex),
+        },
+      );
     } finally {
       this.saveInProcess = false;
     }
@@ -241,10 +288,14 @@ export class FocusTaskComponent {
       const res = await firstValueFrom(this.settingsService.getSettings());
       const parents = res.parents ?? [];
       const children = res.children ?? [];
-      const projectParent = parents.find(p => p.key === 'project');
-      const statusParent = parents.find(p => p.key === 'status');
-      this.projectOptions = projectParent ? children.filter(c => c.parentId === projectParent.id) : [];
-      this.statusOptions = statusParent ? children.filter(c => c.parentId === statusParent.id) : [];
+      const projectParent = parents.find((p) => p.key === 'project');
+      const statusParent = parents.find((p) => p.key === 'status');
+      this.projectOptions = projectParent
+        ? children.filter((c) => c.parentId === projectParent.id)
+        : [];
+      this.statusOptions = statusParent
+        ? children.filter((c) => c.parentId === statusParent.id)
+        : [];
     } catch {
       this.projectOptions = [];
       this.statusOptions = [];
@@ -259,13 +310,14 @@ export class FocusTaskComponent {
         pageSize: 9999,
         isAllFilter: true,
         nameType: 'important',
-        status: this.selectedStatus !== 'ทั้งหมด' ? this.selectedStatus : undefined,
+        status:
+          this.selectedStatus !== 'ทั้งหมด' ? this.selectedStatus : undefined,
       };
       const res = await firstValueFrom(this.historyService.getTask(req));
       const items = Array.isArray(res) ? res : ((res as any).items ?? []);
       this.focusTaskItems = items;
-        // .filter((item: any) => this.isImportantType(item))
-        // .sort((a: any, b: any) => +new Date(b.startDate ?? b.date ?? 0) - +new Date(a.startDate ?? a.date ?? 0));
+      // .filter((item: any) => this.isImportantType(item))
+      // .sort((a: any, b: any) => +new Date(b.startDate ?? b.date ?? 0) - +new Date(a.startDate ?? a.date ?? 0));
     } catch {
       this.focusTaskItems = [];
     } finally {
@@ -274,7 +326,11 @@ export class FocusTaskComponent {
   }
 
   private isFocusTaskType(item: any): boolean {
-    return String(item?.nameType ?? '').trim().toLowerCase() === 'important';
+    return (
+      String(item?.nameType ?? '')
+        .trim()
+        .toLowerCase() === 'important'
+    );
   }
 
   isToday(item: any): boolean {
@@ -289,9 +345,11 @@ export class FocusTaskComponent {
     }
 
     const now = new Date();
-    return date.getFullYear() === now.getFullYear()
-      && date.getMonth() === now.getMonth()
-      && date.getDate() === now.getDate();
+    return (
+      date.getFullYear() === now.getFullYear() &&
+      date.getMonth() === now.getMonth() &&
+      date.getDate() === now.getDate()
+    );
   }
 
   private resetForm(): void {
@@ -301,7 +359,8 @@ export class FocusTaskComponent {
       description: '',
       projectName: '',
       taskName: '',
-      status: ''
+      status: '',
+      hyperlink: '',
     });
   }
 

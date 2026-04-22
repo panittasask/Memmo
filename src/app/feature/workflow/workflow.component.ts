@@ -1,6 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { WorkflowService } from '../../shared/services/workflow.service';
-import { Component, inject, OnInit, ElementRef, ViewChild, HostListener } from '@angular/core';
+import {
+  Component,
+  inject,
+  OnInit,
+  ElementRef,
+  ViewChild,
+  HostListener,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import {
@@ -17,6 +24,7 @@ interface WorkflowTask {
   status: string;
   duration: number;
   description?: string;
+  hyperlink?: string;
 }
 
 interface WFNode {
@@ -26,8 +34,8 @@ interface WFNode {
   /** 'task' = pulled from history, 'custom' = user-created free-text box */
   type: 'task' | 'custom';
   task?: WorkflowTask;
-  label: string;   // custom node title
-  note: string;    // custom node body text
+  label: string; // custom node title
+  note: string; // custom node body text
 }
 
 interface WFConnection {
@@ -139,7 +147,7 @@ export class WorkflowComponent implements OnInit {
     event.preventDefault();
     this.nodes = this.nodes.filter((n) => n.id !== nodeId);
     this.connections = this.connections.filter(
-      (c) => c.fromNodeId !== nodeId && c.toNodeId !== nodeId
+      (c) => c.fromNodeId !== nodeId && c.toNodeId !== nodeId,
     );
   }
 
@@ -155,7 +163,8 @@ export class WorkflowComponent implements OnInit {
   // ── Node drag ──────────────────────────────────────────
   onNodeMouseDown(e: MouseEvent, node: WFNode) {
     const target = e.target as HTMLElement;
-    if (target.closest('.port, .node-delete, .custom-label, .custom-note')) return;
+    if (target.closest('.port, .node-delete, .custom-label, .custom-note'))
+      return;
     e.preventDefault();
     e.stopPropagation();
     this.draggingNode = node;
@@ -186,8 +195,7 @@ export class WorkflowComponent implements OnInit {
     }
     const alreadyExists = this.connections.some(
       (c) =>
-        c.fromNodeId === this.drawingConn!.fromNodeId &&
-        c.toNodeId === node.id
+        c.fromNodeId === this.drawingConn!.fromNodeId && c.toNodeId === node.id,
     );
     if (!alreadyExists) {
       this.connections.push({
@@ -246,7 +254,10 @@ export class WorkflowComponent implements OnInit {
   }
 
   // ── Helpers ────────────────────────────────────────────
-  private screenToInner(clientX: number, clientY: number): { x: number; y: number } {
+  private screenToInner(
+    clientX: number,
+    clientY: number,
+  ): { x: number; y: number } {
     const rect =
       this.canvasWrapperEl?.nativeElement.getBoundingClientRect() ?? {
         left: 0,
@@ -279,15 +290,10 @@ export class WorkflowComponent implements OnInit {
     // คำนวณจุดศูนย์กลางของ port-out (ขวา) และ port-in (ซ้าย)
     const fromW = from.type === 'custom' ? CUSTOM_NODE_W : NODE_W;
     const fromPortOutX = from.x + fromW - 8 + 7; // left + width - 8px (port offset) + 7px (port radius)
-    const fromPortOutY = from.y + (NODE_H / 2);
+    const fromPortOutY = from.y + NODE_H / 2;
     const toPortInX = to.x - 8 + 7; // left - 8px (port offset) + 7px (port radius)
-    const toPortInY = to.y + (NODE_H / 2);
-    return this.bezier(
-      fromPortOutX,
-      fromPortOutY,
-      toPortInX,
-      toPortInY
-    );
+    const toPortInY = to.y + NODE_H / 2;
+    return this.bezier(fromPortOutX, fromPortOutY, toPortInX, toPortInY);
   }
 
   drawingPath(): string {
@@ -364,7 +370,9 @@ export class WorkflowComponent implements OnInit {
     }
 
     const invalidConnection = this.connections.find((connection) => {
-      const fromNode = this.nodes.find((node) => node.id === connection.fromNodeId);
+      const fromNode = this.nodes.find(
+        (node) => node.id === connection.fromNodeId,
+      );
       const toNode = this.nodes.find((node) => node.id === connection.toNodeId);
 
       return !fromNode?.task?.id || !toNode?.task?.id;
@@ -372,7 +380,8 @@ export class WorkflowComponent implements OnInit {
 
     if (invalidConnection) {
       this.toast.error('ยังบันทึกไม่ได้', {
-        detail: 'รองรับการบันทึกเฉพาะเส้นเชื่อมระหว่าง task ที่มี id จากระบบเท่านั้น',
+        detail:
+          'รองรับการบันทึกเฉพาะเส้นเชื่อมระหว่าง task ที่มี id จากระบบเท่านั้น',
       });
       return;
     }

@@ -34,9 +34,9 @@
         display: flex;
         flex: 1;
         .dropdown-field {
-            display: flex;
-            width: 100%;
-          }
+          display: flex;
+          width: 100%;
+        }
 
         ::ng-deep .dropdown-field {
           width: 100%;
@@ -161,6 +161,35 @@
         -webkit-box-orient: vertical;
       }
 
+      .postit-link {
+        margin-top: 8px;
+        margin-bottom: 4px;
+
+        a {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          padding: 3px 6px;
+          background-color: #e0f2fe;
+          color: #0277bd;
+          text-decoration: none;
+          border-radius: 4px;
+          font-size: 10px;
+          font-weight: 500;
+          transition: all 0.2s ease;
+
+          &:hover {
+            background-color: #b3e5fc;
+            color: #01579b;
+            transform: translateY(-1px);
+          }
+
+          i {
+            font-size: 8px;
+          }
+        }
+      }
+
       .postit-footer {
         margin-top: 10px;
         padding-top: 8px;
@@ -198,7 +227,10 @@
         opacity: 0;
         flex-shrink: 0;
         line-height: 1;
-        transition: opacity 0.15s, color 0.15s, background 0.15s;
+        transition:
+          opacity 0.15s,
+          color 0.15s,
+          background 0.15s;
 
         &:hover {
           color: #ef4444;
