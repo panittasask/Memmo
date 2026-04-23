@@ -6,6 +6,33 @@
       Tasks
     </div>
 
+    <div class="workflow-section">
+      <div class="workflow-section-title">
+        <i class="fa-solid fa-diagram-project"></i>
+        Workflows (click to load)
+      </div>
+      <div class="workflow-list">
+        @for (workflow of workflows; track workflow.id) {
+          <button
+            type="button"
+            class="workflow-item"
+            [class.selected]="selectedWorkflowId === workflow.id"
+            [class.loaded]="workflowId === workflow.id"
+            (click)="selectWorkflow(workflow)"
+            [title]="workflow.description || workflow.name"
+          >
+            <span class="workflow-name">{{ workflow.name }}</span>
+            @if (workflowId === workflow.id) {
+              <span class="workflow-badge">Loaded</span>
+            }
+          </button>
+        }
+        @if (workflows.length === 0) {
+          <div class="empty-workflow">ไม่พบ workflow</div>
+        }
+      </div>
+    </div>
+
     <!-- Add Custom Box button -->
     <div class="panel-custom-add">
       <button class="btn-add-custom" (click)="addCustomNode()">
@@ -34,12 +61,11 @@
           class="task-item"
           [class.on-canvas]="isOnCanvas(task)"
           [class.active]="selectedTask?.id === task.id"
-          (click)="selectTask(task)"
-          (dblclick)="addNodeFromTask(task)"
+          (dblclick)="selectTask(task)"
           draggable="true"
           (dragstart)="onTaskDragStart($event, task)"
           (dragend)="onTaskDragEnd($event)"
-          title="Double-click หรือ ลากเพื่อเพิ่มลง canvas"
+          title="Double-click เพื่อเลือก task หรือ ลากเพื่อเพิ่มลง canvas"
         >
           <div class="task-name">{{ task.taskName }}</div>
           <div class="task-meta">
@@ -232,7 +258,7 @@
     @if (nodes.length === 0) {
       <div class="canvas-hint">
         <i class="fa-solid fa-diagram-project"></i>
-        <p>Double-click task ทางซ้ายเพื่อเพิ่มลง canvas</p>
+        <p>ลาก task ทางซ้ายลง canvas เพื่อเพิ่ม node</p>
         <p class="hint-sub">หรือกด "Custom Box" เพื่อสร้าง node เปล่า</p>
         <p class="hint-sub">
           ลากวงกลมขวา → วงกลมซ้ายของ node อื่น เพื่อเชื่อมต่อ

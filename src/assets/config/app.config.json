@@ -1,5 +1,5 @@
 {
-  "apiBaseUrl": "https://panittasak-001-site1.ltempurl.com",
+  "apiBaseUrl": "http://localhost:5065",
   "appName": "Memmo",
   "env": "dev"
 }

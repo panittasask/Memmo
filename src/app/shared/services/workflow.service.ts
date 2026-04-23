@@ -13,7 +13,10 @@ export interface WorkflowNodeItem {
   id: number;
   nodeType: string;
   taskId?: number | null;
+  positionX: number;
+  positionY: number;
   customName?: string | null;
+  customNote?: string | null;
   externalTaskKey?: string | null;
   childNodeIds?: number[];
 }
@@ -25,16 +28,25 @@ export interface WorkflowEdgeItem {
 }
 
 export interface WorkflowDetailItem {
-  workflow: WorkflowItem;
+  workflow: WorkflowItem | null;
   nodes: WorkflowNodeItem[];
   edges: WorkflowEdgeItem[];
+}
+
+export interface WorkflowByTaskResult extends WorkflowDetailItem {
+  found: boolean;
+  isMock?: boolean;
+  message?: string;
 }
 
 export interface WorkflowSyncNodeItem {
   clientNodeId: string;
   nodeType: 'Task' | 'Custom';
   taskId?: number | null;
+  positionX: number;
+  positionY: number;
   customName?: string | null;
+  customNote?: string | null;
   externalTaskKey?: string | null;
 }
 
@@ -94,12 +106,21 @@ export class WorkflowService {
     return this.http.get<WorkflowDetailItem>(`${this.baseUrl}/${id}`);
   }
 
+  getWorkflowByTask(taskId: string): Observable<WorkflowByTaskResult> {
+    return this.http.get<WorkflowByTaskResult>(
+      `${this.baseUrl}/by-task/${encodeURIComponent(taskId)}`,
+    );
+  }
+
   createNode(
     workflowId: number,
     data: {
       nodeType: string;
       taskId?: number | null;
+      positionX: number;
+      positionY: number;
       customName?: string | null;
+      customNote?: string | null;
     },
   ): Observable<WorkflowNodeItem> {
     return this.http.post<WorkflowNodeItem>(
@@ -114,7 +135,10 @@ export class WorkflowService {
     data: {
       nodeType: string;
       taskId?: number | null;
+      positionX: number;
+      positionY: number;
       customName?: string | null;
+      customNote?: string | null;
     },
   ): Observable<void> {
     return this.http.put<void>(

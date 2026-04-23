@@ -1,5 +1,8 @@
 import { CommonModule, DOCUMENT } from '@angular/common';
-import { WorkflowService } from '../../shared/services/workflow.service';
+import {
+  WorkflowItem,
+  WorkflowService,
+} from '../../shared/services/workflow.service';
 import {
   Component,
   inject,
@@ -57,7 +60,6 @@ interface WFConnection {
 const NODE_W = 230;
 const NODE_H = 95;
 const CUSTOM_NODE_W = 230;
-const DEFAULT_WORKFLOW_ID = 1;
 const TASKS_PER_PAGE = 10;
 
 @Component({
@@ -76,7 +78,11 @@ export class WorkflowComponent implements OnInit {
   private readonly settingsService = inject(SettingsService);
   private readonly document = inject(DOCUMENT);
 
-  private workflowId: number | null = null;
+  workflowId: number | null = null;
+
+  workflows: WorkflowItem[] = [];
+  selectedWorkflowId: number | null = null;
+  isWorkflowLoading = false;
 
   tasks: WorkflowTask[] = [];
   nodes: WFNode[] = [];
@@ -134,8 +140,13 @@ export class WorkflowComponent implements OnInit {
   private async initialize(): Promise<void> {
     await this.loadSettings();
     await this.loadTasks();
-    await this.loadOrCreateWorkflow();
-    this.focusTaskFromRoute();
+    await this.loadWorkflowCatalog();
+    await this.focusTaskFromRoute();
+  }
+
+  selectWorkflow(workflow: WorkflowItem): void {
+    this.selectedWorkflowId = workflow.id;
+    void this.loadWorkflowById(workflow.id, true);
   }
 
   get statusFilterOptions(): string[] {
@@ -239,6 +250,7 @@ export class WorkflowComponent implements OnInit {
 
   selectTask(task: WorkflowTask): void {
     this.selectedTask = task;
+    void this.loadWorkflowByTask(task.id, true);
   }
 
   private normalizePagedResponse(
@@ -537,7 +549,7 @@ export class WorkflowComponent implements OnInit {
   onCanvasDrop(event: DragEvent) {
     event.preventDefault();
     if (!this.draggingTask) return;
-    this.selectTask(this.draggingTask);
+    this.selectedTask = this.draggingTask;
     // Get drop position relative to canvas
     const rect = this.canvasWrapperEl.nativeElement.getBoundingClientRect();
     const x = (event.clientX - rect.left - this.panX) / this.zoom;
@@ -559,8 +571,8 @@ export class WorkflowComponent implements OnInit {
 
   onNodeTaskClick(event: MouseEvent, node: WFNode): void {
     event.stopPropagation();
-    if (node.type === 'task' && node.task) {
-      this.selectTask(node.task);
+    if (node.type !== 'task' || !node.task) {
+      return;
     }
   }
 
@@ -570,7 +582,6 @@ export class WorkflowComponent implements OnInit {
     if (node.type !== 'task' || !node.task) {
       return;
     }
-    this.selectTask(node.task);
     this.modalTask = node.task;
     this.isTaskDetailModalOpen = true;
   }
@@ -580,11 +591,14 @@ export class WorkflowComponent implements OnInit {
     this.modalTask = null;
   }
 
-  private focusTaskFromRoute(): void {
+  private async focusTaskFromRoute(): Promise<void> {
     const taskId = this.activatedRoute.snapshot.queryParamMap.get('taskId');
     if (!taskId) {
       return;
     }
+
+    await this.loadWorkflowByTask(taskId, true);
+
     const task = this.tasks.find((item) => item.id === taskId);
     if (!task) {
       return;
@@ -601,28 +615,164 @@ export class WorkflowComponent implements OnInit {
     return Number.isFinite(value) ? value : null;
   }
 
-  private async loadOrCreateWorkflow(): Promise<void> {
+  private async loadWorkflowCatalog(): Promise<void> {
     try {
-      const detail = await firstValueFrom(
-        this.workflowService.getWorkflowDetail(DEFAULT_WORKFLOW_ID),
+      const workflowList = await firstValueFrom(
+        this.workflowService.getWorkflowList(),
       );
-      this.workflowId = detail.workflow?.id ?? DEFAULT_WORKFLOW_ID;
-      this.hydrateCanvasFromWorkflow(detail.nodes ?? [], detail.edges ?? []);
-    } catch (ex: any) {
-      if (ex?.status === 404) {
-        const created = await firstValueFrom(
-          this.workflowService.createWorkflow({
-            name: 'Main Workflow',
-            description: 'Auto generated workflow',
-          }),
-        );
-        this.workflowId = created.id;
-        return;
+      this.workflows = [...workflowList].sort((a, b) => a.id - b.id);
+      if (!this.selectedWorkflowId && this.workflows.length > 0) {
+        this.selectedWorkflowId = this.workflows[0].id;
       }
-      this.toast.error('โหลด workflow ไม่สำเร็จ', {
+    } catch (ex: any) {
+      this.toast.error('โหลด workflow list ไม่สำเร็จ', {
         detail: ex?.error ?? ex?.message ?? String(ex),
       });
     }
+  }
+
+  private resetCanvasForWorkflowLoad(): void {
+    this.nodes = [];
+    this.connections = [];
+    this.selectedTask = null;
+    this.modalTask = null;
+    this.isTaskDetailModalOpen = false;
+  }
+
+  private async loadWorkflowById(
+    workflowId: number,
+    resetViewport: boolean = false,
+  ): Promise<void> {
+    this.isWorkflowLoading = true;
+    this.resetCanvasForWorkflowLoad();
+    if (resetViewport) {
+      this.panX = 0;
+      this.panY = 0;
+      this.zoom = 1;
+    }
+
+    try {
+      const detail = await firstValueFrom(
+        this.workflowService.getWorkflowDetail(workflowId),
+      );
+      await this.loadWorkflowTasksForHydration(detail.nodes ?? []);
+      this.workflowId = detail.workflow?.id ?? workflowId;
+      this.selectedWorkflowId = this.workflowId;
+      this.hydrateCanvasFromWorkflow(detail.nodes ?? [], detail.edges ?? []);
+      this.centerLoadedWorkflow();
+    } catch (ex: any) {
+      this.toast.error('โหลด workflow ไม่สำเร็จ', {
+        detail: ex?.error ?? ex?.message ?? String(ex),
+      });
+    } finally {
+      this.isWorkflowLoading = false;
+    }
+  }
+
+  private async loadWorkflowByTask(
+    taskId: string,
+    resetViewport: boolean = false,
+  ): Promise<void> {
+    const normalizedTaskId = String(taskId ?? '').trim();
+    if (!normalizedTaskId) {
+      return;
+    }
+
+    this.isWorkflowLoading = true;
+    this.resetCanvasForWorkflowLoad();
+    if (resetViewport) {
+      this.panX = 0;
+      this.panY = 0;
+      this.zoom = 1;
+    }
+
+    try {
+      const detail = await firstValueFrom(
+        this.workflowService.getWorkflowByTask(normalizedTaskId),
+      );
+      await this.loadWorkflowTasksForHydration(detail.nodes ?? []);
+      this.workflowId = detail.workflow?.id ?? null;
+      this.selectedWorkflowId = this.workflowId;
+      this.hydrateCanvasFromWorkflow(detail.nodes ?? [], detail.edges ?? []);
+      this.centerLoadedWorkflow();
+    } catch (ex: any) {
+      this.toast.error('โหลด workflow จาก task ไม่สำเร็จ', {
+        detail: ex?.error ?? ex?.message ?? String(ex),
+      });
+    } finally {
+      this.isWorkflowLoading = false;
+    }
+  }
+
+  private async loadWorkflowTasksForHydration(
+    apiNodes: Array<{
+      nodeType: string;
+      taskId?: number | null;
+      positionX?: number | null;
+      positionY?: number | null;
+      customName?: string | null;
+      customNote?: string | null;
+      externalTaskKey?: string | null;
+    }>,
+  ): Promise<void> {
+    const requiredTaskKeys = apiNodes
+      .filter((apiNode) => (apiNode.nodeType ?? '').toLowerCase() === 'task')
+      .map((apiNode) => this.resolveTaskKey(apiNode))
+      .filter((item): item is string => !!item);
+
+    if (requiredTaskKeys.length === 0) {
+      return;
+    }
+
+    const existingTaskKeys = new Set(
+      this.tasks.map((task) => String(task.id ?? '').trim()).filter(Boolean),
+    );
+    const missingTaskKeys = Array.from(new Set(requiredTaskKeys)).filter(
+      (taskKey) => !existingTaskKeys.has(taskKey),
+    );
+
+    if (missingTaskKeys.length === 0) {
+      return;
+    }
+
+    try {
+      const fetched = await firstValueFrom(
+        this.historyService.getTasksByIds(missingTaskKeys),
+      );
+      const mergedTaskMap = new Map(
+        this.tasks.map((task) => [String(task.id ?? '').trim(), task]),
+      );
+      for (const task of fetched ?? []) {
+        const taskKey = String(task?.id ?? '').trim();
+        if (!taskKey) {
+          continue;
+        }
+        mergedTaskMap.set(taskKey, task as WorkflowTask);
+      }
+      this.tasks = Array.from(mergedTaskMap.values());
+    } catch (ex: any) {
+      this.toast.warning('โหลด task บางรายการของ workflow ไม่ครบ', {
+        detail: ex?.error ?? ex?.message ?? String(ex),
+      });
+    }
+  }
+
+  private resolveTaskKey(apiNode: {
+    taskId?: number | null;
+    customName?: string | null;
+    customNote?: string | null;
+    externalTaskKey?: string | null;
+  }): string | null {
+    const externalTaskKey = String(
+      apiNode.externalTaskKey ?? apiNode.customName ?? '',
+    ).trim();
+    if (externalTaskKey) {
+      return externalTaskKey;
+    }
+    if (apiNode.taskId == null) {
+      return null;
+    }
+    return String(apiNode.taskId).trim() || null;
   }
 
   private hydrateCanvasFromWorkflow(
@@ -630,7 +780,10 @@ export class WorkflowComponent implements OnInit {
       id: number;
       nodeType: string;
       taskId?: number | null;
+      positionX?: number | null;
+      positionY?: number | null;
       customName?: string | null;
+      customNote?: string | null;
       externalTaskKey?: string | null;
     }>,
     apiEdges: Array<{ id: number; fromNodeId: number; toNodeId: number }>,
@@ -640,7 +793,12 @@ export class WorkflowComponent implements OnInit {
 
     for (const apiNode of apiNodes) {
       const isTask = (apiNode.nodeType ?? '').toLowerCase() === 'task';
-      if (!isTask || apiNode.taskId == null) {
+      if (!isTask) {
+        continue;
+      }
+
+      const taskKey = this.resolveTaskKey(apiNode);
+      if (!taskKey) {
         continue;
       }
 
@@ -648,27 +806,30 @@ export class WorkflowComponent implements OnInit {
         const numericMatched =
           apiNode.taskId != null &&
           this.parseTaskId(item.id) === apiNode.taskId;
-        const externalMatched =
-          apiNode.taskId == null &&
-          !!(apiNode.externalTaskKey ?? apiNode.customName) &&
-          String(item.id).trim() ===
-            String(apiNode.externalTaskKey ?? apiNode.customName).trim();
+        const externalMatched = String(item.id ?? '').trim() === taskKey;
         return numericMatched || externalMatched;
       });
-      if (!task) {
-        continue;
-      }
+      const fallbackTask: WorkflowTask = {
+        id: taskKey,
+        startDate: '',
+        taskName: task?.taskName || `Task ${taskKey}`,
+        projectName: task?.projectName || '-',
+        status: task?.status || '-',
+        duration: task?.duration ?? 0,
+        description: task?.description,
+        hyperlink: task?.hyperlink,
+      };
 
       const index = hydratedNodes.length;
       const nodeId = `node-${apiNode.id}`;
       hydratedNodes.push({
         id: nodeId,
         backendNodeId: apiNode.id,
-        x: 80 + (index % 3) * 270,
-        y: 60 + Math.floor(index / 3) * 160,
+        x: apiNode.positionX ?? 80 + (index % 3) * 270,
+        y: apiNode.positionY ?? 60 + Math.floor(index / 3) * 160,
         type: 'task',
-        task,
-        label: task.taskName,
+        task: task ?? fallbackTask,
+        label: task?.taskName || fallbackTask.taskName,
         note: '',
       });
       nodeIdMap.set(apiNode.id, nodeId);
@@ -685,11 +846,11 @@ export class WorkflowComponent implements OnInit {
       hydratedNodes.push({
         id: nodeId,
         backendNodeId: apiNode.id,
-        x: 100 + (index % 3) * 260,
-        y: 80 + Math.floor(index / 3) * 180,
+        x: apiNode.positionX ?? 100 + (index % 3) * 260,
+        y: apiNode.positionY ?? 80 + Math.floor(index / 3) * 180,
         type: 'custom',
         label: apiNode.customName?.trim() || 'Custom Box',
-        note: '',
+        note: apiNode.customNote?.trim() || '',
       });
       nodeIdMap.set(apiNode.id, nodeId);
     }
@@ -710,20 +871,66 @@ export class WorkflowComponent implements OnInit {
       })
       .filter((item): item is WFConnection => item !== null);
 
-    if (hydratedNodes.length > 0) {
-      this.nodes = hydratedNodes;
-      this.connections = hydratedConnections;
+    this.nodes = hydratedNodes;
+    this.connections = hydratedConnections;
+  }
+
+  private centerLoadedWorkflow(): void {
+    if (this.nodes.length === 0) {
+      return;
     }
+
+    const canvasEl = this.canvasWrapperEl?.nativeElement;
+    if (!canvasEl) {
+      return;
+    }
+
+    const rect = canvasEl.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) {
+      return;
+    }
+
+    const minX = Math.min(...this.nodes.map((node) => node.x));
+    const minY = Math.min(...this.nodes.map((node) => node.y));
+    const maxX = Math.max(
+      ...this.nodes.map(
+        (node) => node.x + (node.type === 'custom' ? CUSTOM_NODE_W : NODE_W),
+      ),
+    );
+    const maxY = Math.max(...this.nodes.map((node) => node.y + NODE_H));
+
+    const centerX = (minX + maxX) / 2;
+    const centerY = (minY + maxY) / 2;
+
+    this.panX = rect.width / 2 - centerX * this.zoom;
+    this.panY = rect.height / 2 - centerY * this.zoom;
   }
 
   async saveWorkflow(): Promise<void> {
     if (!this.workflowId) {
-      await this.loadOrCreateWorkflow();
-    }
+      if (!this.selectedTask?.id) {
+        this.toast.error('กรุณาเลือก task ก่อนบันทึก workflow');
+        return;
+      }
 
-    if (!this.workflowId) {
-      this.toast.error('ไม่พบ workflow สำหรับบันทึก');
-      return;
+      try {
+        const created = await firstValueFrom(
+          this.workflowService.createWorkflow({
+            name: `Workflow: ${this.selectedTask.taskName || this.selectedTask.id}`,
+            description: `Created from task ${this.selectedTask.id}`,
+          }),
+        );
+        this.workflowId = created.id;
+        this.selectedWorkflowId = created.id;
+        this.workflows = [...this.workflows, created].sort(
+          (a, b) => a.id - b.id,
+        );
+      } catch (ex: any) {
+        this.toast.error('สร้าง workflow ไม่สำเร็จ', {
+          detail: ex?.error ?? ex?.message ?? String(ex),
+        });
+        return;
+      }
     }
 
     const workflowId = this.workflowId;
@@ -733,7 +940,10 @@ export class WorkflowComponent implements OnInit {
         clientNodeId: string;
         nodeType: 'Task' | 'Custom';
         taskId?: number | null;
+        positionX: number;
+        positionY: number;
         customName?: string | null;
+        customNote?: string | null;
         externalTaskKey?: string | null;
       }> = [];
 
@@ -742,15 +952,16 @@ export class WorkflowComponent implements OnInit {
 
       for (const node of this.nodes) {
         if (node.type === 'custom') {
-          const customName =
-            String(node.label ?? '').trim() ||
-            String(node.note ?? '').trim() ||
-            node.id;
+          const customName = String(node.label ?? '').trim() || node.id;
+          const customNote = String(node.note ?? '').trim() || null;
           syncNodes.push({
             clientNodeId: node.id,
             nodeType: 'Custom',
             taskId: null,
+            positionX: node.x,
+            positionY: node.y,
             customName,
+            customNote,
             externalTaskKey: null,
           });
           continue;
@@ -766,6 +977,8 @@ export class WorkflowComponent implements OnInit {
             clientNodeId: node.id,
             nodeType: 'Task',
             taskId: parsedTaskId,
+            positionX: node.x,
+            positionY: node.y,
             customName: null,
           });
           continue;
@@ -781,6 +994,8 @@ export class WorkflowComponent implements OnInit {
           clientNodeId: node.id,
           nodeType: 'Task',
           taskId: null,
+          positionX: node.x,
+          positionY: node.y,
           customName: externalTaskId,
           externalTaskKey: externalTaskId,
         });
