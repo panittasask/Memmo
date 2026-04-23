@@ -142,6 +142,13 @@
       </div>
       <div class="button-wrapper">
         <button
+          type="button"
+          class="btn-go-workflow"
+          (click)="goToWorkflowFromDetail()"
+        >
+          ไปหน้า Workflow
+        </button>
+        <button
           type="submit"
           class="btn-save"
           [disabled]="formUpdate.invalid || saveInProcess"

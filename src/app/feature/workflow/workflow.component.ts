@@ -1,20 +1,28 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, DOCUMENT } from '@angular/common';
 import { WorkflowService } from '../../shared/services/workflow.service';
 import {
   Component,
   inject,
   OnInit,
+  OnDestroy,
   ElementRef,
   ViewChild,
   HostListener,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   HistoryService,
+  HistoryPagedResult,
   HistoryQueryRequest,
 } from '../../shared/services/history.service';
 import { ToastService } from '../../shared/services/toast.service';
+import {
+  DropdownChildItem,
+  SettingsService,
+} from '../../shared/services/settings.service';
+import { DropdownListComponent } from '../../shared/components/dropdown-list/dropdown-list.component';
 
 interface WorkflowTask {
   id: string;
@@ -31,6 +39,7 @@ interface WFNode {
   id: string;
   x: number;
   y: number;
+  backendNodeId?: number;
   /** 'task' = pulled from history, 'custom' = user-created free-text box */
   type: 'task' | 'custom';
   task?: WorkflowTask;
@@ -40,6 +49,7 @@ interface WFNode {
 
 interface WFConnection {
   id: string;
+  backendEdgeId?: number;
   fromNodeId: string;
   toNodeId: string;
 }
@@ -47,11 +57,13 @@ interface WFConnection {
 const NODE_W = 230;
 const NODE_H = 95;
 const CUSTOM_NODE_W = 230;
+const DEFAULT_WORKFLOW_ID = 1;
+const TASKS_PER_PAGE = 10;
 
 @Component({
   selector: 'app-workflow',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DropdownListComponent],
   templateUrl: './workflow.component.html',
   styleUrl: './workflow.component.scss',
 })
@@ -59,10 +71,28 @@ export class WorkflowComponent implements OnInit {
   private readonly historyService = inject(HistoryService);
   private readonly toast = inject(ToastService);
   private readonly workflowService = inject(WorkflowService);
+  private readonly activatedRoute = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly settingsService = inject(SettingsService);
+  private readonly document = inject(DOCUMENT);
+
+  private workflowId: number | null = null;
 
   tasks: WorkflowTask[] = [];
   nodes: WFNode[] = [];
   connections: WFConnection[] = [];
+
+  selectedTask: WorkflowTask | null = null;
+  modalTask: WorkflowTask | null = null;
+  isTaskDetailModalOpen = false;
+  searchText = '';
+  selectedStatus = 'all';
+  readonly taskPageSize = TASKS_PER_PAGE;
+  taskCurrentPage = 1;
+  totalTaskPages = 1;
+  totalTaskCount: number | null = null;
+  hasNextTaskPage = false;
+  statusOptions: DropdownChildItem[] = [];
 
   panX = 0;
   panY = 0;
@@ -93,18 +123,78 @@ export class WorkflowComponent implements OnInit {
   @ViewChild('canvasWrapper') canvasWrapperEl!: ElementRef<HTMLDivElement>;
 
   ngOnInit(): void {
-    this.loadTasks();
+    this.document.body.classList.add('workflow-dropdown-theme-active');
+    void this.initialize();
   }
 
-  async loadTasks() {
+  ngOnDestroy(): void {
+    this.document.body.classList.remove('workflow-dropdown-theme-active');
+  }
+
+  private async initialize(): Promise<void> {
+    await this.loadSettings();
+    await this.loadTasks();
+    await this.loadOrCreateWorkflow();
+    this.focusTaskFromRoute();
+  }
+
+  get statusFilterOptions(): string[] {
+    return ['all', ...this.statusOptions.map((o) => o.name)];
+  }
+
+  get displayedTasks(): WorkflowTask[] {
+    const keyword = this.searchText.trim().toLowerCase();
+    if (!keyword) {
+      return this.tasks;
+    }
+    return this.tasks.filter((task) => {
+      const taskName = (task.taskName ?? '').toLowerCase();
+      const projectName = (task.projectName ?? '').toLowerCase();
+      const status = (task.status ?? '').toLowerCase();
+      return (
+        taskName.includes(keyword) ||
+        projectName.includes(keyword) ||
+        status.includes(keyword)
+      );
+    });
+  }
+
+  private async loadSettings(): Promise<void> {
+    try {
+      const res = await firstValueFrom(this.settingsService.getSettings());
+      const parents = res.parents ?? [];
+      const children = res.children ?? [];
+      const statusParent = parents.find((p) => p.key === 'status');
+      this.statusOptions = statusParent
+        ? children.filter((c) => c.parentId === statusParent.id)
+        : [];
+    } catch {
+      this.statusOptions = [];
+    }
+  }
+
+  async loadTasks(page: number = this.taskCurrentPage): Promise<void> {
     try {
       const req: HistoryQueryRequest = {
-        page: 1,
-        pageSize: 200,
+        page,
+        pageSize: this.taskPageSize,
         isAllFilter: true,
+        status: this.selectedStatus !== 'all' ? this.selectedStatus : undefined,
       };
       const res = await firstValueFrom(this.historyService.getTask(req));
-      this.tasks = Array.isArray(res) ? res : ((res as any).items ?? []);
+      const normalized = this.normalizePagedResponse(res);
+      this.tasks = normalized.items;
+      this.taskCurrentPage = normalized.currentPage;
+      this.totalTaskPages = normalized.totalPages;
+      this.totalTaskCount = normalized.totalCount;
+      this.hasNextTaskPage = normalized.hasNextPage;
+
+      if (
+        this.selectedTask &&
+        !this.tasks.some((task) => task.id === this.selectedTask?.id)
+      ) {
+        this.selectedTask = null;
+      }
     } catch (ex: any) {
       this.toast.error('ไม่สามารถโหลด task ได้', {
         detail: ex?.error ?? ex?.message ?? String(ex),
@@ -112,11 +202,101 @@ export class WorkflowComponent implements OnInit {
     }
   }
 
+  onSearchChanged(): void {
+    // client-side search on current page
+  }
+
+  async onStatusChanged(value: string | number): Promise<void> {
+    this.selectedStatus = String(value || 'all');
+    this.taskCurrentPage = 1;
+    await this.loadTasks(1);
+  }
+
+  async previousTaskPage(): Promise<void> {
+    if (this.taskCurrentPage > 1) {
+      await this.loadTasks(this.taskCurrentPage - 1);
+    }
+  }
+
+  async nextTaskPage(): Promise<void> {
+    if (this.taskCurrentPage < this.totalTaskPages || this.hasNextTaskPage) {
+      await this.loadTasks(this.taskCurrentPage + 1);
+    }
+  }
+
+  selectTask(task: WorkflowTask): void {
+    this.selectedTask = task;
+  }
+
+  private normalizePagedResponse(
+    response: HistoryPagedResult<WorkflowTask> | WorkflowTask[],
+  ): {
+    items: WorkflowTask[];
+    currentPage: number;
+    totalPages: number;
+    totalCount: number | null;
+    hasNextPage: boolean;
+  } {
+    if (Array.isArray(response)) {
+      return {
+        items: response,
+        currentPage: this.taskCurrentPage,
+        totalPages:
+          response.length < this.taskPageSize
+            ? this.taskCurrentPage
+            : this.taskCurrentPage + 1,
+        totalCount: null,
+        hasNextPage: response.length === this.taskPageSize,
+      };
+    }
+
+    const items = response.items ?? [];
+    const currentPage =
+      response.currentPage ?? response.page ?? this.taskCurrentPage;
+    const totalCount =
+      response.totalCount ??
+      response.totalRows ??
+      response.totalRecords ??
+      response.rowCount ??
+      null;
+    const pageSize = response.pageSize ?? this.taskPageSize;
+    const totalPages =
+      response.totalPages ??
+      (typeof totalCount === 'number'
+        ? Math.max(1, Math.ceil(totalCount / pageSize))
+        : items.length < pageSize
+          ? currentPage
+          : currentPage + 1);
+    const hasNextPage =
+      response.hasNext ??
+      (typeof response.totalPages === 'number'
+        ? currentPage < response.totalPages
+        : items.length === pageSize);
+
+    return {
+      items,
+      currentPage,
+      totalPages,
+      totalCount,
+      hasNextPage,
+    };
+  }
+
+  goToTaskDetail(): void {
+    if (!this.modalTask?.id) {
+      return;
+    }
+    void this.router.navigate(['/history'], {
+      queryParams: { taskId: this.modalTask.id },
+    });
+  }
+
   isOnCanvas(task: WorkflowTask): boolean {
     return this.nodes.some((n) => n.type === 'task' && n.task?.id === task.id);
   }
 
   addNodeFromTask(task: WorkflowTask) {
+    this.selectTask(task);
     if (this.isOnCanvas(task)) return;
     const i = this.nodes.length;
     this.nodes.push({
@@ -163,7 +343,11 @@ export class WorkflowComponent implements OnInit {
   // ── Node drag ──────────────────────────────────────────
   onNodeMouseDown(e: MouseEvent, node: WFNode) {
     const target = e.target as HTMLElement;
-    if (target.closest('.port, .node-delete, .custom-label, .custom-note'))
+    if (
+      target.closest(
+        '.port, .node-delete, .custom-label, .custom-note, .node-open-detail',
+      )
+    )
       return;
     e.preventDefault();
     e.stopPropagation();
@@ -340,6 +524,7 @@ export class WorkflowComponent implements OnInit {
   onCanvasDrop(event: DragEvent) {
     event.preventDefault();
     if (!this.draggingTask) return;
+    this.selectTask(this.draggingTask);
     // Get drop position relative to canvas
     const rect = this.canvasWrapperEl.nativeElement.getBoundingClientRect();
     const x = (event.clientX - rect.left - this.panX) / this.zoom;
@@ -359,56 +544,207 @@ export class WorkflowComponent implements OnInit {
     this.draggingTask = null;
   }
 
-  saveWorkflow() {
-    const workflowId = 1;
-    if (this.connections.length === 0) {
-      this.toast.warning('ไม่มีเส้นเชื่อมให้บันทึก', {
-        duration: 2500,
-        showDetailOnClick: false,
-      });
+  onNodeTaskClick(event: MouseEvent, node: WFNode): void {
+    event.stopPropagation();
+    if (node.type === 'task' && node.task) {
+      this.selectTask(node.task);
+    }
+  }
+
+  openTaskDetailModal(event: MouseEvent, node: WFNode): void {
+    event.stopPropagation();
+    event.preventDefault();
+    if (node.type !== 'task' || !node.task) {
       return;
     }
+    this.selectTask(node.task);
+    this.modalTask = node.task;
+    this.isTaskDetailModalOpen = true;
+  }
 
-    const invalidConnection = this.connections.find((connection) => {
-      const fromNode = this.nodes.find(
-        (node) => node.id === connection.fromNodeId,
+  closeTaskDetailModal(): void {
+    this.isTaskDetailModalOpen = false;
+    this.modalTask = null;
+  }
+
+  private focusTaskFromRoute(): void {
+    const taskId = this.activatedRoute.snapshot.queryParamMap.get('taskId');
+    if (!taskId) {
+      return;
+    }
+    const task = this.tasks.find((item) => item.id === taskId);
+    if (!task) {
+      return;
+    }
+    this.selectTask(task);
+    if (!this.isOnCanvas(task)) {
+      this.addNodeFromTask(task);
+    }
+  }
+
+  private parseTaskId(taskId?: string): number | null {
+    if (!taskId) return null;
+    const value = Number(taskId);
+    return Number.isFinite(value) ? value : null;
+  }
+
+  private async loadOrCreateWorkflow(): Promise<void> {
+    try {
+      const detail = await firstValueFrom(
+        this.workflowService.getWorkflowDetail(DEFAULT_WORKFLOW_ID),
       );
-      const toNode = this.nodes.find((node) => node.id === connection.toNodeId);
-
-      return !fromNode?.task?.id || !toNode?.task?.id;
-    });
-
-    if (invalidConnection) {
-      this.toast.error('ยังบันทึกไม่ได้', {
-        detail:
-          'รองรับการบันทึกเฉพาะเส้นเชื่อมระหว่าง task ที่มี id จากระบบเท่านั้น',
+      this.workflowId = detail.workflow?.id ?? DEFAULT_WORKFLOW_ID;
+      this.hydrateCanvasFromWorkflow(detail.nodes ?? [], detail.edges ?? []);
+    } catch (ex: any) {
+      if (ex?.status === 404) {
+        const created = await firstValueFrom(
+          this.workflowService.createWorkflow({
+            name: 'Main Workflow',
+            description: 'Auto generated workflow',
+          }),
+        );
+        this.workflowId = created.id;
+        return;
+      }
+      this.toast.error('โหลด workflow ไม่สำเร็จ', {
+        detail: ex?.error ?? ex?.message ?? String(ex),
       });
-      return;
+    }
+  }
+
+  private hydrateCanvasFromWorkflow(
+    apiNodes: Array<{
+      id: number;
+      nodeType: string;
+      taskId?: number | null;
+      customName?: string | null;
+    }>,
+    apiEdges: Array<{ id: number; fromNodeId: number; toNodeId: number }>,
+  ): void {
+    const nodeIdMap = new Map<number, string>();
+    const hydratedNodes: WFNode[] = [];
+
+    for (const apiNode of apiNodes) {
+      const isTask = (apiNode.nodeType ?? '').toLowerCase() === 'task';
+      if (!isTask || apiNode.taskId == null) {
+        continue;
+      }
+
+      const task = this.tasks.find(
+        (item) => this.parseTaskId(item.id) === apiNode.taskId,
+      );
+      if (!task) {
+        continue;
+      }
+
+      const index = hydratedNodes.length;
+      const nodeId = `node-${task.id}`;
+      hydratedNodes.push({
+        id: nodeId,
+        backendNodeId: apiNode.id,
+        x: 80 + (index % 3) * 270,
+        y: 60 + Math.floor(index / 3) * 160,
+        type: 'task',
+        task,
+        label: task.taskName,
+        note: '',
+      });
+      nodeIdMap.set(apiNode.id, nodeId);
     }
 
-    const edge = this.connections[0];
-    const fromNode = this.nodes.find((node) => node.id === edge.fromNodeId);
-    const toNode = this.nodes.find((node) => node.id === edge.toNodeId);
-
-    if (!fromNode?.task?.id || !toNode?.task?.id) {
-      this.toast.error('ไม่พบข้อมูล node สำหรับบันทึก');
-      return;
-    }
-
-    this.workflowService
-      .createEdge(workflowId, {
-        fromNodeId: Number(fromNode.task.id),
-        toNodeId: Number(toNode.task.id),
+    const hydratedConnections: WFConnection[] = apiEdges
+      .map((edge) => {
+        const fromNodeId = nodeIdMap.get(edge.fromNodeId);
+        const toNodeId = nodeIdMap.get(edge.toNodeId);
+        if (!fromNodeId || !toNodeId) {
+          return null;
+        }
+        return {
+          id: `conn-${edge.id}`,
+          backendEdgeId: edge.id,
+          fromNodeId,
+          toNodeId,
+        } as WFConnection;
       })
-      .subscribe({
-        next: () => {
-          this.toast.success('บันทึกเส้นเชื่อมสำเร็จ');
-        },
-        error: (err) => {
-          this.toast.error('บันทึกเส้นเชื่อมไม่สำเร็จ', {
-            detail: err?.error?.message ?? err?.message ?? 'Unknown error',
-          });
-        },
+      .filter((item): item is WFConnection => item !== null);
+
+    if (hydratedNodes.length > 0) {
+      this.nodes = hydratedNodes;
+      this.connections = hydratedConnections;
+    }
+  }
+
+  async saveWorkflow(): Promise<void> {
+    if (!this.workflowId) {
+      await this.loadOrCreateWorkflow();
+    }
+
+    if (!this.workflowId) {
+      this.toast.error('ไม่พบ workflow สำหรับบันทึก');
+      return;
+    }
+
+    const workflowId = this.workflowId;
+
+    try {
+      const syncNodes: Array<{
+        clientNodeId: string;
+        nodeType: 'Task' | 'Custom';
+        taskId?: number | null;
+        customName?: string | null;
+      }> = [];
+
+      let skippedInvalidTaskId = 0;
+
+      for (const node of this.nodes) {
+        if (node.type !== 'task' || !node.task?.id) {
+          continue;
+        }
+
+        const parsedTaskId = this.parseTaskId(node.task.id);
+        if (parsedTaskId == null) {
+          skippedInvalidTaskId++;
+          continue;
+        }
+
+        syncNodes.push({
+          clientNodeId: node.id,
+          nodeType: 'Task',
+          taskId: parsedTaskId,
+          customName: null,
+        });
+      }
+
+      const syncEdges = this.connections.map((connection) => ({
+        fromClientNodeId: connection.fromNodeId,
+        toClientNodeId: connection.toNodeId,
+      }));
+
+      const syncResult = await firstValueFrom(
+        this.workflowService.syncGraph(workflowId, {
+          nodes: syncNodes,
+          edges: syncEdges,
+          replaceExistingEdges: true,
+        }),
+      );
+
+      this.toast.success(
+        `บันทึก workflow สำเร็จ (เพิ่มโหนด ${syncResult.createdNodes}, เพิ่มเส้น ${syncResult.createdEdges}, ลบเส้น ${syncResult.deletedEdges})`,
+      );
+
+      if (
+        skippedInvalidTaskId > 0 ||
+        (syncResult.skippedEdges ?? 0) > 0 ||
+        (syncResult.warnings?.length ?? 0) > 0
+      ) {
+        this.toast.warning('มีบางรายการที่ไม่ได้บันทึก', {
+          detail: `task id ไม่ใช่ตัวเลข: ${skippedInvalidTaskId} รายการ, edge ถูกข้าม: ${syncResult.skippedEdges ?? 0} รายการ`,
+        });
+      }
+    } catch (err: any) {
+      this.toast.error('บันทึกเส้นเชื่อมไม่สำเร็จ', {
+        detail: err?.error?.message ?? err?.message ?? 'Unknown error',
       });
+    }
   }
 }

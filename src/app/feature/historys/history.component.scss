@@ -358,6 +358,29 @@
   bottom: 20px;
   right: 40px;
   z-index: 1002;
+  display: flex;
+  gap: 10px;
+
+  .btn-go-workflow {
+    width: auto;
+    min-width: 140px;
+    padding: 12px 18px;
+    background-color: #10b981;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+
+    &:hover {
+      background-color: #059669;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    }
+  }
 
   .btn-save {
     width: auto;
@@ -463,7 +486,10 @@
     bottom: 10px;
     right: 15px;
     left: 15px;
+    display: grid;
+    grid-template-columns: 1fr;
 
+    .btn-go-workflow,
     .btn-save {
       width: 100%;
     }

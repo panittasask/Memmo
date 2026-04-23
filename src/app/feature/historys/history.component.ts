@@ -26,6 +26,7 @@ import {
   SettingsService,
 } from '../../shared/services/settings.service';
 import { ConfirmService } from '../../shared/services/confirm.service';
+import { ActivatedRoute, Router } from '@angular/router';
 
 interface HistoryItem {
   id: string;
@@ -57,6 +58,10 @@ export class HistoryComponent {
   private readonly toast = inject(ToastService);
   private readonly settingsService = inject(SettingsService);
   private readonly confirmService = inject(ConfirmService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+
+  private requestedTaskId: string | null = null;
 
   saveInProcess: boolean = false;
   selectedStatus = 'ทั้งหมด';
@@ -188,6 +193,7 @@ export class HistoryComponent {
       this.totalCount = normalized.totalCount;
       this.hasNextPage = normalized.hasNextPage;
       this.pageSize = normalized.pageSize;
+      this.tryOpenRequestedTask();
     } catch (ex: any) {
       this.toast.error('ไม่สามารถโหลดข้อมูลได้', {
         detail: ex?.error ?? ex?.message ?? String(ex),
@@ -247,7 +253,15 @@ export class HistoryComponent {
   }
 
   ngOnInit(): void {
+    this.requestedTaskId = this.route.snapshot.queryParamMap.get('taskId');
     this.loadSettings().then(() => this.fetchData());
+  }
+
+  goToWorkflowFromDetail(): void {
+    const taskId = this.formUpdate.controls.id.value;
+    void this.router.navigate(['/workflow'], {
+      queryParams: taskId ? { taskId } : undefined,
+    });
   }
 
   async loadSettings() {
@@ -416,5 +430,21 @@ export class HistoryComponent {
       hasNextPage,
       pageSize,
     };
+  }
+
+  private tryOpenRequestedTask(): void {
+    if (!this.requestedTaskId) {
+      return;
+    }
+
+    const item = this.data.find(
+      (history) => history.id === this.requestedTaskId,
+    );
+    if (!item) {
+      return;
+    }
+
+    this.selectedItem(item);
+    this.requestedTaskId = null;
   }
 }
