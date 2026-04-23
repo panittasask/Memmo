@@ -142,6 +142,19 @@ export class WorkflowComponent implements OnInit {
     return ['all', ...this.statusOptions.map((o) => o.name)];
   }
 
+  getStatusColor(status: string): string {
+    const color = this.statusOptions.find(
+      (o) =>
+        (o.name ?? '').trim().toLowerCase() ===
+        (status ?? '').trim().toLowerCase(),
+    )?.color;
+    return color || '#63b3ed';
+  }
+
+  getStatusBackgroundColor(status: string): string {
+    return `${this.getStatusColor(status)}26`;
+  }
+
   get displayedTasks(): WorkflowTask[] {
     const keyword = this.searchText.trim().toLowerCase();
     if (!keyword) {
@@ -618,6 +631,7 @@ export class WorkflowComponent implements OnInit {
       nodeType: string;
       taskId?: number | null;
       customName?: string | null;
+      externalTaskKey?: string | null;
     }>,
     apiEdges: Array<{ id: number; fromNodeId: number; toNodeId: number }>,
   ): void {
@@ -630,15 +644,23 @@ export class WorkflowComponent implements OnInit {
         continue;
       }
 
-      const task = this.tasks.find(
-        (item) => this.parseTaskId(item.id) === apiNode.taskId,
-      );
+      const task = this.tasks.find((item) => {
+        const numericMatched =
+          apiNode.taskId != null &&
+          this.parseTaskId(item.id) === apiNode.taskId;
+        const externalMatched =
+          apiNode.taskId == null &&
+          !!(apiNode.externalTaskKey ?? apiNode.customName) &&
+          String(item.id).trim() ===
+            String(apiNode.externalTaskKey ?? apiNode.customName).trim();
+        return numericMatched || externalMatched;
+      });
       if (!task) {
         continue;
       }
 
       const index = hydratedNodes.length;
-      const nodeId = `node-${task.id}`;
+      const nodeId = `node-${apiNode.id}`;
       hydratedNodes.push({
         id: nodeId,
         backendNodeId: apiNode.id,
@@ -647,6 +669,26 @@ export class WorkflowComponent implements OnInit {
         type: 'task',
         task,
         label: task.taskName,
+        note: '',
+      });
+      nodeIdMap.set(apiNode.id, nodeId);
+    }
+
+    for (const apiNode of apiNodes) {
+      const isCustom = (apiNode.nodeType ?? '').toLowerCase() === 'custom';
+      if (!isCustom) {
+        continue;
+      }
+
+      const index = hydratedNodes.length;
+      const nodeId = `custom-${apiNode.id}`;
+      hydratedNodes.push({
+        id: nodeId,
+        backendNodeId: apiNode.id,
+        x: 100 + (index % 3) * 260,
+        y: 80 + Math.floor(index / 3) * 180,
+        type: 'custom',
+        label: apiNode.customName?.trim() || 'Custom Box',
         note: '',
       });
       nodeIdMap.set(apiNode.id, nodeId);
@@ -692,17 +734,45 @@ export class WorkflowComponent implements OnInit {
         nodeType: 'Task' | 'Custom';
         taskId?: number | null;
         customName?: string | null;
+        externalTaskKey?: string | null;
       }> = [];
 
       let skippedInvalidTaskId = 0;
+      let fallbackExternalTaskId = 0;
 
       for (const node of this.nodes) {
-        if (node.type !== 'task' || !node.task?.id) {
+        if (node.type === 'custom') {
+          const customName =
+            String(node.label ?? '').trim() ||
+            String(node.note ?? '').trim() ||
+            node.id;
+          syncNodes.push({
+            clientNodeId: node.id,
+            nodeType: 'Custom',
+            taskId: null,
+            customName,
+            externalTaskKey: null,
+          });
+          continue;
+        }
+
+        if (!node.task?.id) {
           continue;
         }
 
         const parsedTaskId = this.parseTaskId(node.task.id);
-        if (parsedTaskId == null) {
+        if (parsedTaskId != null) {
+          syncNodes.push({
+            clientNodeId: node.id,
+            nodeType: 'Task',
+            taskId: parsedTaskId,
+            customName: null,
+          });
+          continue;
+        }
+
+        const externalTaskId = String(node.task.id ?? '').trim();
+        if (!externalTaskId) {
           skippedInvalidTaskId++;
           continue;
         }
@@ -710,9 +780,11 @@ export class WorkflowComponent implements OnInit {
         syncNodes.push({
           clientNodeId: node.id,
           nodeType: 'Task',
-          taskId: parsedTaskId,
-          customName: null,
+          taskId: null,
+          customName: externalTaskId,
+          externalTaskKey: externalTaskId,
         });
+        fallbackExternalTaskId++;
       }
 
       const syncEdges = this.connections.map((connection) => ({
@@ -738,7 +810,7 @@ export class WorkflowComponent implements OnInit {
         (syncResult.warnings?.length ?? 0) > 0
       ) {
         this.toast.warning('มีบางรายการที่ไม่ได้บันทึก', {
-          detail: `task id ไม่ใช่ตัวเลข: ${skippedInvalidTaskId} รายการ, edge ถูกข้าม: ${syncResult.skippedEdges ?? 0} รายการ`,
+          detail: `task id ไม่ใช่ตัวเลขและไม่มีค่า fallback: ${skippedInvalidTaskId} รายการ, edge ถูกข้าม: ${syncResult.skippedEdges ?? 0} รายการ`,
         });
       }
     } catch (err: any) {

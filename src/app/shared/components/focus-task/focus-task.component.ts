@@ -24,6 +24,7 @@ import {
 } from '../../services/history.service';
 import { ToastService } from '../../services/toast.service';
 import { ConfirmService } from '../../services/confirm.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-focus-task',
@@ -44,6 +45,7 @@ export class FocusTaskComponent {
   private readonly settingsService = inject(SettingsService);
   private readonly toast = inject(ToastService);
   private readonly confirmService = inject(ConfirmService);
+  private readonly router = inject(Router);
 
   isLoading = false;
   isAddNew = false;
@@ -133,6 +135,21 @@ export class FocusTaskComponent {
       return;
     }
     this.openEdit(item);
+  }
+
+  goToWorkflowForItem(event: MouseEvent, item: any): void {
+    event.stopPropagation();
+    const taskId = String(item?.id ?? '').trim();
+    void this.router.navigate(['/workflow'], {
+      queryParams: taskId ? { taskId } : undefined,
+    });
+  }
+
+  goToWorkflowFromEdit(): void {
+    const taskId = String(this.editingItemId ?? '').trim();
+    void this.router.navigate(['/workflow'], {
+      queryParams: taskId ? { taskId } : undefined,
+    });
   }
 
   async onDelete(event: MouseEvent, item: any): Promise<void> {

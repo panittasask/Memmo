@@ -44,7 +44,13 @@
           <div class="task-name">{{ task.taskName }}</div>
           <div class="task-meta">
             <span class="project-tag">{{ task.projectName }}</span>
-            <span class="status-tag">{{ task.status }}</span>
+            <span
+              class="status-tag"
+              [style.background]="getStatusBackgroundColor(task.status)"
+              [style.color]="getStatusColor(task.status)"
+            >
+              {{ task.status }}
+            </span>
           </div>
         </div>
       }
@@ -154,7 +160,15 @@
             <div class="node-body">
               <div class="node-task-name">{{ node.task?.taskName }}</div>
               <div class="node-meta">
-                <span class="node-status">{{ node.task?.status }}</span>
+                <span
+                  class="node-status"
+                  [style.background]="
+                    getStatusBackgroundColor(node.task?.status || '')
+                  "
+                  [style.color]="getStatusColor(node.task?.status || '')"
+                >
+                  {{ node.task?.status }}
+                </span>
                 <span class="node-duration">{{ node.task?.duration }}h</span>
               </div>
               <button

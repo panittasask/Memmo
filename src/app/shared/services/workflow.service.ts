@@ -14,6 +14,7 @@ export interface WorkflowNodeItem {
   nodeType: string;
   taskId?: number | null;
   customName?: string | null;
+  externalTaskKey?: string | null;
   childNodeIds?: number[];
 }
 
@@ -34,6 +35,7 @@ export interface WorkflowSyncNodeItem {
   nodeType: 'Task' | 'Custom';
   taskId?: number | null;
   customName?: string | null;
+  externalTaskKey?: string | null;
 }
 
 export interface WorkflowSyncEdgeItem {
