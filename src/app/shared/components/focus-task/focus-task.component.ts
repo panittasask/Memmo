@@ -194,6 +194,7 @@ export class FocusTaskComponent {
       status: item?.status,
       startDate: new Date(),
       nameType: 'important',
+      taskGroupId: item?.taskGroupId ?? item?.id,
     };
 
     const clearFocusModel = {

@@ -7,7 +7,8 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { DatepickerComponent } from '../../shared/components/datepicker/datepicker.component';
 import { DropdownListComponent } from '../../shared/components/dropdown-list/dropdown-list.component';
 import { firstValueFrom } from 'rxjs';
@@ -79,6 +80,13 @@ export class SideBarComponent {
   ngOnInit() {
     this.routes.navigate([this.currentRoute]);
     this.loadSettings();
+
+    this.routes.events
+      .pipe(filter((e) => e instanceof NavigationEnd))
+      .subscribe((e: NavigationEnd) => {
+        const segment = e.urlAfterRedirects.split('/')[1]?.split('?')[0] ?? '';
+        this.currentRoute = segment || 'summary';
+      });
   }
 
   async loadSettings() {

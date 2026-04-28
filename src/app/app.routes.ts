@@ -31,6 +31,20 @@ routes.push(
       ),
   },
   {
+    path: 'email-sent',
+    loadComponent: () =>
+      import('../app/feature/email-sent/email-sent.component').then(
+        (m) => m.EmailSentComponent,
+      ),
+  },
+  {
+    path: 'verify-email',
+    loadComponent: () =>
+      import('../app/feature/verify-email/verify-email.component').then(
+        (m) => m.VerifyEmailComponent,
+      ),
+  },
+  {
     path: 'summary',
     loadComponent: () =>
       import('../app/feature/summary/summary.component').then(
@@ -50,7 +64,7 @@ routes.push(
       import('../app/feature/historys/history.component').then(
         (m) => m.HistoryComponent,
       ),
-    canActivate:[authGuard]
+    canActivate: [authGuard],
   },
   {
     path: 'analytics',

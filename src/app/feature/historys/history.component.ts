@@ -324,6 +324,7 @@ export class HistoryComponent {
       status: item.status,
       hyperlink: item.hyperlink,
       startDate: new Date(),
+      taskGroupId: item.taskGroupId ?? item.id,
     };
     try {
       const result = await firstValueFrom(

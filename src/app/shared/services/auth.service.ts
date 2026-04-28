@@ -22,6 +22,10 @@ export interface AuthResponse {
   message: string;
 }
 
+export interface RegisterResponse {
+  message: string;
+}
+
 export interface RefreshTokenRequest {
   refreshToken: string;
 }
@@ -39,17 +43,22 @@ export class AuthService {
     return this.appConfig.getApiBaseUrl();
   }
 
-  register(payload: RegisterRequest): Observable<AuthResponse> {
+  register(payload: RegisterRequest): Observable<RegisterResponse> {
     const url = `${this.baseUrl}/Auth/register`;
-    return this.http
-      .post<AuthResponse>(url, payload)
-      .pipe(tap((response) => this.setAuthTokens(response)));
+    return this.http.post<RegisterResponse>(url, payload);
   }
 
   login(payload: LoginRequest): Observable<AuthResponse> {
     const url = `${this.baseUrl}/Auth/login`;
     return this.http
       .post<AuthResponse>(url, payload)
+      .pipe(tap((response) => this.setAuthTokens(response)));
+  }
+
+  verifyEmail(token: string): Observable<AuthResponse> {
+    const url = `${this.baseUrl}/Auth/verify-email?token=${encodeURIComponent(token)}`;
+    return this.http
+      .get<AuthResponse>(url)
       .pipe(tap((response) => this.setAuthTokens(response)));
   }
 

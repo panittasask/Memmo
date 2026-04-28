@@ -23,7 +23,10 @@ export class RegisterComponent {
     fullName: new FormControl('', [Validators.required]),
     userName: new FormControl('', [Validators.required]),
     email: new FormControl('', [Validators.required, Validators.email]),
-    password: new FormControl('', [Validators.required, Validators.minLength(6)]),
+    password: new FormControl('', [
+      Validators.required,
+      Validators.minLength(6),
+    ]),
     confirmPassword: new FormControl('', [Validators.required]),
   });
   isSubmitting = false;
@@ -64,7 +67,10 @@ export class RegisterComponent {
   }
 
   onSubmit() {
-    if (this.form.invalid || this.password.value !== this.confirmPassword.value) {
+    if (
+      this.form.invalid ||
+      this.password.value !== this.confirmPassword.value
+    ) {
       this.form.markAllAsTouched();
       return;
     }
@@ -80,16 +86,25 @@ export class RegisterComponent {
     };
 
     this.authService.register(payload).subscribe({
-      next: () => {
+      next: (response: any) => {
         this.isSubmitting = false;
-        this.toast.success('สมัครสมาชิกสำเร็จ');
-        this.router.navigate(['/history']);
+        const requiresVerification =
+          response?.emailVerificationRequired ?? true;
+        const message =
+          response?.message ??
+          (requiresVerification
+            ? 'สมัครสมาชิกสำเร็จ กรุณายืนยันอีเมลของคุณ'
+            : 'สมัครสมาชิกสำเร็จ สามารถเข้าสู่ระบบได้ทันที');
+        this.toast.success(message);
+        this.router.navigate([requiresVerification ? '/email-sent' : '/login']);
       },
       error: (error) => {
         this.isSubmitting = false;
         this.errorMessage =
           error?.error ?? 'Register failed. Please check your information.';
-        this.toast.error(this.errorMessage, { detail: JSON.stringify(error?.error ?? error?.message, null, 2) });
+        this.toast.error(this.errorMessage, {
+          detail: JSON.stringify(error?.error ?? error?.message, null, 2),
+        });
       },
     });
   }
