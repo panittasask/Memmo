@@ -78,12 +78,15 @@ export class SideBarComponent {
   private readonly routes = inject(Router);
   isAddNew: boolean = false;
   ngOnInit() {
-    this.routes.navigate([this.currentRoute]);
+    // Sync currentRoute with the actual URL on first load (don't force-navigate to 'summary')
+    const initialSegment = this.routes.url.split('/')[1]?.split('?')[0] ?? '';
+    this.currentRoute = initialSegment || 'summary';
+
     this.loadSettings();
 
     this.routes.events
-      .pipe(filter((e) => e instanceof NavigationEnd))
-      .subscribe((e: NavigationEnd) => {
+      .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
+      .subscribe((e) => {
         const segment = e.urlAfterRedirects.split('/')[1]?.split('?')[0] ?? '';
         this.currentRoute = segment || 'summary';
       });
