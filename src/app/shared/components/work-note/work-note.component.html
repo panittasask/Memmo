@@ -1,0 +1,95 @@
+<div class="work-note-wrapper">
+  <div class="wn-header">
+    <div class="title-group">
+      <span class="title">Work Notes</span>
+      <span class="sub-title">เก็บโน้ตและรายละเอียดงาน</span>
+    </div>
+    <div class="header-actions">
+      <button class="btn-add" (click)="openAdd()">
+        <i class="fa-solid fa-plus"></i>
+        เพิ่ม
+      </button>
+    </div>
+  </div>
+
+  @if (isLoading) {
+    <div class="wn-loading">
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      <span>กำลังโหลด...</span>
+    </div>
+  } @else {
+    <div class="wn-list">
+      @if (notes.length === 0) {
+        <div class="wn-empty">ยังไม่มี Work Note</div>
+      }
+      @for (note of notes; track trackNote($index, note)) {
+        <div class="wn-item" (click)="openEdit(note)">
+          <div class="wn-item-icon">
+            <i class="fa-solid fa-note-sticky"></i>
+          </div>
+          <div class="wn-item-info">
+            <div class="wn-item-title">{{ note.title }}</div>
+          </div>
+          <button
+            class="wn-item-delete"
+            (click)="onDelete($event, note)"
+            title="ลบ"
+          >
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!-- Add / Edit Form Modal -->
+@if (isFormOpen) {
+  <div class="wn-modal-backdrop" (click)="closeForm()">
+    <div class="wn-modal" (click)="$event.stopPropagation()" [formGroup]="form">
+      <div class="wn-modal-header">
+        <div class="wn-modal-title">
+          <i
+            class="fa-solid"
+            [class.fa-plus]="!isEditMode"
+            [class.fa-note-sticky]="isEditMode"
+          ></i>
+          {{ isEditMode ? "แก้ไข Work Note" : "เพิ่ม Work Note" }}
+        </div>
+        <button class="wn-modal-close" (click)="closeForm()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="wn-modal-body">
+        <div class="wn-field">
+          <label>หัวข้อ <span class="required">*</span></label>
+          <input
+            formControlName="title"
+            type="text"
+            class="form-input"
+            placeholder="เช่น Server Login, Wifi office"
+          />
+        </div>
+        <div class="wn-field">
+          <label>รายละเอียด</label>
+          <textarea
+            formControlName="detail"
+            class="form-input"
+            rows="8"
+            placeholder="พิมพ์รายละเอียด..."
+          ></textarea>
+        </div>
+      </div>
+      <div class="wn-modal-footer">
+        <button
+          class="btn-save"
+          (click)="onSave()"
+          [disabled]="form.invalid || saveInProcess"
+        >
+          <i class="fa-solid fa-floppy-disk"></i>
+          บันทึก
+        </button>
+      </div>
+    </div>
+  </div>
+}

@@ -3,9 +3,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import { DonutChartComponent, DonutSlice } from '../../shared/components/donut-chart/donut-chart.component';
+import {
+  DonutChartComponent,
+  DonutSlice,
+} from '../../shared/components/donut-chart/donut-chart.component';
 import { DropdownListComponent } from '../../shared/components/dropdown-list/dropdown-list.component';
 import { FocusTaskComponent } from '../../shared/components/focus-task/focus-task.component';
+import { WorkNoteComponent } from '../../shared/components/work-note/work-note.component';
 import { DatepickerComponent } from '../../shared/components/datepicker/datepicker.component';
 import { DashboardService } from '../../shared/services/dashboard.service';
 import { HistoryService } from '../../shared/services/history.service';
@@ -15,9 +19,17 @@ import { ToastService } from '../../shared/services/toast.service';
 @Component({
   selector: 'app-summary',
   standalone: true,
-  imports: [CommonModule, FormsModule, DonutChartComponent, DropdownListComponent, FocusTaskComponent, DatepickerComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    DonutChartComponent,
+    DropdownListComponent,
+    FocusTaskComponent,
+    WorkNoteComponent,
+    DatepickerComponent,
+  ],
   templateUrl: './summary.component.html',
-  styleUrl: './summary.component.scss'
+  styleUrl: './summary.component.scss',
 })
 export class SummaryComponent {
   private readonly dashboardService = inject(DashboardService);
@@ -36,7 +48,20 @@ export class SummaryComponent {
 
   private statusColorMap = new Map<string, string>();
 
-  private readonly thaiMonths = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+  private readonly thaiMonths = [
+    'มกราคม',
+    'กุมภาพันธ์',
+    'มีนาคม',
+    'เมษายน',
+    'พฤษภาคม',
+    'มิถุนายน',
+    'กรกฎาคม',
+    'สิงหาคม',
+    'กันยายน',
+    'ตุลาคม',
+    'พฤศจิกายน',
+    'ธันวาคม',
+  ];
 
   readonly periodOptions = ['สัปดาห์', 'เดือน'];
   selectedPeriod = 'สัปดาห์';
@@ -103,9 +128,13 @@ export class SummaryComponent {
     this.isDailyReportLoading = true;
     this.dailyReport = null;
     try {
-      this.dailyReport = await firstValueFrom(this.historyService.summaryToday(this.dailyReportDate));
+      this.dailyReport = await firstValueFrom(
+        this.historyService.summaryToday(this.dailyReportDate),
+      );
     } catch (ex: any) {
-      this.toast.error('ไม่สามารถโหลดรายงานรายวันได้', { detail: ex?.error ?? ex?.message ?? String(ex) });
+      this.toast.error('ไม่สามารถโหลดรายงานรายวันได้', {
+        detail: ex?.error ?? ex?.message ?? String(ex),
+      });
     } finally {
       this.isDailyReportLoading = false;
     }
@@ -135,11 +164,13 @@ export class SummaryComponent {
       const res = await firstValueFrom(this.settingsService.getSettings());
       const parents = res.parents ?? [];
       const children = res.children ?? [];
-      const statusParent = parents.find(p => p.key === 'status');
+      const statusParent = parents.find((p) => p.key === 'status');
       if (statusParent) {
         children
-          .filter(c => c.parentId === statusParent.id && c.color)
-          .forEach(c => this.statusColorMap.set(c.name.toLowerCase(), c.color!));
+          .filter((c) => c.parentId === statusParent.id && c.color)
+          .forEach((c) =>
+            this.statusColorMap.set(c.name.toLowerCase(), c.color!),
+          );
       }
     } catch {
       // ignore — colors are optional
@@ -149,27 +180,44 @@ export class SummaryComponent {
   private async buildMonthOptions(): Promise<void> {
     try {
       const result = await firstValueFrom(
-        this.historyService.getTask({ page: 1, pageSize: 9999, isAllFilter: true }),
+        this.historyService.getTask({
+          page: 1,
+          pageSize: 9999,
+          isAllFilter: true,
+        }),
       );
-      const items: any[] = Array.isArray(result) ? result : (result as any)?.items ?? [];
+      const items: any[] = Array.isArray(result)
+        ? result
+        : ((result as any)?.items ?? []);
       const seen = new Set<string>();
       const months: string[] = [];
       for (const item of items) {
         const d = new Date(item.startDate);
         if (isNaN(d.getTime())) continue;
         const key = `${this.thaiMonths[d.getMonth()]} ${d.getFullYear()}`;
-        if (!seen.has(key)) { seen.add(key); months.push(key); }
+        if (!seen.has(key)) {
+          seen.add(key);
+          months.push(key);
+        }
       }
       months.sort((a, b) => {
-        const pa = a.split(' '), pb = b.split(' ');
-        const ya = parseInt(pa[1], 10), yb = parseInt(pb[1], 10);
+        const pa = a.split(' '),
+          pb = b.split(' ');
+        const ya = parseInt(pa[1], 10),
+          yb = parseInt(pb[1], 10);
         if (ya !== yb) return yb - ya;
         return this.thaiMonths.indexOf(pb[0]) - this.thaiMonths.indexOf(pa[0]);
       });
-      this.monthOptions = months.length ? months : [`${this.thaiMonths[new Date().getMonth()]} ${new Date().getFullYear()}`];
+      this.monthOptions = months.length
+        ? months
+        : [
+            `${this.thaiMonths[new Date().getMonth()]} ${new Date().getFullYear()}`,
+          ];
     } catch {
       const now = new Date();
-      this.monthOptions = [`${this.thaiMonths[now.getMonth()]} ${now.getFullYear()}`];
+      this.monthOptions = [
+        `${this.thaiMonths[now.getMonth()]} ${now.getFullYear()}`,
+      ];
     }
     this.selectedMonth = this.monthOptions[0];
   }
@@ -194,9 +242,18 @@ export class SummaryComponent {
       const res = await firstValueFrom(
         this.dashboardService.getChartData(startDate, endDate),
       );
-      this.statusSlices = (res?.statuses ?? []).map(s => ({ label: s.status ?? '(ไม่ระบุ)', value: s.taskCount }));
-      this.projectSlices = (res?.projects ?? []).map(p => ({ label: p.projectName ?? '(ไม่ระบุ)', value: p.totalDuration }));
-      this.projectTaskSlices = (res?.projects ?? []).map(p => ({ label: p.projectName ?? '(ไม่ระบุ)', value: p.taskCount }));
+      this.statusSlices = (res?.statuses ?? []).map((s) => ({
+        label: s.status ?? '(ไม่ระบุ)',
+        value: s.taskCount,
+      }));
+      this.projectSlices = (res?.projects ?? []).map((p) => ({
+        label: p.projectName ?? '(ไม่ระบุ)',
+        value: p.totalDuration,
+      }));
+      this.projectTaskSlices = (res?.projects ?? []).map((p) => ({
+        label: p.projectName ?? '(ไม่ระบุ)',
+        value: p.taskCount,
+      }));
     } catch (ex: any) {
       this.toast.error('ไม่สามารถโหลดข้อมูลได้', {
         detail: ex?.error ?? ex?.message ?? String(ex),
@@ -212,9 +269,13 @@ export class SummaryComponent {
   private async loadRecentTasks(): Promise<void> {
     try {
       const res = await firstValueFrom(
-        this.historyService.getTask({ page: 1, pageSize: 8, isAllFilter: true }),
+        this.historyService.getTask({
+          page: 1,
+          pageSize: 8,
+          isAllFilter: true,
+        }),
       );
-      const items = Array.isArray(res) ? res : (res as any)?.items ?? [];
+      const items = Array.isArray(res) ? res : ((res as any)?.items ?? []);
       this.recentTasks = items;
     } catch {
       this.recentTasks = [];

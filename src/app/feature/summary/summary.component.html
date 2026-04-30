@@ -8,7 +8,10 @@
       </div>
     </div> -->
     <div class="body">
-      <app-focus-task></app-focus-task>
+      <div class="top-row">
+        <app-focus-task></app-focus-task>
+        <app-work-note></app-work-note>
+      </div>
 
       <div class="chart-controls">
         <div class="chart-stats">
@@ -22,12 +25,12 @@
           </div>
         </div>
         <div class="dropdown-group">
-        <app-dropdown-list
+          <app-dropdown-list
             [value]="selectedPeriod"
             [options]="periodOptions"
             (valueChange)="onPeriodChange($event)"
           ></app-dropdown-list>
-          @if (selectedPeriod === 'เดือน') {
+          @if (selectedPeriod === "เดือน") {
             <app-dropdown-list
               [value]="selectedMonth"
               [options]="monthOptions"
@@ -84,20 +87,38 @@
           <div class="activity-item">
             <div class="activity-dot"></div>
             <div class="activity-info">
-              <div class="activity-name">{{ task.taskName ?? task.description ?? '(ไม่ระบุ)' }}</div>
+              <div class="activity-name">
+                {{ task.taskName ?? task.description ?? "(ไม่ระบุ)" }}
+              </div>
               <div class="activity-meta">
-                <span class="activity-project">{{ task.projectName ?? '-' }}</span>
+                <span class="activity-project">{{
+                  task.projectName ?? "-"
+                }}</span>
                 @if (task.status) {
                   <span
                     class="activity-status"
-                    [style.background]="getStatusColor(task.status) ? getStatusColor(task.status) + '25' : null"
+                    [style.background]="
+                      getStatusColor(task.status)
+                        ? getStatusColor(task.status) + '25'
+                        : null
+                    "
                     [style.color]="getStatusColor(task.status) || null"
-                    [style.border]="getStatusColor(task.status) ? '1px solid ' + getStatusColor(task.status) + '60' : null"
-                    [class.status-done]="!getStatusColor(task.status) && task.status?.toLowerCase() === 'done'"
-                  >{{ task.status }}</span>
+                    [style.border]="
+                      getStatusColor(task.status)
+                        ? '1px solid ' + getStatusColor(task.status) + '60'
+                        : null
+                    "
+                    [class.status-done]="
+                      !getStatusColor(task.status) &&
+                      task.status?.toLowerCase() === 'done'
+                    "
+                    >{{ task.status }}</span
+                  >
                 }
                 @if (task.startDate ?? task.date) {
-                  <span class="activity-date">{{ (task.startDate ?? task.date) | date:'d MMM':'':'th' }}</span>
+                  <span class="activity-date">{{
+                    task.startDate ?? task.date | date: "d MMM" : "" : "th"
+                  }}</span>
                 }
               </div>
             </div>
@@ -174,15 +195,24 @@
               <tbody>
                 @for (task of dailyReport.tasks; track task.taskId) {
                   <tr>
-                    <td>{{ task.projectName ?? '-' }}</td>
-                    <td>{{ task.taskName ?? '-' }}</td>
+                    <td>{{ task.projectName ?? "-" }}</td>
+                    <td>{{ task.taskName ?? "-" }}</td>
                     <td>
                       <span
                         class="dr-status-badge"
-                        [style.background]="getStatusColor(task.status) ? getStatusColor(task.status) + '22' : '#f1f5f9'"
+                        [style.background]="
+                          getStatusColor(task.status)
+                            ? getStatusColor(task.status) + '22'
+                            : '#f1f5f9'
+                        "
                         [style.color]="getStatusColor(task.status) || '#475569'"
-                        [style.border]="getStatusColor(task.status) ? '1px solid ' + getStatusColor(task.status) + '55' : '1px solid #e2e8f0'"
-                      >{{ task.status ?? '-' }}</span>
+                        [style.border]="
+                          getStatusColor(task.status)
+                            ? '1px solid ' + getStatusColor(task.status) + '55'
+                            : '1px solid #e2e8f0'
+                        "
+                        >{{ task.status ?? "-" }}</span
+                      >
                     </td>
                     <td class="text-right">{{ task.duration ?? 0 }}</td>
                   </tr>
