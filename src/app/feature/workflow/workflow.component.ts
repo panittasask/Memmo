@@ -908,16 +908,26 @@ export class WorkflowComponent implements OnInit {
 
   async saveWorkflow(): Promise<void> {
     if (!this.workflowId) {
-      if (!this.selectedTask?.id) {
+      const taskForCreate =
+        this.selectedTask ??
+        this.nodes.find(
+          (node): node is WFNode & { type: 'task'; task: WorkflowTask } =>
+            node.type === 'task' && !!node.task?.id,
+        )?.task ??
+        null;
+
+      if (!taskForCreate?.id) {
         this.toast.error('กรุณาเลือก task ก่อนบันทึก workflow');
         return;
       }
 
+      this.selectedTask = taskForCreate;
+
       try {
         const created = await firstValueFrom(
           this.workflowService.createWorkflow({
-            name: `Workflow: ${this.selectedTask.taskName || this.selectedTask.id}`,
-            description: `Created from task ${this.selectedTask.id}`,
+            name: `Workflow: ${taskForCreate.taskName || taskForCreate.id}`,
+            description: `Created from task ${taskForCreate.id}`,
           }),
         );
         this.workflowId = created.id;
