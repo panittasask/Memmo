@@ -504,3 +504,385 @@
     }
   }
 }
+
+@media (max-width: 1100px) {
+  .summary-container {
+    flex-direction: column;
+    height: auto;
+
+    .summary-chart-container {
+      flex: 1;
+      min-height: 0;
+      padding: 14px;
+
+      .body {
+        .chart-controls {
+          flex-direction: column;
+          align-items: stretch;
+          gap: 10px;
+
+          .chart-stats {
+            width: 100%;
+            flex-wrap: wrap;
+
+            .stat-card {
+              flex: 1;
+              min-width: 120px;
+            }
+          }
+
+          .dropdown-group {
+            width: 100%;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+
+            app-dropdown-list {
+              flex: 1;
+              min-width: 130px;
+            }
+          }
+        }
+
+        .charts-row {
+          flex-direction: column;
+
+          .chart-card {
+            min-width: unset;
+            flex: 1;
+            width: 100%;
+          }
+        }
+      }
+    }
+
+    .summary-activity {
+      flex: 1;
+      min-height: 250px;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .summary-container {
+    gap: 8px;
+
+    .summary-chart-container {
+      padding: 10px;
+      overflow-y: auto;
+
+      .body {
+        .top-row {
+          gap: 10px;
+          margin-bottom: 12px;
+        }
+
+        .chart-controls {
+          margin-bottom: 12px;
+
+          .chart-stats {
+            gap: 8px;
+
+            .stat-card {
+              padding: 8px 12px;
+
+              .stat-value {
+                font-size: 18px;
+              }
+
+              .stat-label {
+                font-size: 11px;
+              }
+            }
+          }
+
+          .dropdown-group {
+            app-dropdown-list {
+              min-width: 110px;
+
+              ::ng-deep .dropdown-trigger {
+                font-size: 13px;
+              }
+            }
+          }
+        }
+
+        .charts-row {
+          gap: 12px;
+
+          .chart-card {
+            padding: 10px;
+
+            .chart-card-title {
+              font-size: 12px;
+              margin-bottom: 8px;
+            }
+          }
+        }
+      }
+    }
+
+    .summary-activity {
+      .recent-activity {
+        .body {
+          padding: 8px;
+
+          .activity-item {
+            gap: 6px;
+            padding: 6px 4px;
+
+            .activity-name {
+              font-size: 12px;
+            }
+
+            .activity-meta {
+              gap: 4px;
+
+              .activity-project,
+              .activity-status,
+              .activity-date {
+                font-size: 10px;
+              }
+            }
+
+            .activity-duration {
+              font-size: 11px;
+            }
+          }
+        }
+      }
+
+      .quick-action {
+        .body {
+          padding: 12px;
+          gap: 6px;
+
+          .quick-button {
+            font-size: 12px;
+            padding: 8px 12px;
+            gap: 6px;
+
+            i {
+              font-size: 13px;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .daily-report-modal {
+    width: calc(100vw - 20px);
+    max-height: 85vh;
+
+    .dr-header {
+      padding: 12px 16px;
+      flex-wrap: wrap;
+      gap: 8px;
+
+      .dr-title {
+        flex: 1;
+        min-width: 0;
+        font-size: 15px;
+      }
+
+      .dr-header-right {
+        flex: 1;
+        min-width: 200px;
+        justify-content: flex-end;
+
+        app-datepicker {
+          flex: 1;
+          min-width: 140px;
+        }
+      }
+    }
+
+    .dr-stats {
+      padding: 12px 16px;
+      gap: 8px;
+
+      .dr-stat-card {
+        padding: 10px 12px;
+
+        .dr-stat-value {
+          font-size: 20px;
+        }
+
+        .dr-stat-label {
+          font-size: 11px;
+        }
+      }
+    }
+
+    .dr-table-wrapper {
+      padding: 0 16px 16px;
+
+      .dr-table {
+        font-size: 12px;
+
+        th {
+          padding: 6px 8px;
+          font-size: 11px;
+        }
+
+        td {
+          padding: 8px 8px;
+          font-size: 12px;
+        }
+
+        .dr-status-badge {
+          padding: 1px 6px;
+          font-size: 10px;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 560px) {
+  .summary-container {
+    .summary-chart-container {
+      padding: 8px;
+
+      .body {
+        .chart-controls {
+          flex-direction: column;
+          gap: 8px;
+
+          .chart-stats {
+            width: 100%;
+
+            .stat-card {
+              flex: 1;
+              min-width: auto;
+              padding: 8px 10px;
+            }
+          }
+        }
+
+        .charts-row {
+          gap: 10px;
+
+          .chart-card {
+            padding: 8px;
+
+            .chart-card-title {
+              font-size: 11px;
+            }
+          }
+        }
+      }
+    }
+
+    .summary-activity {
+      .recent-activity {
+        .header {
+          font-size: 15px;
+          text-indent: 12px;
+          padding: 8px 0;
+        }
+
+        .body {
+          padding: 6px;
+
+          .activity-item {
+            gap: 6px;
+            padding: 4px 2px;
+
+            .activity-name {
+              font-size: 11px;
+            }
+
+            .activity-meta {
+              gap: 2px;
+
+              .activity-project,
+              .activity-status,
+              .activity-date {
+                font-size: 9px;
+              }
+            }
+
+            .activity-duration {
+              font-size: 10px;
+            }
+          }
+        }
+      }
+
+      .quick-action {
+        .header {
+          font-size: 15px;
+          text-indent: 12px;
+          padding: 8px 0;
+        }
+
+        .body {
+          padding: 10px;
+          gap: 5px;
+
+          .quick-button {
+            font-size: 11px;
+            padding: 8px 10px;
+            gap: 5px;
+
+            i {
+              font-size: 12px;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .daily-report-modal {
+    max-height: 90vh;
+
+    .dr-header {
+      padding: 10px 12px;
+
+      .dr-title {
+        font-size: 14px;
+      }
+
+      .dr-header-right {
+        flex-direction: column;
+        justify-content: flex-start;
+
+        app-datepicker {
+          width: 100%;
+        }
+      }
+    }
+
+    .dr-stats {
+      padding: 10px 12px;
+      gap: 6px;
+
+      .dr-stat-card {
+        padding: 8px 10px;
+
+        .dr-stat-value {
+          font-size: 18px;
+        }
+      }
+    }
+
+    .dr-table-wrapper {
+      padding: 0 12px 12px;
+
+      .dr-table {
+        font-size: 11px;
+
+        th {
+          padding: 5px 6px;
+          font-size: 10px;
+        }
+
+        td {
+          padding: 6px 6px;
+        }
+      }
+    }
+  }
+}

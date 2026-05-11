@@ -1,6 +1,29 @@
 <div class="workflow-page">
+  <div class="workflow-mobile-actions">
+    <button type="button" class="btn-mobile-panel" (click)="toggleTaskPanel()">
+      <i
+        class="fa-solid"
+        [class.fa-bars]="!isMobileTaskPanelOpen"
+        [class.fa-xmark]="isMobileTaskPanelOpen"
+      ></i>
+      Tasks
+    </button>
+    <button type="button" class="btn-mobile-custom" (click)="addCustomNode()">
+      <i class="fa-solid fa-plus"></i>
+      Custom
+    </button>
+  </div>
+
+  <button
+    type="button"
+    class="task-panel-overlay"
+    [class.is-show]="isMobileTaskPanelOpen && isMobileView"
+    (click)="closeTaskPanelOnMobile()"
+    aria-label="Close task panel"
+  ></button>
+
   <!-- ── Left: Task Panel ─────────────────────── -->
-  <div class="task-panel">
+  <div class="task-panel" [class.mobile-open]="isMobileTaskPanelOpen">
     <div class="panel-header">
       <i class="fa-solid fa-list-check"></i>
       Tasks
@@ -61,6 +84,7 @@
           class="task-item"
           [class.on-canvas]="isOnCanvas(task)"
           [class.active]="selectedTask?.id === task.id"
+          (click)="selectTask(task)"
           (dblclick)="selectTask(task)"
           draggable="true"
           (dragstart)="onTaskDragStart($event, task)"

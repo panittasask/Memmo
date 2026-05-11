@@ -99,6 +99,8 @@ export class WorkflowComponent implements OnInit {
   totalTaskCount: number | null = null;
   hasNextTaskPage = false;
   statusOptions: DropdownChildItem[] = [];
+  readonly mobileBreakpoint = 1100;
+  isMobileTaskPanelOpen = false;
 
   panX = 0;
   panY = 0;
@@ -130,6 +132,7 @@ export class WorkflowComponent implements OnInit {
 
   ngOnInit(): void {
     this.document.body.classList.add('workflow-dropdown-theme-active');
+    this.isMobileTaskPanelOpen = !this.isMobileView;
     void this.initialize();
   }
 
@@ -251,6 +254,33 @@ export class WorkflowComponent implements OnInit {
   selectTask(task: WorkflowTask): void {
     this.selectedTask = task;
     void this.loadWorkflowByTask(task.id, true);
+    this.closeTaskPanelOnMobile();
+  }
+
+  get isMobileView(): boolean {
+    return (
+      typeof window !== 'undefined' &&
+      window.innerWidth <= this.mobileBreakpoint
+    );
+  }
+
+  toggleTaskPanel(): void {
+    this.isMobileTaskPanelOpen = !this.isMobileTaskPanelOpen;
+  }
+
+  closeTaskPanelOnMobile(): void {
+    if (this.isMobileView) {
+      this.isMobileTaskPanelOpen = false;
+    }
+  }
+
+  @HostListener('window:resize')
+  onResize(): void {
+    if (!this.isMobileView) {
+      this.isMobileTaskPanelOpen = true;
+      return;
+    }
+    this.isMobileTaskPanelOpen = false;
   }
 
   private normalizePagedResponse(
@@ -567,6 +597,7 @@ export class WorkflowComponent implements OnInit {
       });
     }
     this.draggingTask = null;
+    this.closeTaskPanelOnMobile();
   }
 
   onNodeTaskClick(event: MouseEvent, node: WFNode): void {
@@ -1025,9 +1056,7 @@ export class WorkflowComponent implements OnInit {
         }),
       );
 
-      this.toast.success(
-        `บันทึก workflow สำเร็จ (เพิ่มโหนด ${syncResult.createdNodes}, เพิ่มเส้น ${syncResult.createdEdges}, ลบเส้น ${syncResult.deletedEdges})`,
-      );
+      this.toast.success(`บันทึก workflow สำเร็จ)`);
 
       if (
         skippedInvalidTaskId > 0 ||

@@ -29,3 +29,18 @@
     overflow: hidden;
   }
 }
+
+@media (max-width: 900px) {
+  :host {
+    height: 100dvh;
+  }
+
+  .dashboard-container {
+    height: 100dvh;
+
+    .content {
+      padding: 8px;
+      border-radius: 0;
+    }
+  }
+}

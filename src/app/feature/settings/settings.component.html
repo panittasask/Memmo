@@ -6,7 +6,12 @@
         <div class="subtitle">จัดการข้อมูล Enum ของระบบ</div>
       </div>
       <div class="header-actions">
-        <button type="button" class="btn-add-child" (click)="openAddForm()" [disabled]="!activeParentId">
+        <button
+          type="button"
+          class="btn-add-child"
+          (click)="openAddForm()"
+          [disabled]="!activeParentId"
+        >
           <i class="fa-solid fa-plus"></i>
           เพิ่มรายการ
         </button>
@@ -48,9 +53,15 @@
     </div>
   </div>
 
-  <div [class.is-show]="isShowParentForm" class="detail-settings-container" [formGroup]="formParent">
+  <div
+    [class.is-show]="isShowParentForm"
+    class="detail-settings-container"
+    [formGroup]="formParent"
+  >
     <div class="header-settings-container">
-      <div class="header-content">{{ editingParent ? 'แก้ไขหมวดหมู่' : 'เพิ่มหมวดหมู่ใหม่' }}</div>
+      <div class="header-content">
+        {{ editingParent ? "แก้ไขหมวดหมู่" : "เพิ่มหมวดหมู่ใหม่" }}
+      </div>
       <div class="close-icon">
         <i class="fa-solid fa-xmark" (click)="isShowParentForm = false"></i>
       </div>
@@ -79,9 +90,15 @@
     </div>
   </div>
 
-  <div [class.is-show]="isShowForm" class="detail-settings-container" [formGroup]="formChild">
+  <div
+    [class.is-show]="isShowForm"
+    class="detail-settings-container"
+    [formGroup]="formChild"
+  >
     <div class="header-settings-container">
-      <div class="header-content">{{ editingChild ? 'แก้ไขรายการ' : 'เพิ่มรายการใหม่' }}</div>
+      <div class="header-content">
+        {{ editingChild ? "แก้ไขรายการ" : "เพิ่มรายการใหม่" }}
+      </div>
       <div class="close-icon">
         <i class="fa-solid fa-xmark" (click)="isShowForm = false"></i>
       </div>

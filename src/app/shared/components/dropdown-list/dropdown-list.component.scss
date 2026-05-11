@@ -15,7 +15,7 @@
 }
 
 .dropdown-trigger {
-  width:100%;
+  width: 100%;
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
@@ -25,13 +25,17 @@
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   // background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-  background:white;
+  background: white;
   color: #0f172a;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   // box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, transform 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s ease;
 
   &:hover {
     border-color: #94a3b8;
@@ -67,7 +71,9 @@
   width: 16px;
   height: 16px;
   color: #64748b;
-  transition: transform 0.2s ease, color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    color 0.2s ease;
 
   svg {
     width: 14px;
@@ -113,7 +119,10 @@
   font-weight: 600;
   text-align: left;
   cursor: pointer;
-  transition: background-color 0.16s ease, color 0.16s ease, transform 0.16s ease;
+  transition:
+    background-color 0.16s ease,
+    color 0.16s ease,
+    transform 0.16s ease;
 
   &:hover {
     background: #eff6ff;
@@ -128,7 +137,7 @@
 
   &.is-selected {
     // background: linear-gradient(180deg, #eff6ff 0%, #dbeafe 100%);
-    background:#dbeafe;
+    background: #dbeafe;
     color: #1d4ed8;
   }
 }
@@ -150,5 +159,53 @@
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 768px) {
+  .dropdown-trigger {
+    height: 32px;
+    padding: 0 10px;
+    font-size: 12px;
+  }
+
+  .dropdown-icon {
+    width: 14px;
+    height: 14px;
+
+    svg {
+      width: 12px;
+      height: 12px;
+    }
+  }
+
+  .dropdown-popover {
+    margin-top: 4px;
+    padding: 4px;
+  }
+
+  .dropdown-option {
+    min-height: 36px;
+    padding: 0 10px;
+    font-size: 12px;
+  }
+
+  .selected-indicator {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 560px) {
+  .dropdown-trigger {
+    height: 30px;
+    padding: 0 8px;
+    font-size: 11px;
+  }
+
+  .dropdown-option {
+    min-height: 32px;
+    padding: 0 8px;
+    font-size: 11px;
+    gap: 8px;
   }
 }

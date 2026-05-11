@@ -1,4 +1,40 @@
-<div class="side-bar-container">
+<div class="mobile-top-bar">
+  <button
+    type="button"
+    class="mobile-menu-button"
+    (click)="toggleMobileMenu()"
+    aria-label="Toggle menu"
+    [attr.aria-expanded]="isMobileMenuOpen"
+  >
+    <i
+      class="fa-solid"
+      [class.fa-bars]="!isMobileMenuOpen"
+      [class.fa-xmark]="isMobileMenuOpen"
+    ></i>
+  </button>
+  <div class="mobile-title">
+    <i class="fa-solid fa-book"></i>
+    <span>Memo Me</span>
+  </div>
+  <button
+    type="button"
+    class="mobile-add-button"
+    (click)="onAddNew()"
+    aria-label="เพิ่มงานใหม่"
+  >
+    <i class="fa-solid fa-plus"></i>
+  </button>
+</div>
+
+<button
+  type="button"
+  class="mobile-menu-overlay"
+  [class.is-show]="isMobileMenuOpen"
+  (click)="closeMobileMenu()"
+  aria-label="Close menu"
+></button>
+
+<div class="side-bar-container" [class.mobile-open]="isMobileMenuOpen">
   <div class="side-bar-item">
     <i style="font-size: 25px" class="fa-solid fa-book"></i>
     <span style="margin-left: 10px">Memo Me</span>
@@ -51,9 +87,9 @@
   <div class="quick-add">
     <button (click)="onAddNew()" class="quick-add-new-button">+</button>
   </div>
-  <div class="profile">
+  <!-- <div class="profile">
     <img class="profile-image" src="/assets/images/SnowyOwl.jpg" alt="" />
-  </div>
+  </div> -->
 </div>
 <div [class.isShow]="isAddNew" class="add-new-container">
   <div [formGroup]="formAddNew" class="add-new-content">

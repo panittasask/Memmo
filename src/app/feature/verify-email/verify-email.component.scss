@@ -61,3 +61,27 @@ p {
     background: #185f41;
   }
 }
+
+@media (max-width: 520px) {
+  .info-page {
+    padding: 16px;
+  }
+
+  .info-card {
+    border-radius: 16px;
+    padding: 28px 20px;
+  }
+
+  h1 {
+    font-size: 1.3rem;
+  }
+
+  p {
+    font-size: 0.9rem;
+  }
+
+  .btn-back {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+  }
+}

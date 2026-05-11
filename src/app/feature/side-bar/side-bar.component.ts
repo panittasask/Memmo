@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, effect, inject } from '@angular/core';
+import { Component, HostListener, effect, inject } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -38,6 +38,8 @@ export class SideBarComponent {
   private readonly settingsService = inject(SettingsService);
 
   saveInProcess: boolean = false;
+  readonly mobileBreakpoint = 900;
+  isMobileMenuOpen = false;
 
   projectOptions: DropdownChildItem[] = [];
   statusOptions: DropdownChildItem[] = [];
@@ -113,9 +115,39 @@ export class SideBarComponent {
   navigate(route: string) {
     this.currentRoute = route;
     this.routes.navigate([route]);
+    this.closeMobileMenu();
   }
+
+  get isMobileView(): boolean {
+    return (
+      typeof window !== 'undefined' &&
+      window.innerWidth <= this.mobileBreakpoint
+    );
+  }
+
+  toggleMobileMenu() {
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+  }
+
+  closeMobileMenu() {
+    this.isMobileMenuOpen = false;
+  }
+
+  @HostListener('window:resize')
+  onWindowResize() {
+    if (!this.isMobileView) {
+      this.closeMobileMenu();
+    }
+  }
+
+  @HostListener('window:keydown.escape')
+  onEscapeKey() {
+    this.closeMobileMenu();
+  }
+
   onAddNew() {
     this.isAddNew = true;
+    this.closeMobileMenu();
   }
   async onSave() {
     if (!this.formAddNew.valid) {

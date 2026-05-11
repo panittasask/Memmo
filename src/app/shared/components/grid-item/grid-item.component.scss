@@ -22,13 +22,13 @@
     flex: 1;
     min-height: 0;
     overflow-y: auto;
-    overflow-x: hidden;
+    overflow-x: auto;
   }
 
   .grid-table {
     width: 100%;
     border-collapse: collapse;
-    table-layout: fixed;
+    table-layout: auto;
     th,
     td {
       padding: 8px 12px;
