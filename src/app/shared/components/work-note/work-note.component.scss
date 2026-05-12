@@ -67,9 +67,12 @@
   .wn-list {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
+    align-items: stretch;
     gap: 6px;
 
     .wn-empty {
+      width: 100%;
       padding: 20px;
       border-radius: 10px;
       border: 1px dashed #cbd5e1;
@@ -80,6 +83,8 @@
 
     .wn-item {
       display: flex;
+      flex: 1 1 280px;
+      min-width: 220px;
       align-items: center;
       gap: 12px;
       padding: 10px 12px;
@@ -159,6 +164,31 @@
           color: #ef4444;
           background: rgba(239, 68, 68, 0.1);
         }
+      }
+    }
+  }
+}
+
+@media (max-width: 900px) {
+  .work-note-wrapper {
+    .wn-header {
+      align-items: flex-start;
+      flex-wrap: wrap;
+
+      .header-actions {
+        width: 100%;
+
+        .btn-add {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+    }
+
+    .wn-list {
+      .wn-item {
+        flex-basis: 100%;
+        min-width: 0;
       }
     }
   }
@@ -429,6 +459,37 @@
 }
 
 @media (max-width: 600px) {
+  .work-note-wrapper {
+    .wn-header {
+      margin-bottom: 8px;
+
+      .title-group {
+        .title {
+          font-size: 16px;
+        }
+
+        .sub-title {
+          font-size: 11px;
+        }
+      }
+
+      .header-actions {
+        .btn-add {
+          padding: 8px 12px;
+          font-size: 12px;
+        }
+      }
+    }
+
+    .wn-list {
+      gap: 8px;
+
+      .wn-item {
+        padding: 10px;
+      }
+    }
+  }
+
   .wn-modal .wn-modal-body .wn-field-row {
     flex-direction: column;
   }

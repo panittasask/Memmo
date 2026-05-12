@@ -19,6 +19,7 @@ Use `SESSION_TEMPLATE.md` as the structure when updating this file.
 - [x] Added responsive workflow task-panel drawer with mobile controls
 - [x] Added mobile breakpoints for dashboard and analytics views
 - [x] Verified frontend build success
+- [x] Improved Summary responsive layout: charts row now adapts columns by viewport and Work Note list no longer overflows on small screens
 
 ## Completion
 

@@ -35,6 +35,11 @@
             "inlineStyleLanguage": "scss",
             "assets": [
               {
+                "glob": "web.config",
+                "input": ".",
+                "output": "/"
+              },
+              {
                 "glob": "**/*",
                 "input": "public"
               },
