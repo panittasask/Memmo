@@ -112,6 +112,17 @@
       border-top-left-radius: inherit;
       border-bottom-left-radius: inherit;
     }
+
+    .menu-icon {
+      font-size: 16px;
+      margin-right: 8px;
+      transition: transform 0.2s ease-in-out;
+    }
+
+    &:hover .menu-icon,
+    &.active .menu-icon {
+      transform: scale(1.1);
+    }
   }
   .search-box-container {
     padding: 15px;
@@ -442,6 +453,13 @@ i {
         padding: 18px 16px;
         border-bottom: 1px solid #dbeafe;
         justify-content: flex-start;
+      }
+
+      .menu-icon {
+        font-size: 18px;
+        width: 24px;
+        text-align: center;
+        margin-right: 14px;
       }
     }
 

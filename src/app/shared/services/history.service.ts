@@ -67,6 +67,11 @@ export class HistoryService {
     return this.http.delete(url);
   }
 
+  reorderTasks(items: { id: string; sortOrder: number }[]) {
+    const url = `${this.baseUrl}/History/Reorder`;
+    return this.http.post(url, { items });
+  }
+
   summaryToday(date?: string) {
     const url = `${this.baseUrl}/Dashboard/summarytoday`;
     return this.http.post<any>(url, date ? { date } : {});

@@ -133,7 +133,7 @@
     class="canvas-wrapper"
     #canvasWrapper
     [style.cursor]="cursorStyle"
-    (mousedown)="onCanvasMouseDown($event)"
+    (pointerdown)="onCanvasPointerDown($event)"
     (wheel)="onCanvasWheel($event)"
     (contextmenu)="$event.preventDefault()"
     (dragover)="onCanvasDragOver($event)"
@@ -194,13 +194,10 @@
             [style.left.px]="node.x"
             [style.top.px]="node.y"
             [style.width.px]="NODE_W"
-            (mousedown)="onNodeMouseDown($event, node)"
+            (pointerdown)="onNodePointerDown($event, node)"
             (click)="onNodeTaskClick($event, node)"
           >
-            <div
-              class="port port-in"
-              (mouseup)="onInputPortMouseUp($event, node)"
-            ></div>
+            <div class="port port-in" [attr.data-node-id]="node.id"></div>
             <div class="node-header">
               <span class="node-project">{{ node.task?.projectName }}</span>
               <span class="node-delete" (click)="removeNode(node.id, $event)"
@@ -230,7 +227,7 @@
             </div>
             <div
               class="port port-out"
-              (mousedown)="onOutputPortMouseDown($event, node)"
+              (pointerdown)="onOutputPortPointerDown($event, node)"
             ></div>
           </div>
         }
@@ -242,12 +239,9 @@
             [style.left.px]="node.x"
             [style.top.px]="node.y"
             [style.width.px]="CUSTOM_NODE_W"
-            (mousedown)="onNodeMouseDown($event, node)"
+            (pointerdown)="onNodePointerDown($event, node)"
           >
-            <div
-              class="port port-in"
-              (mouseup)="onInputPortMouseUp($event, node)"
-            ></div>
+            <div class="port port-in" [attr.data-node-id]="node.id"></div>
             <div class="node-header custom-node-header">
               <input
                 class="custom-label"
@@ -272,7 +266,7 @@
             </div>
             <div
               class="port port-out"
-              (mousedown)="onOutputPortMouseDown($event, node)"
+              (pointerdown)="onOutputPortPointerDown($event, node)"
             ></div>
           </div>
         }

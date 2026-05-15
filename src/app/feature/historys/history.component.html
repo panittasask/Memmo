@@ -51,6 +51,7 @@
         (selectedClick)="selectedItem($event)"
         (cloneClick)="cloneItem($event)"
         (removeClick)="deleteItem($event)"
+        (reorderClick)="onReorder($event)"
         (pageChange)="onPageChange($event)"
       ></app-grid-item>
     </div>
@@ -72,6 +73,12 @@
           <label>วันที่</label>
           <app-datepicker formControlName="date"></app-datepicker>
         </div>
+        <div class="input-container-content">
+          <label>เวลาเริ่มต้น</label>
+          <app-time-picker formControlName="startTime"></app-time-picker>
+        </div>
+      </div>
+      <div class="content-container">
         <div class="input-container-content">
           <label>ระยะเวลา</label>
           <input

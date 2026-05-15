@@ -21,6 +21,7 @@ import { DatepickerComponent } from '../../shared/components/datepicker/datepick
 import { ColumnSettings } from '../../shared/models/column-settings.model';
 import { ToastService } from '../../shared/services/toast.service';
 import { DropdownListComponent } from '../../shared/components/dropdown-list/dropdown-list.component';
+import { TimePickerComponent } from '../../shared/components/time-picker/time-picker.component';
 import {
   DropdownChildItem,
   SettingsService,
@@ -31,12 +32,14 @@ import { ActivatedRoute, Router } from '@angular/router';
 interface HistoryItem {
   id: string;
   startDate: string;
+  startTime?: string;
   taskName: string;
   projectName: string;
   status: string;
   duration: number;
   description?: string;
   hyperlink?: string;
+  sortOrder?: number;
 }
 
 @Component({
@@ -49,6 +52,7 @@ interface HistoryItem {
     FormsModule,
     DatepickerComponent,
     DropdownListComponent,
+    TimePickerComponent,
   ],
   templateUrl: './history.component.html',
   styleUrl: './history.component.scss',
@@ -83,6 +87,7 @@ export class HistoryComponent {
   formUpdate = new FormGroup({
     id: new FormControl('', [Validators.required]),
     date: new FormControl('', [Validators.required]),
+    startTime: new FormControl(''),
     time: new FormControl(0),
     description: new FormControl(''),
     projectName: new FormControl('', [Validators.required]),
@@ -158,6 +163,7 @@ export class HistoryComponent {
     this.formUpdate.patchValue({
       id: item.id,
       date: this.getDate(item.startDate),
+      startTime: item.startTime ?? '',
       description: item.description,
       time: item.duration,
       projectName: item.projectName,
@@ -293,6 +299,7 @@ export class HistoryComponent {
       description: value.description,
       status: value.status,
       startDate: new Date(value.date),
+      startTime: value.startTime || null,
       hyperlink: value.hyperlink,
       nameType: value.isFocusTask ? 'important' : null,
     };
@@ -324,6 +331,7 @@ export class HistoryComponent {
       status: item.status,
       hyperlink: item.hyperlink,
       startDate: new Date(),
+      startTime: item.startTime ?? null,
       taskGroupId: item.taskGroupId ?? item.id,
     };
     try {
@@ -356,6 +364,30 @@ export class HistoryComponent {
       await this.fetchData();
     } catch (ex: any) {
       this.toast.error('ไม่สามารถลบงานได้', {
+        detail: ex?.error ?? ex?.message ?? String(ex),
+      });
+    }
+  }
+
+  async onReorder(reorderedData: any[]) {
+    if (!Array.isArray(reorderedData) || reorderedData.length === 0) return;
+    this.data = reorderedData;
+    const offset = (this.currentPage - 1) * this.pageSize;
+    const items = reorderedData
+      .map((it: any, idx: number) => {
+        const id = String(it?.id ?? '').trim();
+        if (!id) return null;
+        const sortOrder = offset + idx;
+        it.sortOrder = sortOrder;
+        return { id, sortOrder };
+      })
+      .filter((x): x is { id: string; sortOrder: number } => x !== null);
+    if (items.length === 0) return;
+    try {
+      await firstValueFrom(this.HistoryService.reorderTasks(items));
+      this.HistoryService.notifyDataChanged();
+    } catch (ex: any) {
+      this.toast.error('ไม่สามารถบันทึกลำดับได้', {
         detail: ex?.error ?? ex?.message ?? String(ex),
       });
     }

@@ -11,6 +11,7 @@ import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { DatepickerComponent } from '../../shared/components/datepicker/datepicker.component';
 import { DropdownListComponent } from '../../shared/components/dropdown-list/dropdown-list.component';
+import { TimePickerComponent } from '../../shared/components/time-picker/time-picker.component';
 import { firstValueFrom } from 'rxjs';
 import { HistoryService } from '../../shared/services/history.service';
 import { ToastService } from '../../shared/services/toast.service';
@@ -28,6 +29,7 @@ import {
     FormsModule,
     DatepickerComponent,
     DropdownListComponent,
+    TimePickerComponent,
   ],
   templateUrl: './side-bar.component.html',
   styleUrl: './side-bar.component.scss',
@@ -62,6 +64,7 @@ export class SideBarComponent {
 
   formAddNew = new FormGroup({
     date: new FormControl(this.getToday(), [Validators.required]),
+    startTime: new FormControl(''),
     time: new FormControl(0),
     description: new FormControl(''),
     hyperlink: new FormControl(''),
@@ -163,6 +166,7 @@ export class SideBarComponent {
       hyperlink: value.hyperlink,
       status: value.status,
       startDate: new Date(value.date),
+      startTime: value.startTime || null,
     };
     try {
       const result = await firstValueFrom(
@@ -175,6 +179,7 @@ export class SideBarComponent {
         // this.formAddNew.reset();
         this.formAddNew.patchValue({
           date: this.getToday(),
+          startTime: '',
           time: 0,
           description: '',
           hyperlink: '',

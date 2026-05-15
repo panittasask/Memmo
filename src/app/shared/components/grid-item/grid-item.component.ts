@@ -40,6 +40,7 @@ export class GridItemComponent {
   @Output() selectedClick = new EventEmitter();
   @Output() cloneClick = new EventEmitter();
   @Output() removeClick = new EventEmitter();
+  @Output() reorderClick = new EventEmitter<any[]>();
   @Output() pageChange = new EventEmitter<GridPageChangeEvent>();
 
   ngOnInit() {
@@ -65,6 +66,7 @@ export class GridItemComponent {
     e.preventDefault();
     if (this.draggedIndex !== null && this.draggedIndex !== index) {
       this.reorderData(this.draggedIndex, index);
+      this.reorderClick.emit(this.data);
     }
     if (this.selectedItem === this.draggedIndex) this.selectedItem = index;
     this.draggedIndex = null;
@@ -100,9 +102,11 @@ export class GridItemComponent {
     const date = new Date(d);
     if (Number.isNaN(date.getTime())) return false;
     const now = new Date();
-    return date.getFullYear() === now.getFullYear()
-      && date.getMonth() === now.getMonth()
-      && date.getDate() === now.getDate();
+    return (
+      date.getFullYear() === now.getFullYear() &&
+      date.getMonth() === now.getMonth() &&
+      date.getDate() === now.getDate()
+    );
   }
 
   getCellValue(item: any, col: ColumnSettings): unknown {
@@ -118,7 +122,10 @@ export class GridItemComponent {
       return;
     }
 
-    this.pageChange.emit({ page: this.currentPage - 1, pageSize: this.pageSize });
+    this.pageChange.emit({
+      page: this.currentPage - 1,
+      pageSize: this.pageSize,
+    });
   }
 
   nextPage(): void {
@@ -126,13 +133,20 @@ export class GridItemComponent {
       return;
     }
 
-    this.pageChange.emit({ page: this.currentPage + 1, pageSize: this.pageSize });
+    this.pageChange.emit({
+      page: this.currentPage + 1,
+      pageSize: this.pageSize,
+    });
   }
 
   onPageSizeChange(value: string | number): void {
     const pageSize = Number(value);
 
-    if (!Number.isFinite(pageSize) || pageSize <= 0 || pageSize === this.pageSize) {
+    if (
+      !Number.isFinite(pageSize) ||
+      pageSize <= 0 ||
+      pageSize === this.pageSize
+    ) {
       return;
     }
 

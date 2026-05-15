@@ -349,6 +349,11 @@
   overflow: hidden;
   @include grid-bg;
   outline: none;
+  // Disable native gestures so pointer events drive pan / drag / connect on touch.
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  overscroll-behavior: contain;
 }
 
 // ── Toolbar ──────────────────────────────────────────────
@@ -578,6 +583,7 @@
   user-select: none;
   z-index: 2;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  touch-action: none;
   transition:
     box-shadow 0.15s,
     border-color 0.15s;
@@ -683,6 +689,7 @@
   top: 50%;
   transform: translateY(-50%);
   z-index: 10;
+  touch-action: none;
   transition:
     background 0.15s,
     transform 0.15s,

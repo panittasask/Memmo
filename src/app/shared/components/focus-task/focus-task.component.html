@@ -69,9 +69,12 @@
           }
           <div class="postit-footer">
             <span>{{ item?.projectName ?? "-" }}</span>
-            <span>{{
-              item?.startDate ?? item?.date | date: "d MMM" : "" : "th"
-            }}</span>
+            <span>
+              {{ item?.startDate ?? item?.date | date: "d MMM" : "" : "th" }}
+              <ng-container *ngIf="item?.startTime">
+                · {{ item?.startTime }}
+              </ng-container>
+            </span>
             @if (!isToday(item)) {
               <button
                 class="postit-clone"
@@ -112,9 +115,14 @@
               <div class="postit-body">{{ item?.description ?? "-" }}</div>
               <div class="postit-footer">
                 <span>{{ item?.projectName ?? "-" }}</span>
-                <span>{{
-                  item?.startDate ?? item?.date | date: "d MMM" : "" : "th"
-                }}</span>
+                <span>
+                  {{
+                    item?.startDate ?? item?.date | date: "d MMM" : "" : "th"
+                  }}
+                  <ng-container *ngIf="item?.startTime">
+                    · {{ item?.startTime }}
+                  </ng-container>
+                </span>
               </div>
             </div>
           </ng-template>
@@ -137,6 +145,12 @@
         <label>วันที่</label>
         <app-datepicker formControlName="date"></app-datepicker>
       </div>
+      <div class="input-container-content">
+        <label>เวลาเริ่มต้น</label>
+        <app-time-picker formControlName="startTime"></app-time-picker>
+      </div>
+    </div>
+    <div class="content-container">
       <div class="input-container-content">
         <label>ระยะเวลา</label>
         <input

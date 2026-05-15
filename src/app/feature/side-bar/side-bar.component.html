@@ -44,7 +44,8 @@
     class="side-bar-item"
     (click)="navigate('summary')"
   >
-    แดชบอร์ด
+    <i class="menu-icon fa-solid fa-gauge-high"></i>
+    <span class="menu-label">แดชบอร์ด</span>
   </div>
   <!-- <div
     [class.active]="currentRoute === 'today-entry'"
@@ -58,28 +59,32 @@
     class="side-bar-item"
     (click)="navigate('history')"
   >
-    ประวัติ
+    <i class="menu-icon fa-solid fa-clock-rotate-left"></i>
+    <span class="menu-label">ประวัติ</span>
   </div>
   <div
     [class.active]="currentRoute === 'settings'"
     class="side-bar-item"
     (click)="navigate('settings')"
   >
-    การตั้งค่า
+    <i class="menu-icon fa-solid fa-gear"></i>
+    <span class="menu-label">การตั้งค่า</span>
   </div>
   <div
     [class.active]="currentRoute === 'analytics'"
     class="side-bar-item"
     (click)="navigate('analytics')"
   >
-    วิเคราะห์
+    <i class="menu-icon fa-solid fa-chart-line"></i>
+    <span class="menu-label">วิเคราะห์</span>
   </div>
   <div
     [class.active]="currentRoute === 'workflow'"
     class="side-bar-item"
     (click)="navigate('workflow')"
   >
-    เวิร์กโฟลว์
+    <i class="menu-icon fa-solid fa-diagram-project"></i>
+    <span class="menu-label">เวิร์กโฟลว์</span>
   </div>
   <!-- <div class="search-box-container">
      <input class="search-box" placeholder="ค้นหา..." />
@@ -102,6 +107,12 @@
         <label>วันที่</label>
         <app-datepicker formControlName="date"></app-datepicker>
       </div>
+      <div class="input-container-content">
+        <label>เวลาเริ่มต้น</label>
+        <app-time-picker formControlName="startTime"></app-time-picker>
+      </div>
+    </div>
+    <div class="content-container">
       <div class="input-container-content">
         <label>ระยะเวลา</label>
         <input

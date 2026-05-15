@@ -14,6 +14,7 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { DatepickerComponent } from '../datepicker/datepicker.component';
 import { DropdownListComponent } from '../dropdown-list/dropdown-list.component';
+import { TimePickerComponent } from '../time-picker/time-picker.component';
 import {
   DropdownChildItem,
   SettingsService,
@@ -35,6 +36,7 @@ import { Router } from '@angular/router';
     DragDropModule,
     DatepickerComponent,
     DropdownListComponent,
+    TimePickerComponent,
   ],
   templateUrl: './focus-task.component.html',
   styleUrl: './focus-task.component.scss',
@@ -61,6 +63,7 @@ export class FocusTaskComponent {
 
   formAddNew = new FormGroup({
     date: new FormControl(this.getToday(), [Validators.required]),
+    startTime: new FormControl(''),
     time: new FormControl(0),
     description: new FormControl(''),
     projectName: new FormControl('', [Validators.required]),
@@ -120,6 +123,7 @@ export class FocusTaskComponent {
     this.editingItemId = String(item?.id ?? '');
     this.formAddNew.patchValue({
       date: this.getDate(item?.startDate ?? item?.date),
+      startTime: item?.startTime ?? '',
       time: item?.duration ?? 0,
       description: item?.description ?? '',
       projectName: item?.projectName ?? '',
@@ -170,6 +174,7 @@ export class FocusTaskComponent {
         description: item.description,
         status: item.status,
         startDate: item.startDate ?? item.date,
+        startTime: item.startTime ?? null,
         nameType: null,
       };
       await firstValueFrom(this.historyService.updateTask(model));
@@ -194,6 +199,7 @@ export class FocusTaskComponent {
       hyperlink: item?.hyperlink,
       status: item?.status,
       startDate: new Date(),
+      startTime: item?.startTime ?? null,
       nameType: 'important',
       taskGroupId: item?.taskGroupId ?? item?.id,
     };
@@ -207,6 +213,7 @@ export class FocusTaskComponent {
       hyperlink: item?.hyperlink,
       status: item?.status,
       startDate: item?.startDate ?? item?.date,
+      startTime: item?.startTime ?? null,
       nameType: null,
     };
 
@@ -243,6 +250,27 @@ export class FocusTaskComponent {
     setTimeout(() => {
       this.suppressOpenFromDrag = false;
     }, 0);
+    void this.persistOrder();
+  }
+
+  private async persistOrder(): Promise<void> {
+    const items = this.focusTaskItems
+      .map((it, idx) => {
+        const id = String(it?.id ?? '').trim();
+        if (!id) return null;
+        it.sortOrder = idx;
+        return { id, sortOrder: idx };
+      })
+      .filter((x): x is { id: string; sortOrder: number } => x !== null);
+    if (items.length === 0) return;
+    try {
+      await firstValueFrom(this.historyService.reorderTasks(items));
+      this.historyService.notifyDataChanged();
+    } catch (ex: any) {
+      this.toast.error('ไม่สามารถบันทึกลำดับได้', {
+        detail: ex?.error ?? ex?.message ?? String(ex),
+      });
+    }
   }
 
   closeAddNew(): void {
@@ -265,6 +293,7 @@ export class FocusTaskComponent {
       description: value.description,
       status: value.status,
       startDate: new Date(value.date),
+      startTime: value.startTime || null,
       hyperlink: value.hyperlink,
       nameType: 'important',
     };
@@ -375,6 +404,7 @@ export class FocusTaskComponent {
   private resetForm(): void {
     this.formAddNew.patchValue({
       date: this.getToday(),
+      startTime: '',
       time: 0,
       description: '',
       projectName: '',

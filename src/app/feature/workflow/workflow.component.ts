@@ -395,8 +395,8 @@ export class WorkflowComponent implements OnInit {
     this.connections = [];
   }
 
-  // ── Node drag ──────────────────────────────────────────
-  onNodeMouseDown(e: MouseEvent, node: WFNode) {
+  // ── Node drag (Pointer Events: works on mouse + touch) ──
+  onNodePointerDown(e: PointerEvent, node: WFNode) {
     const target = e.target as HTMLElement;
     if (
       target.closest(
@@ -406,6 +406,9 @@ export class WorkflowComponent implements OnInit {
       return;
     e.preventDefault();
     e.stopPropagation();
+    try {
+      (e.target as Element).releasePointerCapture?.(e.pointerId);
+    } catch {}
     this.draggingNode = node;
     const p = this.screenToInner(e.clientX, e.clientY);
     this.dragOffsetX = p.x - node.x;
@@ -413,9 +416,12 @@ export class WorkflowComponent implements OnInit {
   }
 
   // ── Connection drawing ─────────────────────────────────
-  onOutputPortMouseDown(e: MouseEvent, node: WFNode) {
+  onOutputPortPointerDown(e: PointerEvent, node: WFNode) {
     e.preventDefault();
     e.stopPropagation();
+    try {
+      (e.target as Element).releasePointerCapture?.(e.pointerId);
+    } catch {}
     const p = this.screenToInner(e.clientX, e.clientY);
     const nodeW = node.type === 'custom' ? CUSTOM_NODE_W : NODE_W;
     this.drawingConn = {
@@ -427,38 +433,50 @@ export class WorkflowComponent implements OnInit {
     };
   }
 
-  onInputPortMouseUp(e: MouseEvent, node: WFNode) {
-    if (!this.drawingConn || this.drawingConn.fromNodeId === node.id) {
-      this.drawingConn = null;
-      return;
-    }
-    const alreadyExists = this.connections.some(
-      (c) =>
-        c.fromNodeId === this.drawingConn!.fromNodeId && c.toNodeId === node.id,
-    );
-    if (!alreadyExists) {
-      this.connections.push({
-        id: `conn-${Date.now()}`,
-        fromNodeId: this.drawingConn.fromNodeId,
-        toNodeId: node.id,
-      });
+  private finalizeConnection(clientX: number, clientY: number): void {
+    if (!this.drawingConn) return;
+    const el = this.document.elementFromPoint(
+      clientX,
+      clientY,
+    ) as Element | null;
+    const portIn = el?.closest('.port-in') as HTMLElement | null;
+    if (portIn) {
+      const targetNodeId = portIn.getAttribute('data-node-id');
+      if (targetNodeId && targetNodeId !== this.drawingConn.fromNodeId) {
+        const alreadyExists = this.connections.some(
+          (c) =>
+            c.fromNodeId === this.drawingConn!.fromNodeId &&
+            c.toNodeId === targetNodeId,
+        );
+        if (!alreadyExists) {
+          this.connections.push({
+            id: `conn-${Date.now()}`,
+            fromNodeId: this.drawingConn.fromNodeId,
+            toNodeId: targetNodeId,
+          });
+        }
+      }
     }
     this.drawingConn = null;
   }
 
-  // ── Canvas panning: left-click drag on canvas background ──
-  onCanvasMouseDown(e: MouseEvent) {
-    // middle or right button also works
-    if (e.button === 0 || e.button === 1 || e.button === 2) {
-      e.preventDefault();
-      this.isPanning = true;
-      this.panStartX = e.clientX - this.panX;
-      this.panStartY = e.clientY - this.panY;
+  // ── Canvas panning (Pointer Events) ────────────────────
+  onCanvasPointerDown(e: PointerEvent) {
+    const target = e.target as HTMLElement;
+    if (target.closest('.wf-node, .port, .conn-mid-group, .conn-hit')) {
+      return;
     }
+    e.preventDefault();
+    try {
+      (e.target as Element).releasePointerCapture?.(e.pointerId);
+    } catch {}
+    this.isPanning = true;
+    this.panStartX = e.clientX - this.panX;
+    this.panStartY = e.clientY - this.panY;
   }
 
-  @HostListener('window:mousemove', ['$event'])
-  onMouseMove(e: MouseEvent) {
+  @HostListener('document:pointermove', ['$event'])
+  onPointerMove(e: PointerEvent) {
     if (this.draggingNode) {
       const p = this.screenToInner(e.clientX, e.clientY);
       this.draggingNode.x = p.x - this.dragOffsetX;
@@ -473,8 +491,12 @@ export class WorkflowComponent implements OnInit {
     }
   }
 
-  @HostListener('window:mouseup')
-  onMouseUp() {
+  @HostListener('document:pointerup', ['$event'])
+  @HostListener('document:pointercancel', ['$event'])
+  onPointerUp(e: PointerEvent) {
+    if (this.drawingConn) {
+      this.finalizeConnection(e.clientX, e.clientY);
+    }
     this.draggingNode = null;
     this.drawingConn = null;
     this.isPanning = false;
